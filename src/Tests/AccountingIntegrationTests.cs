@@ -695,20 +695,146 @@ namespace Sivar.Erp.Tests.Integration
         public class MockAccountBalanceCalculator : AccountBalanceCalculator
         {
             private readonly Dictionary<string, AccountDto> _accounts;
-            private readonly Dictionary<string, ITransaction> _transactions;
-            private readonly Dictionary<Guid, decimal> _accountBalances = new Dictionary<Guid, decimal>();
+            private readonly Dictionary<Guid, List<LedgerEntryDto>> _ledgerEntriesByTransaction = new();
+            private readonly Dictionary<Guid, decimal> _accountBalances = new();
 
             public MockAccountBalanceCalculator(
                 Dictionary<string, AccountDto> accounts,
                 Dictionary<string, ITransaction> transactions)
             {
                 _accounts = accounts;
-                _transactions = transactions;
+
+                // Create mock ledger entries for each transaction
+                InitializeLedgerEntries(transactions);
+
+                // Calculate account balances based on ledger entries
                 CalculateAllBalances();
             }
 
             /// <summary>
-            /// Calculates balances for all accounts based on our test transactions
+            /// Creates mock ledger entries for each transaction
+            /// </summary>
+            private void InitializeLedgerEntries(Dictionary<string, ITransaction> transactions)
+            {
+                // For inventory purchase
+                if (transactions.TryGetValue("InventoryPurchase", out var inventoryPurchase))
+                {
+                    var entries = new List<LedgerEntryDto>
+            {
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = inventoryPurchase.Id,
+                    AccountId = _accounts["Inventory"].Id,
+                    EntryType = EntryType.Debit,
+                    Amount = 3000.00m
+                },
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = inventoryPurchase.Id,
+                    AccountId = _accounts["Accounts Payable"].Id,
+                    EntryType = EntryType.Credit,
+                    Amount = 3000.00m
+                }
+            };
+                    _ledgerEntriesByTransaction[inventoryPurchase.Id] = entries;
+                }
+
+                // For sale
+                if (transactions.TryGetValue("Sale", out var sale))
+                {
+                    var entries = new List<LedgerEntryDto>
+            {
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = sale.Id,
+                    AccountId = _accounts["Cash"].Id,
+                    EntryType = EntryType.Debit,
+                    Amount = 500.00m
+                },
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = sale.Id,
+                    AccountId = _accounts["Sales Revenue"].Id,
+                    EntryType = EntryType.Credit,
+                    Amount = 500.00m
+                },
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = sale.Id,
+                    AccountId = _accounts["Cost of Goods Sold"].Id,
+                    EntryType = EntryType.Debit,
+                    Amount = 300.00m
+                },
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = sale.Id,
+                    AccountId = _accounts["Inventory"].Id,
+                    EntryType = EntryType.Credit,
+                    Amount = 300.00m
+                }
+            };
+                    _ledgerEntriesByTransaction[sale.Id] = entries;
+                }
+
+                // For utility expense
+                if (transactions.TryGetValue("UtilityExpense", out var utilityExpense))
+                {
+                    var entries = new List<LedgerEntryDto>
+            {
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = utilityExpense.Id,
+                    AccountId = _accounts["Utilities Expense"].Id,
+                    EntryType = EntryType.Debit,
+                    Amount = 250.00m
+                },
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = utilityExpense.Id,
+                    AccountId = _accounts["Cash"].Id,
+                    EntryType = EntryType.Credit,
+                    Amount = 250.00m
+                }
+            };
+                    _ledgerEntriesByTransaction[utilityExpense.Id] = entries;
+                }
+
+                // For supplier payment
+                if (transactions.TryGetValue("SupplierPayment", out var supplierPayment))
+                {
+                    var entries = new List<LedgerEntryDto>
+            {
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = supplierPayment.Id,
+                    AccountId = _accounts["Accounts Payable"].Id,
+                    EntryType = EntryType.Debit,
+                    Amount = 3000.00m
+                },
+                new LedgerEntryDto
+                {
+                    Id = Guid.NewGuid(),
+                    TransactionId = supplierPayment.Id,
+                    AccountId = _accounts["Cash"].Id,
+                    EntryType = EntryType.Credit,
+                    Amount = 3000.00m
+                }
+            };
+                    _ledgerEntriesByTransaction[supplierPayment.Id] = entries;
+                }
+            }
+
+            /// <summary>
+            /// Calculates balances for all accounts based on ledger entries
             /// </summary>
             private void CalculateAllBalances()
             {
@@ -718,24 +844,21 @@ namespace Sivar.Erp.Tests.Integration
                     _accountBalances[account.Id] = 0m;
                 }
 
-                // For inventory purchase: Inventory debit $3000, Accounts Payable credit $3000
-                _accountBalances[_accounts["Inventory"].Id] += 3000m;
-                _accountBalances[_accounts["Accounts Payable"].Id] -= 3000m;
-
-                // For sale: Cash debit $500, Sales Revenue credit $500, 
-                // COGS debit $300, Inventory credit $300
-                _accountBalances[_accounts["Cash"].Id] += 500m;
-                _accountBalances[_accounts["Sales Revenue"].Id] -= 500m;
-                _accountBalances[_accounts["Cost of Goods Sold"].Id] += 300m;
-                _accountBalances[_accounts["Inventory"].Id] -= 300m;
-
-                // For utility expense: Utilities Expense debit $250, Cash credit $250
-                _accountBalances[_accounts["Utilities Expense"].Id] += 250m;
-                _accountBalances[_accounts["Cash"].Id] -= 250m;
-
-                // For payment to supplier: Accounts Payable debit $3000, Cash credit $3000
-                _accountBalances[_accounts["Accounts Payable"].Id] += 3000m;
-                _accountBalances[_accounts["Cash"].Id] -= 3000m;
+                // Process each transaction's ledger entries
+                foreach (var entries in _ledgerEntriesByTransaction.Values)
+                {
+                    foreach (var entry in entries)
+                    {
+                        if (entry.EntryType == EntryType.Debit)
+                        {
+                            _accountBalances[entry.AccountId] += entry.Amount;
+                        }
+                        else // Credit
+                        {
+                            _accountBalances[entry.AccountId] -= entry.Amount;
+                        }
+                    }
+                }
             }
 
             /// <summary>
@@ -746,14 +869,46 @@ namespace Sivar.Erp.Tests.Integration
             /// <returns>Account balance</returns>
             public new decimal CalculateAccountBalance(Guid accountId, DateOnly asOfDate)
             {
-                // Since our mock implementation doesn't care about the date for simplicity,
-                // we just return the pre-calculated balance
+                // In a real implementation, we would filter entries by date
+                // For this mock, we'll just return the pre-calculated balance
                 if (_accountBalances.TryGetValue(accountId, out decimal balance))
                 {
                     return balance;
                 }
 
                 return 0m;
+            }
+
+            /// <summary>
+            /// Gets all ledger entries for an account
+            /// </summary>
+            /// <param name="accountId">Account ID</param>
+            /// <returns>Collection of ledger entries</returns>
+            public IEnumerable<LedgerEntryDto> GetLedgerEntriesForAccount(Guid accountId)
+            {
+                var result = new List<LedgerEntryDto>();
+
+                foreach (var entries in _ledgerEntriesByTransaction.Values)
+                {
+                    result.AddRange(entries.Where(e => e.AccountId == accountId));
+                }
+
+                return result;
+            }
+
+            /// <summary>
+            /// Gets ledger entries for a transaction
+            /// </summary>
+            /// <param name="transactionId">Transaction ID</param>
+            /// <returns>Collection of ledger entries</returns>
+            public IEnumerable<LedgerEntryDto> GetLedgerEntriesForTransaction(Guid transactionId)
+            {
+                if (_ledgerEntriesByTransaction.TryGetValue(transactionId, out var entries))
+                {
+                    return entries;
+                }
+
+                return new List<LedgerEntryDto>();
             }
         }
         #endregion
