@@ -11,6 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sivar.Erp.Xpo", "Sivar.Erp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Xpo", "Tests.Xpo\Tests.Xpo.csproj", "{16A17C7F-3F04-474C-A676-0E99E7EF4DF4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requirements", "Requirements", "{D5DF175A-70C6-830F-AEB8-D1143C81ACB0}"
+	ProjectSection(SolutionItems) = preProject
+		FinancialStatementsModule.txt = FinancialStatementsModule.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

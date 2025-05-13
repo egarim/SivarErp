@@ -1,0 +1,436 @@
+Financial Statement Module Implementation Task List
+Overview
+The Financial Statement Module handles the preparation of financial statements including Balance Sheet, Income Statement, Cash Flow Statement, and Equity Statement. These statements are built using a hierarchical nested set model for organizing lines and accounts.
+1. Core Interfaces and Enums
+Task 1.1: Create Value Type Enumeration
+
+ Create ValueType enum with values:
+
+Debit = 'D'
+Credit = 'C'
+
+
+
+Task 1.2: Create Financial Statement Line Type Enums
+
+ Create BalanceIncomeLineType enum with values:
+
+BaseHeader
+BalanceHeader
+IncomeHeader
+BalanceLine
+IncomeLine
+
+
+
+Task 1.3: Create Cash Flow Statement Enums
+
+ Create CashFlowLineType enum with values:
+
+Header
+Line
+
+
+ Create BalanceType enum with values:
+
+Total
+PerPeriod
+Debit
+Credit
+
+
+
+Task 1.4: Create Equity Statement Enum
+
+ Create EquityLineType enum with values:
+
+InitialBalance
+CumulativeDelta
+ZeroBalance
+FirstDelta
+FirstBalance
+SecondDelta
+SecondBalance
+
+
+
+2. Balance Sheet and Income Statement
+Task 2.1: Create Balance and Income Line Interface
+
+ Create IBalanceAndIncomeLine interface with properties:
+
+Guid Id
+BalanceIncomeLineType LineType
+int VisibleIndex
+string PrintedNo
+string LineText
+ValueType ValueType
+int LeftIndex
+int RightIndex
+DateTime InsertedAt
+string InsertedBy
+DateTime UpdatedAt
+string UpdatedBy
+
+
+
+Task 2.2: Create Balance and Income Line DTO
+
+ Create BalanceAndIncomeLineDto implementing IBalanceAndIncomeLine
+ Implement validation logic for nested set indexes
+ Add business methods for tree operations (add child, move, etc.)
+
+Task 2.3: Create Balance and Income Line Service Interface
+
+ Create IBalanceAndIncomeLineService with methods:
+
+Task<IBalanceAndIncomeLine> CreateLineAsync(IBalanceAndIncomeLine line, string userName)
+Task<IBalanceAndIncomeLine> UpdateLineAsync(IBalanceAndIncomeLine line, string userName)
+Task<bool> DeleteLineAsync(Guid id)
+Task<IBalanceAndIncomeLine> MoveLineAsync(Guid lineId, Guid? parentId, int position)
+Task<IEnumerable<IBalanceAndIncomeLine>> GetLinesByTypeAsync(BalanceIncomeLineType lineType)
+Task<IEnumerable<IBalanceAndIncomeLine>> GetChildLinesAsync(Guid parentId)
+
+
+
+3. Cash Flow Statement
+Task 3.1: Create Cash Flow Line Interface
+
+ Create ICashFlowLine interface with properties:
+
+Guid Id
+CashFlowLineType LineType
+bool IsNetIncome
+int VisibleIndex
+string PrintedNo
+string LineText
+ValueType ValueType
+BalanceType BalanceType
+int LeftIndex
+int RightIndex
+DateTime InsertedAt
+string InsertedBy
+DateTime UpdatedAt
+string UpdatedBy
+
+
+
+Task 3.2: Create Cash Flow Line DTO
+
+ Create CashFlowLineDto implementing ICashFlowLine
+ Implement validation for line constraints (e.g., only one net income line)
+
+Task 3.3: Create Cash Flow Line Assignment Interfaces
+
+ Create ICashFlowLineAssignment interface:
+
+Guid Id
+Guid AccountId
+Guid CashFlowLineId
+
+
+ Create CashFlowLineAssignmentDto implementation
+
+Task 3.4: Create Cash Flow Adjustment Interface
+
+ Create ICashFlowAdjustment interface with properties:
+
+Guid Id
+Guid TransactionId
+Guid AccountId
+EntryType EntryType
+decimal Amount
+
+
+
+Task 3.5: Create Cash Flow Service Interfaces
+
+ Create ICashFlowLineService with methods:
+
+Task<ICashFlowLine> CreateLineAsync(ICashFlowLine line, string userName)
+Task<ICashFlowLine> UpdateLineAsync(ICashFlowLine line, string userName)
+Task<bool> DeleteLineAsync(Guid id)
+Task<IEnumerable<ICashFlowLine>> GetAllLinesAsync()
+
+
+ Create ICashFlowAdjustmentService with methods:
+
+Task<ICashFlowAdjustment> CreateAdjustmentAsync(ICashFlowAdjustment adjustment)
+Task<bool> DeleteAdjustmentAsync(Guid id)
+Task<IEnumerable<ICashFlowAdjustment>> GetAdjustmentsByTransactionAsync(Guid transactionId)
+
+
+
+4. Equity Statement
+Task 4.1: Create Equity Line Interface
+
+ Create IEquityLine interface with properties:
+
+Guid Id
+int VisibleIndex
+string PrintedNo
+string LineText
+EquityLineType LineType
+DateTime InsertedAt
+string InsertedBy
+DateTime UpdatedAt
+string UpdatedBy
+
+
+
+Task 4.2: Create Equity Column Interface
+
+ Create IEquityColumn interface with properties:
+
+Guid Id
+string ColumnText
+int VisibleIndex
+DateTime InsertedAt
+string InsertedBy
+DateTime UpdatedAt
+string UpdatedBy
+
+
+
+Task 4.3: Create Equity Line Assignment Interface
+
+ Create IEquityLineAssignment interface:
+
+Guid Id
+Guid EquityLineId
+DocumentType DocumentType
+Guid? ExtendedDocumentTypeId
+
+
+
+Task 4.4: Create Equity DTOs
+
+ Create EquityLineDto implementing IEquityLine
+ Create EquityColumnDto implementing IEquityColumn
+ Create EquityLineAssignmentDto implementing IEquityLineAssignment
+
+5. Financial Statement Generation Services
+Task 5.1: Create Financial Statement Service Interface
+
+ Create IFinancialStatementService with methods:
+
+Task<BalanceSheetDto> GenerateBalanceSheetAsync(DateOnly asOfDate)
+Task<IncomeStatementDto> GenerateIncomeStatementAsync(DateOnly startDate, DateOnly endDate)
+Task<CashFlowStatementDto> GenerateCashFlowStatementAsync(DateOnly startDate, DateOnly endDate)
+Task<EquityStatementDto> GenerateEquityStatementAsync(DateOnly startDate, DateOnly endDate)
+
+
+
+Task 5.2: Create Statement DTOs
+
+ Create BalanceSheetDto with:
+
+DateOnly AsOfDate
+IEnumerable<BalanceSheetLineDto> Lines
+decimal TotalAssets
+decimal TotalLiabilitiesAndEquity
+
+
+ Create IncomeStatementDto with:
+
+DateOnly StartDate
+DateOnly EndDate
+IEnumerable<IncomeStatementLineDto> Lines
+decimal NetIncome
+
+
+ Create CashFlowStatementDto with:
+
+DateOnly StartDate
+DateOnly EndDate
+IEnumerable<CashFlowLineValueDto> Lines
+decimal NetCashFlow
+
+
+ Create EquityStatementDto with:
+
+DateOnly StartDate
+DateOnly EndDate
+IEnumerable<EquityLineValueDto> Lines
+IEnumerable<EquityColumnDto> Columns
+
+
+
+Task 5.3: Create Statement Line Value DTOs
+
+ Create BalanceSheetLineDto:
+
+string PrintedNo
+string LineText
+decimal Amount
+bool IsHeader
+int IndentLevel
+
+
+ Create IncomeStatementLineDto:
+
+string PrintedNo
+string LineText
+decimal Amount
+bool IsHeader
+int IndentLevel
+
+
+ Create CashFlowLineValueDto:
+
+string PrintedNo
+string LineText
+decimal Amount
+bool IsHeader
+int IndentLevel
+
+
+ Create EquityLineValueDto:
+
+string PrintedNo
+string LineText
+Dictionary<Guid, decimal> ColumnValues
+
+
+
+6. XPO Implementations
+Task 6.1: Create XPO Balance and Income Line
+
+ Create XpoBalanceAndIncomeLine : XpoPersistentBase, IBalanceAndIncomeLine
+ Implement nested set model persistence
+ Add XPO-specific validation and indexes
+
+Task 6.2: Create XPO Cash Flow Components
+
+ Create XpoCashFlowLine : XpoPersistentBase, ICashFlowLine
+ Create XpoCashFlowLineAssignment : XPObject, ICashFlowLineAssignment
+ Create XpoCashFlowAdjustment : XPObject, ICashFlowAdjustment
+
+Task 6.3: Create XPO Equity Components
+
+ Create XpoEquityLine : XpoPersistentBase, IEquityLine
+ Create XpoEquityColumn : XpoPersistentBase, IEquityColumn
+ Create XpoEquityLineAssignment : XPObject, IEquityLineAssignment
+
+Task 6.4: Create XPO Service Implementations
+
+ Create XpoBalanceAndIncomeLineService implementing IBalanceAndIncomeLineService
+ Create XpoCashFlowLineService implementing ICashFlowLineService
+ Create XpoCashFlowAdjustmentService implementing ICashFlowAdjustmentService
+ Create XpoEquityLineService implementing IEquityLineService
+ Create XpoFinancialStatementService implementing IFinancialStatementService
+
+7. Business Logic Implementation
+Task 7.1: Implement Nested Set Model Operations
+
+ Create helper class for nested set calculations
+ Implement methods for:
+
+Inserting nodes
+Moving nodes
+Deleting nodes
+Calculating tree depth
+Finding parent/child relationships
+
+
+
+Task 7.2: Implement Financial Statement Calculation Logic
+
+ Create account balance aggregation logic
+ Implement balance sheet calculation:
+
+Account balance summation by lines
+Hierarchy aggregation
+Retained earnings simulation
+
+
+ Implement income statement calculation:
+
+Period-specific account balances
+Revenue and expense categorization
+
+
+ Implement cash flow statement calculation:
+
+Direct method support
+Indirect method calculations
+Adjustment applications
+
+
+ Implement equity statement calculation:
+
+Transaction classification by document type
+Period-wise equity movements
+
+
+
+Task 7.3: Create Validation Services
+
+ Create financial statement validation:
+
+Balance sheet balance verification
+Cash flow balance verification
+Equity movements verification
+
+
+ Create account assignment validation:
+
+Ensure accounts are properly assigned
+Validate against nested set constraints
+
+
+
+8. Unit Tests
+Task 8.1: Create Core Tests
+
+ Test DTOs and interfaces
+ Test enumerations and validation
+ Test nested set model operations
+
+Task 8.2: Create Service Tests
+
+ Test balance and income line service
+ Test cash flow line service
+ Test equity line service
+ Test financial statement generation service
+
+Task 8.3: Create Integration Tests
+
+ Test complete financial statement generation
+ Test account assignment and aggregation
+ Test cross-period calculations
+
+Task 8.4: Create XPO-Specific Tests
+
+ Test XPO persistence operations
+ Test XPO performance with large datasets
+ Test XPO transaction handling
+
+9. Documentation and Examples
+Task 9.1: Create Documentation
+
+ Document nested set model implementation
+ Document financial statement generation algorithms
+ Create API documentation for all interfaces
+ Document XPO-specific considerations
+
+Task 9.2: Create Usage Examples
+
+ Create example financial statement configurations
+ Create sample reports and exports
+ Create integration examples with chart of accounts
+
+Implementation Order Recommendation
+
+Start with enums and core interfaces (Tasks 1.1-1.4)
+Implement Balance Sheet and Income Statement components (Tasks 2.1-2.3)
+Implement Cash Flow Statement components (Tasks 3.1-3.5)
+Implement Equity Statement components (Tasks 4.1-4.4)
+Create statement DTOs and generation services (Tasks 5.1-5.3)
+Implement nested set model logic (Task 7.1)
+Create business logic for calculations (Task 7.2-7.3)
+Implement XPO persistence layer (Tasks 6.1-6.4)
+Create comprehensive tests (Tasks 8.1-8.4)
+Complete documentation (Tasks 9.1-9.2)
+
+This task list provides a comprehensive roadmap for implementing the Financial Statement Module while maintaining consistency with the existing architecture and following SOLID design principles.

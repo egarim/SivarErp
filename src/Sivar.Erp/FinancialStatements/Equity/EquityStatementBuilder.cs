@@ -119,6 +119,7 @@ namespace Sivar.Erp.FinancialStatements.Equity
                 .AddLine("Dividends", EquityLineType.FirstDelta, "5.4")
                 .AssignDocumentType(DocumentType.Miscellaneous)
                 .AddLine("Balance at the end of the first period", EquityLineType.FirstBalance, "6")
+                .AddLine("Restated balance at the beginning of the second period", EquityLineType.FirstBalance, "6.1")  // Added missing line
                 .AddLine("Changes in equity for the second period", EquityLineType.SecondDelta, "7")
                 .AddLine("Issue of share capital", EquityLineType.SecondDelta, "7.1")
                 .AssignDocumentType(DocumentType.Miscellaneous)
