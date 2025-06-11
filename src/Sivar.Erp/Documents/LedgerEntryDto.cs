@@ -33,11 +33,19 @@
         /// <summary>
         /// Optional reference to a person for analysis
         /// </summary>
-        public Guid? PersonId { get; set; }
+        public Guid? PersonId { get; set; }        /// <summary>
+                                                   /// Optional reference to a cost center for analysis
+                                                   /// </summary>
+        public Guid? CostCentreId { get; set; }
 
         /// <summary>
-        /// Optional reference to a cost center for analysis
+        /// Name of the account
         /// </summary>
-        public Guid? CostCentreId { get; set; }
+        public string AccountName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Official code/identifier for the account
+        /// </summary>
+        public string OfficialCode { get; set; } = string.Empty;
     }
 }

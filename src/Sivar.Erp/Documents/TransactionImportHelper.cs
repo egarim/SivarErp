@@ -88,22 +88,26 @@ namespace Sivar.Erp.Documents
                         {
                             Console.WriteLine($"Failed to parse credit amount: {cols[4]}");
                         }
-                    }
-
-                    // If both debit and credit are 0 or non-zero, skip this entry
-                    if ((debitAmount == 0 && creditAmount == 0) || (debitAmount != 0 && creditAmount != 0))
+                    }                    // Only skip if both debit and credit are non-zero (which is invalid)
+                    if (debitAmount != 0 && creditAmount != 0)
                     {
-                        Console.WriteLine($"Invalid entry: debit={debitAmount}, credit={creditAmount}");
+                        Console.WriteLine($"Invalid entry: both debit and credit have values - debit={debitAmount}, credit={creditAmount}");
                         continue;
-                    }
+                    }                    // Allow entries where both debit and credit are 0
+                    // Find the account to get its name and official code
+                    var account = _accounts.FirstOrDefault(a => a.Id == accountId);
 
                     var entry = new LedgerEntryDto
                     {
                         Id = Guid.NewGuid(),
                         TransactionId = currentTransactionId,
                         AccountId = accountId,
+                        // If both are zero, default to Debit with zero amount                        // When both are zero, default to Debit with zero amount
                         EntryType = debitAmount != 0 ? EntryType.Debit : EntryType.Credit,
-                        Amount = debitAmount != 0 ? debitAmount : creditAmount
+                        Amount = debitAmount != 0 ? debitAmount : creditAmount,
+                        // Set the new properties
+                        AccountName = account?.AccountName ?? string.Empty,
+                        OfficialCode = account?.OfficialCode ?? accountCode
                     };
 
                     currentEntries.Add(entry);

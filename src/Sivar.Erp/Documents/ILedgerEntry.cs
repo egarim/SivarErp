@@ -31,11 +31,19 @@ namespace Sivar.Erp.Documents
         /// <summary>
         /// Optional reference to a person for analysis
         /// </summary>
-        Guid? PersonId { get; set; }
+        Guid? PersonId { get; set; }        /// <summary>
+                                            /// Optional reference to a cost center for analysis
+                                            /// </summary>
+        Guid? CostCentreId { get; set; }
 
         /// <summary>
-        /// Optional reference to a cost center for analysis
+        /// Name of the account
         /// </summary>
-        Guid? CostCentreId { get; set; }
+        string AccountName { get; set; }
+
+        /// <summary>
+        /// Official code/identifier for the account
+        /// </summary>
+        string OfficialCode { get; set; }
     }
 }
