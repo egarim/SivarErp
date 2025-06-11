@@ -217,9 +217,102 @@ namespace Sivar.Erp.Tests.Integration
                 var firstDigit = code[0];
                 var expectedPrefix = accountTypePrefixes[account.AccountType];
 
-                Assert.That(firstDigit, Is.EqualTo(expectedPrefix), 
+                Assert.That(firstDigit, Is.EqualTo(expectedPrefix),
                     $"{account.AccountType} account {account.AccountName} should start with '{expectedPrefix}' but starts with '{firstDigit}'");
             }
+        }
+
+        [Test]
+        public async Task CanImportTransactionsFromTextFile()
+        {
+            // Ensure chart of accounts is set up
+            if (_accounts.Count == 0)
+            {
+                await SetupChartOfAccounts();
+            }            // Load transactions.txt as embedded resource
+            var assembly = Assembly.GetExecutingAssembly();
+            // Try several possible resource names based on namespace conventions
+            string[] possibleResourceNames = new[] {
+                "Sivar.Erp.Tests.Integration.IntegrationTests.transactions.txt",  // Matches namespace + folder
+                "Sivar.Erp.Tests.IntegrationTests.transactions.txt",              // Original attempt
+                "Sivar.Erp.Tests.Integration.transactions.txt"                    // Just namespace
+            };
+
+            string transactionsText = string.Empty;
+            bool resourceLoaded = false;
+
+            // Try loading from embedded resources
+            foreach (var resourceName in possibleResourceNames)
+            {
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream != null)
+                    {
+                        using var reader = new StreamReader(stream);
+                        transactionsText = await reader.ReadToEndAsync();
+                        Console.WriteLine($"Successfully loaded resource: {resourceName}");
+                        resourceLoaded = true;
+                        break;
+                    }
+                }
+            }
+
+            // Fallback: try direct file path (for debugging)
+            if (!resourceLoaded)
+            {
+                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "transactions.txt");
+                if (File.Exists(filePath))
+                {
+                    transactionsText = await File.ReadAllTextAsync(filePath);
+                    resourceLoaded = true;
+                    Console.WriteLine($"Loaded transactions from file: {filePath}");
+                }
+                else
+                {
+                    // Try one more approach - look for the file in the project directory
+                    string projectPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+                    for (int i = 0; i < 5; i++) // Go up to 5 levels to find the project root
+                    {
+                        string testFilePath = Path.Combine(projectPath, "IntegrationTests", "transactions.txt");
+                        if (File.Exists(testFilePath))
+                        {
+                            transactionsText = await File.ReadAllTextAsync(testFilePath);
+                            resourceLoaded = true;
+                            Console.WriteLine($"Loaded transactions from file: {testFilePath}");
+                            break;
+                        }
+                        projectPath = Path.GetDirectoryName(projectPath)!;
+                        if (string.IsNullOrEmpty(projectPath)) break;
+                    }
+                }
+            }
+
+            Assert.That(resourceLoaded, Is.True, "Could not load transactions.txt from any location");
+            Assert.That(transactionsText, Is.Not.Empty, "Transactions text was empty");
+
+            // Prepare account list for import helper
+            var accountList = _accounts.Values.ToList();
+            var importHelper = new TransactionImportHelper(accountList);            // Import transactions and ledger entries
+            var imported = importHelper.Import(transactionsText);
+
+            // Filter out transactions with no entries
+            var validTransactions = imported.Where(item => item.Item2.Count > 0).ToList();
+
+            // Basic assertions
+            Assert.That(validTransactions, Is.Not.Empty, "No valid transactions were imported");
+            Console.WriteLine($"Imported {imported.Count} total transactions, {validTransactions.Count} with entries");
+
+            foreach (var (transaction, entries) in validTransactions)
+            {
+                Assert.That(transaction, Is.Not.Null);
+                Assert.That(entries, Is.Not.Null);
+                Assert.That(entries.Count, Is.GreaterThan(0), $"Transaction {transaction.Id} has no ledger entries");
+                foreach (var entry in entries)
+                {
+                    Assert.That(accountList.Any(a => a.Id == entry.AccountId), $"AccountId {entry.AccountId} not found in chart of accounts");
+                }
+            }
+            Console.WriteLine($"Imported {imported.Count} transactions from embedded resource.");
         }
     }
 }

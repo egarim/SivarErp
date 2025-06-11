@@ -10,10 +10,12 @@
 
   <ItemGroup>
     <None Remove="IntegrationTests\chart_of_accounts_csv_complete.txt" />
+    <None Remove="IntegrationTests\transactions.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="IntegrationTests\chart_of_accounts_csv_complete.txt" />
+    <EmbeddedResource Include="IntegrationTests\transactions.txt" />
   </ItemGroup>
 
   <ItemGroup>
