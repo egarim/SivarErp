@@ -21,7 +21,6 @@ public class MockAccountBalanceCalculator : AccountBalanceCalculator
     public MockAccountBalanceCalculator(
         Dictionary<string, AccountDto> accounts,
         Dictionary<string, ITransaction> transactions)
-        : base(null)
     {
         _accounts = accounts;
         _transactions = transactions;
@@ -34,8 +33,8 @@ public class MockAccountBalanceCalculator : AccountBalanceCalculator
             // Use reflection or similar approach to access _ledgerEntries collection
             // This is a simplified mock for testing - in real code we'd have proper access
             var transactionDto = transaction as TransactionDto;
-            
-            
+
+
             //TODO uncomment after test
             //if (transactionDto != null && transactionDto.LedgerEntries != null)
             //{
@@ -74,7 +73,8 @@ public class MockAccountBalanceCalculator : AccountBalanceCalculator
     public new (decimal DebitTurnover, decimal CreditTurnover) CalculateAccountTurnover(
         Guid accountId, DateOnly startDate, DateOnly endDate)
     {
-        var relevantEntries = _ledgerEntries.Where(e => {
+        var relevantEntries = _ledgerEntries.Where(e =>
+        {
             var transactionDate = GetTransactionDateForEntry(e);
             return e.AccountId == accountId &&
                    transactionDate >= startDate &&

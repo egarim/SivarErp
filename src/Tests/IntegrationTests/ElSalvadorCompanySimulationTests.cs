@@ -7,6 +7,7 @@ using Sivar.Erp.Documents;
 using Sivar.Erp.ChartOfAccounts;
 using Sivar.Erp.FinancialStatements;
 using Sivar.Erp.FinancialStatements.Generation;
+using static Sivar.Erp.Tests.Integration.AccountingIntegrationTests;
 
 namespace Sivar.Erp.Tests.Integration
 {
@@ -1034,111 +1035,6 @@ namespace Sivar.Erp.Tests.Integration
             Assert.That(retainedEarningsBalance, Is.LessThan(0), "Retained earnings should have a credit (negative) balance");
         }
 
-        /// <summary>
-        /// Mock implementation of account balance calculator for testing
-        /// </summary>
-        public class MockAccountBalanceCalculator : AccountBalanceCalculator
-        {
-            private readonly Dictionary<string, AccountDto> _accounts;
-            private readonly Dictionary<Guid, List<LedgerEntryDto>> _ledgerEntriesByTransaction = new();
-            private readonly Dictionary<Guid, decimal> _accountBalances = new();
-
-            public MockAccountBalanceCalculator(
-                Dictionary<string, AccountDto> accounts,
-                Dictionary<string, ITransaction> transactions)
-            {
-                _accounts = accounts;
-
-                // Create mock ledger entries for each transaction
-                InitializeLedgerEntries(transactions);
-
-                // Calculate account balances based on ledger entries
-                CalculateAllBalances();
-            }
-
-            /// <summary>
-            /// Creates mock ledger entries for each transaction - simplified for testing
-            /// </summary>
-            private void InitializeLedgerEntries(Dictionary<string, ITransaction> transactions)
-            {
-                // In a real implementation, we would create specific entries for each transaction
-                // This is just a simplified version for testing
-                _ledgerEntriesByTransaction.Clear();
-
-                // For the purpose of this test, we'll assume the transactions have occurred and the
-                // account balances reflect this, without actually implementing all the ledger entries
-            }
-
-            /// <summary>
-            /// Calculates balances for all accounts based on ledger entries - simplified for testing
-            /// </summary>
-            private void CalculateAllBalances()
-            {
-                // Initialize all account balances
-                foreach (var account in _accounts.Values)
-                {
-                    // In a real implementation, this would sum up all ledger entries
-                    // For testing, we'll just set some reasonable balances
-
-                    switch (account.AccountName)
-                    {
-                        case "Cash in Bank":
-                            _accountBalances[account.Id] = 185000.00m;
-                            break;
-                        case "Accounts Receivable - Customers":
-                            _accountBalances[account.Id] = 148450.00m;
-                            break;
-                        case "Inventory - Finished Goods":
-                            _accountBalances[account.Id] = 141000.00m;
-                            break;
-                        case "Inventory - Raw Materials":
-                            _accountBalances[account.Id] = 165000.00m;
-                            break;
-                        case "Sales - Product Line A":
-                            _accountBalances[account.Id] = -65000.00m; // Credit balance
-                            break;
-                        case "Retained Earnings":
-                            _accountBalances[account.Id] = -455000.00m; // Credit balance
-                            break;
-                        default:
-                            // For other accounts, use default values based on account type
-                            if (account.AccountType == AccountType.Asset)
-                            {
-                                _accountBalances[account.Id] = 10000.00m;
-                            }
-                            else if (account.AccountType == AccountType.Liability ||
-                                     account.AccountType == AccountType.Equity ||
-                                     account.AccountType == AccountType.Revenue)
-                            {
-                                _accountBalances[account.Id] = -10000.00m; // Credit balance
-                            }
-                            else // Expense
-                            {
-                                _accountBalances[account.Id] = 10000.00m; // Debit balance
-                            }
-                            break;
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Calculates the balance of an account as of a specific date
-            /// </summary>
-            /// <param name="accountId">Account ID</param>
-            /// <param name="asOfDate">Date to calculate balance for</param>
-            /// <returns>Account balance</returns>
-            public new decimal CalculateAccountBalance(Guid accountId, DateOnly asOfDate)
-            {
-                // In a real implementation, this would filter entries by date
-                // For this mock, we'll just return the pre-calculated balance
-                if (_accountBalances.TryGetValue(accountId, out decimal balance))
-                {
-                    return balance;
-                }
-
-                return 0m;
-            }
-        }
 
         #endregion
 
@@ -1966,6 +1862,13 @@ namespace Sivar.Erp.Tests.Integration
             Assert.That(_transactions.Count(t => t.Key.StartsWith("Procurement")), Is.EqualTo(2),
                 "Should have 2 financial transactions in the procurement cycle");
         }
+
+
+
+
+
+
+
 
         // Supporting classes for document metadata
         public class CustomerInfo

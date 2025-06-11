@@ -18,23 +18,19 @@ namespace Sivar.Erp.ChartOfAccounts
         {
             _auditService = auditService;
             _accountValidator = new AccountValidator();
-        }
-
-        /// <summary>
-        /// Imports accounts from a CSV file
-        /// </summary>
-        /// <param name="csvContent">Content of the CSV file as a string</param>
-        /// <param name="userName">User performing the operation</param>
-        /// <returns>Collection of imported accounts and any validation errors</returns>
-        public async Task<(IEnumerable<IAccount> ImportedAccounts, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        }        /// <summary>
+                 /// Imports accounts from a CSV file
+                 /// </summary>
+                 /// <param name="csvContent">Content of the CSV file as a string</param>
+                 /// <param name="userName">User performing the operation</param>
+                 /// <returns>Collection of imported accounts and any validation errors</returns>
+        public Task<(IEnumerable<IAccount> ImportedAccounts, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
             List<AccountDto> importedAccounts = new List<AccountDto>();
-            List<string> errors = new List<string>();
-
-            if (string.IsNullOrEmpty(csvContent))
+            List<string> errors = new List<string>(); if (string.IsNullOrEmpty(csvContent))
             {
                 errors.Add("CSV content is empty");
-                return (importedAccounts, errors);
+                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
             }
 
             try
@@ -45,7 +41,7 @@ namespace Sivar.Erp.ChartOfAccounts
                 if (lines.Length <= 1)
                 {
                     errors.Add("CSV file contains no data rows");
-                    return (importedAccounts, errors);
+                    return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
                 }
 
                 // Assume first line is header
@@ -54,7 +50,7 @@ namespace Sivar.Erp.ChartOfAccounts
                 // Validate headers
                 if (!ValidateHeaders(headers, errors))
                 {
-                    return (importedAccounts, errors);
+                    return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
                 }
 
                 // Process data rows
@@ -78,17 +74,15 @@ namespace Sivar.Erp.ChartOfAccounts
                     }
 
                     // Set audit information
-                    _auditService.SetCreationAudit(account, userName);
-
-                    importedAccounts.Add(account);
+                    _auditService.SetCreationAudit(account, userName); importedAccounts.Add(account);
                 }
 
-                return (importedAccounts, errors);
+                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
             }
             catch (Exception ex)
             {
                 errors.Add($"Error importing CSV: {ex.Message}");
-                return (importedAccounts, errors);
+                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
             }
         }
 
@@ -214,33 +208,36 @@ namespace Sivar.Erp.ChartOfAccounts
                             account.BalanceAndIncomeLineId = lineId;
                         }
                         break;
+                    case "parentofficialcode":
+                        account.ParentOfficialCode = string.IsNullOrWhiteSpace(value) ? null : value;
+                        break;
                 }
             }
 
             return account;
-        }
-
-        /// <summary>
-        /// Gets the CSV header row
-        /// </summary>
-        /// <returns>CSV header as a string</returns>
+        }        /// <summary>
+                 /// Gets the CSV header row
+                 /// </summary>
+                 /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
-            return "AccountName,OfficialCode,AccountType,BalanceAndIncomeLineId";
-        }
-
-        /// <summary>
-        /// Gets a CSV row for an account
-        /// </summary>
-        /// <param name="account">Account to convert to CSV</param>
-        /// <returns>CSV row as a string</returns>
+            return "AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId";
+        }        /// <summary>
+                 /// Gets a CSV row for an account
+                 /// </summary>
+                 /// <param name="account">Account to convert to CSV</param>
+                 /// <returns>CSV row as a string</returns>
         private string GetCsvRow(IAccount account)
         {
             string balanceAndIncomeLineId = account.BalanceAndIncomeLineId.HasValue
                 ? account.BalanceAndIncomeLineId.Value.ToString()
                 : string.Empty;
 
-            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},{balanceAndIncomeLineId}";
+            string parentOfficialCode = string.IsNullOrWhiteSpace(account.ParentOfficialCode)
+                ? string.Empty
+                : account.ParentOfficialCode;
+
+            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},\"{parentOfficialCode}\",{balanceAndIncomeLineId}";
         }
     }
 }
