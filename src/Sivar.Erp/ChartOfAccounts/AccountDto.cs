@@ -56,6 +56,11 @@
         public bool IsArchived { get; set; }
 
         /// <summary>
+        /// Official code/identifier for the parent account 
+        /// </summary>
+        public string? ParentOfficialCode { get; set; }
+
+        /// <summary>
         /// Validates the account object according to business rules
         /// </summary>
         /// <returns>True if valid, false otherwise</returns>

@@ -24,5 +24,9 @@
         /// Official code/identifier for the account (e.g., for SAF-T reporting)
         /// </summary>
         string OfficialCode { get; set; }
+        /// <summary>
+        /// Official code/identifier for the parent account 
+        /// </summary>
+        string ParentOfficialCode { get; set; }
     }
 }

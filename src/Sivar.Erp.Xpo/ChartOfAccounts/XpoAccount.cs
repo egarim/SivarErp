@@ -1,4 +1,5 @@
 ﻿using DevExpress.Xpo;
+using DevExpress.Data.Filtering;
 using Sivar.Erp.ChartOfAccounts;
 using Sivar.Erp.Xpo.Core;
 using Sivar.Erp.Xpo.Documents;
@@ -18,8 +19,7 @@ namespace Sivar.Erp.Xpo.ChartOfAccounts
         /// </summary>
         public XpoAccount(Session session) : base(session) { }
 
-       
-
+        string parentOfficialCode;
         private Guid? _balanceAndIncomeLineId;
 
         /// <summary>
@@ -62,16 +62,68 @@ namespace Sivar.Erp.Xpo.ChartOfAccounts
         /// Official code/identifier for the account (e.g., for SAF-T reporting)
         /// </summary>
         [Persistent("OfficialCode"), Size(100)]
+        [Indexed(Name = "IDX_Account_OfficialCode", Unique = true)]
         public string OfficialCode
         {
             get => _officialCode;
             set => SetPropertyValue(nameof(OfficialCode), ref _officialCode, value);
         }
 
+        private string _parentAccountCode = string.Empty;
+
+        /// <summary>
+        /// Optional reference to the parent account's official code (null for top-level accounts)
+        /// </summary>
+        [Persistent("ParentAccountCode"), Size(100)]
+        public string ParentAccountCode
+        {
+            get => _parentAccountCode;
+            set => SetPropertyValue(nameof(ParentAccountCode), ref _parentAccountCode, value);
+        }
+        
+        [Size(SizeAttribute.DefaultStringMappingFieldSize)]
+        public string ParentOfficialCode
+        {
+            get => parentOfficialCode;
+            set => SetPropertyValue(nameof(ParentOfficialCode), ref parentOfficialCode, value);
+        }
         // XPO collections for related entities
         [Association("Account-LedgerEntries")]
         public XPCollection<XpoLedgerEntry> LedgerEntries =>
             GetCollection<XpoLedgerEntry>(nameof(LedgerEntries));
+
+        #region Parent-Child Relationships
+
+        /// <summary>
+        /// Returns the parent account based on ParentAccountCode
+        /// </summary>
+        [NonPersistent]
+        public XpoAccount ParentAccount
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ParentAccountCode))
+                    return null;
+
+                return Session.FindObject<XpoAccount>(
+                    CriteriaOperator.Parse($"{nameof(OfficialCode)} = ?", ParentAccountCode));
+            }
+        }
+
+        /// <summary>
+        /// Returns all child accounts that have this account's official code as their parent account code
+        /// </summary>
+        [NonPersistent]
+        public XPCollection<XpoAccount> ChildAccounts
+        {
+            get
+            {
+                return new XPCollection<XpoAccount>(Session,
+                    CriteriaOperator.Parse($"{nameof(ParentAccountCode)} = ?", OfficialCode));
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Validates the account object according to business rules
@@ -102,6 +154,13 @@ namespace Sivar.Erp.Xpo.ChartOfAccounts
         {
             // Archived accounts cannot be used
             if (IsArchived)
+            {
+                return false;
+            }
+
+            // If this account has child accounts, it's a summary account and shouldn't be used directly
+            // Note: This requires database access, so it might be better to add an IsSummary flag
+            if (ChildAccounts.Count > 0)
             {
                 return false;
             }
