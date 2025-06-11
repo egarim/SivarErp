@@ -9,9 +9,7 @@ namespace Sivar.Erp.Tests.Integration
 {
     public partial class XpoAccountingIntegrationTests
     {
-        #region Chart of Accounts Setup
-
-        /// <summary>
+        #region Chart of Accounts Setup        /// <summary>
         /// Creates a basic chart of accounts for a retail business
         /// </summary>
         private async Task SetupChartOfAccounts()
@@ -19,32 +17,43 @@ namespace Sivar.Erp.Tests.Integration
             // Clear accounts dictionary in case this method is called multiple times
             _accounts.Clear();
 
-            // Assets (1xxxx)
-            await CreateAccount("Cash", "10100", AccountType.Asset, "Cash on hand and in banks");
-            await CreateAccount("Accounts Receivable", "11000", AccountType.Asset, "Amounts owed by customers");
-            await CreateAccount("Inventory", "12000", AccountType.Asset, "Merchandise held for sale");
-            await CreateAccount("Store Equipment", "15000", AccountType.Asset, "Equipment used in store operations");
-            await CreateAccount("Accumulated Depreciation - Store Equipment", "15100", AccountType.Asset, "Accumulated depreciation for store equipment");
+            // Assets (1xxxx) - Create hierarchical structure
+            await CreateAccount("Assets", "10000", AccountType.Asset, "All company assets");
+            await CreateAccount("Current Assets", "11000", AccountType.Asset, "Assets expected to be converted to cash within one year", "10000");
+            await CreateAccount("Cash", "10100", AccountType.Asset, "Cash on hand and in banks", "11000");
+            await CreateAccount("Petty Cash", "10110", AccountType.Asset, "Small amounts of cash for minor expenses", "10100");
+            await CreateAccount("Accounts Receivable", "11100", AccountType.Asset, "Amounts owed by customers", "11000");
+            await CreateAccount("Inventory", "12000", AccountType.Asset, "Merchandise held for sale", "11000");
 
-            // Liabilities (2xxxx)
-            await CreateAccount("Accounts Payable", "20000", AccountType.Liability, "Amounts owed to suppliers");
-            await CreateAccount("Sales Tax Payable", "21000", AccountType.Liability, "Sales tax collected but not yet remitted");
-            await CreateAccount("Payroll Liabilities", "22000", AccountType.Liability, "Employee withholdings and employer payroll taxes");
+            await CreateAccount("Fixed Assets", "15000", AccountType.Asset, "Long-term tangible assets", "10000");
+            await CreateAccount("Store Equipment", "15100", AccountType.Asset, "Equipment used in store operations", "15000");
+            await CreateAccount("Accumulated Depreciation - Store Equipment", "15200", AccountType.Asset, "Accumulated depreciation for store equipment", "15000");
+
+            // Liabilities (2xxxx) - Create hierarchical structure
+            await CreateAccount("Liabilities", "20000", AccountType.Liability, "All company liabilities");
+            await CreateAccount("Current Liabilities", "21000", AccountType.Liability, "Debts due within one year", "20000");
+            await CreateAccount("Accounts Payable", "21100", AccountType.Liability, "Amounts owed to suppliers", "21000");
+            await CreateAccount("Sales Tax Payable", "21200", AccountType.Liability, "Sales tax collected but not yet remitted", "21000");
+            await CreateAccount("Payroll Liabilities", "22000", AccountType.Liability, "Employee withholdings and employer payroll taxes", "20000");
 
             // Equity (3xxxx)
-            await CreateAccount("Owner's Capital", "30000", AccountType.Equity, "Owner's investment in the business");
-            await CreateAccount("Retained Earnings", "31000", AccountType.Equity, "Accumulated earnings of the business");
+            await CreateAccount("Equity", "30000", AccountType.Equity, "Owner's equity in the business");
+            await CreateAccount("Owner's Capital", "30100", AccountType.Equity, "Owner's investment in the business", "30000");
+            await CreateAccount("Retained Earnings", "31000", AccountType.Equity, "Accumulated earnings of the business", "30000");
 
             // Revenue (4xxxx)
-            await CreateAccount("Sales Revenue", "40000", AccountType.Revenue, "Revenue from sales of merchandise");
-            await CreateAccount("Service Revenue", "41000", AccountType.Revenue, "Revenue from services provided");
+            await CreateAccount("Revenue", "40000", AccountType.Revenue, "All company revenue");
+            await CreateAccount("Sales Revenue", "40100", AccountType.Revenue, "Revenue from sales of merchandise", "40000");
+            await CreateAccount("Service Revenue", "41000", AccountType.Revenue, "Revenue from services provided", "40000");
 
-            // Expenses (6xxxx)
-            await CreateAccount("Cost of Goods Sold", "60000", AccountType.Expense, "Cost of merchandise sold");
-            await CreateAccount("Wages Expense", "61000", AccountType.Expense, "Wages paid to employees");
-            await CreateAccount("Rent Expense", "62000", AccountType.Expense, "Rent for store premises");
-            await CreateAccount("Utilities Expense", "63000", AccountType.Expense, "Electricity, water, etc.");
-            await CreateAccount("Advertising Expense", "64000", AccountType.Expense, "Marketing and advertising costs");
+            // Expenses (6xxxx) - Create hierarchical structure
+            await CreateAccount("Expenses", "60000", AccountType.Expense, "All company expenses");
+            await CreateAccount("Cost of Goods Sold", "60100", AccountType.Expense, "Cost of merchandise sold", "60000");
+            await CreateAccount("Operating Expenses", "61000", AccountType.Expense, "Day-to-day operating expenses", "60000");
+            await CreateAccount("Wages Expense", "61100", AccountType.Expense, "Wages paid to employees", "61000");
+            await CreateAccount("Rent Expense", "62000", AccountType.Expense, "Rent for store premises", "61000");
+            await CreateAccount("Utilities Expense", "63000", AccountType.Expense, "Electricity, water, etc.", "61000");
+            await CreateAccount("Advertising Expense", "64000", AccountType.Expense, "Marketing and advertising costs", "61000");
 
             // Verify all accounts are valid
             foreach (var account in _accounts.Values)
@@ -53,28 +62,26 @@ namespace Sivar.Erp.Tests.Integration
                 Assert.That(isValid, Is.True, $"Account {account.AccountName} validation failed");
             }
 
-            // Verify expected number of accounts
-            Assert.That(_accounts.Count, Is.EqualTo(17), "Expected 17 accounts in chart of accounts");
-        }
-
-        /// <summary>
-        /// Helper method to create an account and store it in the accounts dictionary
-        /// </summary>
-        private async Task CreateAccount(string name, string code, AccountType type, string description)
+            // Verify expected number of accounts (now with hierarchical structure)
+            Assert.That(_accounts.Count, Is.EqualTo(25), "Expected 25 accounts in hierarchical chart of accounts");
+        }/// <summary>
+         /// Helper method to create an account and store it in the accounts dictionary
+         /// </summary>
+        private async Task CreateAccount(string name, string code, AccountType type, string description, string? parentCode = null)
         {
             var account = new Sivar.Erp.Xpo.ChartOfAccounts.XpoAccount(_unitOfWork)
             {
                 Id = Guid.NewGuid(),
-                AccountName = name,
-                OfficialCode = code,
+                AccountName = name ?? throw new ArgumentNullException(nameof(name)),
+                OfficialCode = code ?? throw new ArgumentNullException(nameof(code)),
                 AccountType = type,
+                ParentOfficialCode = parentCode,
+                ParentAccountCode = parentCode, // Keep both for compatibility
                 IsArchived = false
             };
 
             // Set audit information
-            _auditService.SetCreationAudit(account, TEST_USER);
-
-            // Store account (ensuring no duplicates)
+            _auditService.SetCreationAudit(account, TEST_USER);            // Store account (ensuring no duplicates)
             if (!_accounts.ContainsKey(name))
             {
                 _accounts[name] = account;

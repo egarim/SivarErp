@@ -28,6 +28,11 @@
         /// <summary>
         /// Expense account - typically has a debit balance
         /// </summary>
-        Expense = 5
+        Expense = 5,
+
+        /// <summary>
+        /// Settlement account - used for year-end closing procedures
+        /// </summary>
+        Settlement = 6
     }
 }

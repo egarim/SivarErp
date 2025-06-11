@@ -112,14 +112,20 @@ namespace Sivar.Erp.Xpo.ChartOfAccounts
                     {
                         // Default to Asset if type is invalid
                         account.AccountType = AccountType.Asset;
-                    }
-
-                    // Parse balance and income line ID if present
+                    }                    // Parse balance and income line ID if present
                     if (data.TryGetValue("BalanceAndIncomeLineId", out var lineIdStr) &&
                         !string.IsNullOrWhiteSpace(lineIdStr) &&
                         Guid.TryParse(lineIdStr, out var lineId))
                     {
                         account.BalanceAndIncomeLineId = lineId;
+                    }
+
+                    // Parse parent official code if present
+                    if (data.TryGetValue("ParentOfficialCode", out var parentCode) &&
+                        !string.IsNullOrWhiteSpace(parentCode))
+                    {
+                        account.ParentOfficialCode = parentCode;
+                        account.ParentAccountCode = parentCode; // Keep both for compatibility
                     }
 
                     // Set audit information
@@ -162,10 +168,8 @@ namespace Sivar.Erp.Xpo.ChartOfAccounts
         /// <returns>CSV content</returns>
         public async Task<string> ExportToCsvAsync(IEnumerable<IAccount>? accounts)
         {
-            var builder = new StringBuilder();
-
-            // Write header
-            builder.AppendLine("AccountName,OfficialCode,AccountType,BalanceAndIncomeLineId");
+            var builder = new StringBuilder();            // Write header
+            builder.AppendLine("AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId");
 
             if (accounts == null || !accounts.Any())
             {
@@ -175,12 +179,11 @@ namespace Sivar.Erp.Xpo.ChartOfAccounts
             // Write data
             foreach (var account in accounts)
             {
-                var line = new StringBuilder();
-
-                // Escape and quote values if needed
+                var line = new StringBuilder();                // Escape and quote values if needed
                 line.Append(CsvEncode(account.AccountName)).Append(",");
                 line.Append(CsvEncode(account.OfficialCode)).Append(",");
                 line.Append(CsvEncode(account.AccountType.ToString())).Append(",");
+                line.Append(CsvEncode(account.ParentOfficialCode ?? "")).Append(",");
                 line.Append(account.BalanceAndIncomeLineId?.ToString() ?? "");
 
                 builder.AppendLine(line.ToString());

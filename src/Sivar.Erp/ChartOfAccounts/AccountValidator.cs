@@ -5,6 +5,60 @@
     /// </summary>
     public class AccountValidator
     {
+        private readonly Dictionary<AccountType, char> _accountTypePrefixes;
+
+        /// <summary>
+        /// Initializes a new instance of AccountValidator with default prefix mappings
+        /// </summary>
+        public AccountValidator()
+        {
+            _accountTypePrefixes = GetDefaultAccountTypePrefixes();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of AccountValidator with custom prefix mappings
+        /// </summary>
+        /// <param name="accountTypePrefixes">Dictionary mapping account types to their expected starting characters</param>
+        public AccountValidator(Dictionary<AccountType, char> accountTypePrefixes)
+        {
+            _accountTypePrefixes = accountTypePrefixes ?? throw new ArgumentNullException(nameof(accountTypePrefixes));
+        }
+
+        /// <summary>
+        /// Gets the default account type prefix mappings
+        /// </summary>
+        /// <returns>Dictionary with default mappings</returns>
+        public static Dictionary<AccountType, char> GetDefaultAccountTypePrefixes()
+        {
+            return new Dictionary<AccountType, char>
+            {
+                { AccountType.Asset, '1' },
+                { AccountType.Liability, '2' },
+                { AccountType.Equity, '3' },
+                { AccountType.Revenue, '4' },
+                { AccountType.Expense, '6' },
+                { AccountType.Settlement, '0' }
+            };
+        }
+
+        /// <summary>
+        /// Gets an account type prefix mapping suitable for El Salvador chart of accounts
+        /// where expenses start with '4' and revenues start with '5'
+        /// </summary>
+        /// <returns>Dictionary with El Salvador mappings</returns>
+        public static Dictionary<AccountType, char> GetElSalvadorAccountTypePrefixes()
+        {
+            return new Dictionary<AccountType, char>
+            {
+                { AccountType.Asset, '1' },
+                { AccountType.Liability, '2' },
+                { AccountType.Equity, '3' },
+                { AccountType.Expense, '4' },  // In El Salvador, expenses start with 4
+                { AccountType.Revenue, '5' },   // In El Salvador, revenues start with 5
+                { AccountType.Settlement, '6' } // Settlement accounts start with 6 in El Salvador CSV
+            };
+        }
+
         /// <summary>
         /// Validates that an account code follows the required format
         /// </summary>
@@ -25,33 +79,13 @@
             }
 
             // Check that account code prefix matches account type
-            char expectedPrefix = GetExpectedPrefix(accountType);
-            return accountCode.Length > 0 && accountCode[0] == expectedPrefix;
-        }
-
-        /// <summary>
-        /// Gets the expected first digit for an account code based on account type
-        /// </summary>
-        /// <param name="accountType">Type of account</param>
-        /// <returns>Expected first digit</returns>
-        private char GetExpectedPrefix(AccountType accountType)
-        {
-            // Convention: Assets start with 1, Liabilities with 2, Equity with 3, etc.
-            switch (accountType)
+            if (_accountTypePrefixes.TryGetValue(accountType, out char expectedPrefix))
             {
-                case AccountType.Asset:
-                    return '1';
-                case AccountType.Liability:
-                    return '2';
-                case AccountType.Equity:
-                    return '3';
-                case AccountType.Revenue:
-                    return '4';
-                case AccountType.Expense:
-                    return '6';
-                default:
-                    return '0';
+                return accountCode.Length > 0 && accountCode[0] == expectedPrefix;
             }
+
+            // If account type is not in our mapping, allow any prefix
+            return true;
         }
 
         /// <summary>

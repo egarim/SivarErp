@@ -18,6 +18,17 @@ namespace Sivar.Erp.ChartOfAccounts
         {
             _auditService = auditService;
             _accountValidator = new AccountValidator();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the AccountImportExportService class with a custom validator
+        /// </summary>
+        /// <param name="auditService">Audit service for setting audit information</param>
+        /// <param name="accountValidator">Custom account validator</param>
+        public AccountImportExportService(IAuditService auditService, AccountValidator accountValidator)
+        {
+            _auditService = auditService;
+            _accountValidator = accountValidator ?? new AccountValidator();
         }        /// <summary>
                  /// Imports accounts from a CSV file
                  /// </summary>
@@ -35,8 +46,8 @@ namespace Sivar.Erp.ChartOfAccounts
 
             try
             {
-                // Split the CSV into lines
-                string[] lines = csvContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                // Split the CSV into lines (preserve all lines)
+                string[] lines = csvContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
                 if (lines.Length <= 1)
                 {
@@ -56,6 +67,7 @@ namespace Sivar.Erp.ChartOfAccounts
                 // Process data rows
                 for (int i = 1; i < lines.Length; i++)
                 {
+                    if (string.IsNullOrWhiteSpace(lines[i])) continue; // Skip empty lines
                     string[] fields = ParseCsvLine(lines[i]);
 
                     if (fields.Length != headers.Length)
@@ -74,7 +86,8 @@ namespace Sivar.Erp.ChartOfAccounts
                     }
 
                     // Set audit information
-                    _auditService.SetCreationAudit(account, userName); importedAccounts.Add(account);
+                    _auditService.SetCreationAudit(account, userName);
+                    importedAccounts.Add(account);
                 }
 
                 return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
