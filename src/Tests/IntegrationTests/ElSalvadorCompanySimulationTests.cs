@@ -489,26 +489,36 @@ namespace Sivar.Erp.Tests.Integration
             });
 
             // Add account balances
-            balanceSheetBuilder.AddAccountBalances(accountBalances);
+            balanceSheetBuilder.AddAccountBalances(accountBalances);            // Create standard balance sheet structure for assets section
+            // Find asset account for main header (matching prefix 1)
+            var assetRootAccount = _accounts.Values
+                .FirstOrDefault(a => a.AccountType == AccountType.Asset && a.OfficialCode == "1")
+                ?? new AccountDto { AccountName = "ASSETS" };
 
-            // Create standard balance sheet structure for assets section
             var assetHeader = new BalanceSheetLineDto
             {
                 PrintedNo = "1",
-                LineText = "ASSETS",
+                LineText = assetRootAccount.AccountName.ToUpper(),
                 IsHeader = true,
                 IndentLevel = 0,
                 LineType = BalanceIncomeLineType.BaseHeader
             };
 
+            // Find current assets account (matching prefix 11)
+            var currentAssetsAccount = _accounts.Values
+                .FirstOrDefault(a => a.AccountType == AccountType.Asset && a.OfficialCode == "11")
+                ?? new AccountDto { AccountName = "Current Assets" };
+
             var currentAssetsHeader = new BalanceSheetLineDto
             {
                 PrintedNo = "11",
-                LineText = "Current Assets",
+                LineText = currentAssetsAccount.AccountName,
                 IsHeader = true,
                 IndentLevel = 1,
                 LineType = BalanceIncomeLineType.BalanceHeader
-            };            // Print top asset accounts to help with mapping
+            };
+
+            // Print top asset accounts to help with mapping
             var topAssets = _accounts.Values
                 .Where(a => a.AccountType == AccountType.Asset)
                 .OrderBy(a => a.OfficialCode)
@@ -519,47 +529,67 @@ namespace Sivar.Erp.Tests.Integration
             {
                 Console.WriteLine($"- {asset.AccountName} ({asset.OfficialCode})");
             }
+
+            // Find account for cash group or use first matching account
+            var cashAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Asset && a.OfficialCode.StartsWith("1101"))
+                .ToList();
+
+            var cashMainAccount = cashAccounts
+                .FirstOrDefault(a => a.OfficialCode == "1101")
+                ?? cashAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "Cash and Cash Equivalents" };
+
             var cashLine = new BalanceSheetLineDto
             {
                 PrintedNo = "1101",
-                LineText = "Cash and Cash Equivalents",
+                LineText = cashMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 2,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Asset &&
-                           a.OfficialCode.StartsWith("1101"))
-                    .Select(a => a.Id)
-                    .ToArray()
+                AccountIds = cashAccounts.Select(a => a.Id).ToArray()
             };
+
+            // Find account for accounts receivable or use first matching account
+            var receivableAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Asset && a.OfficialCode.StartsWith("1103"))
+                .ToList();
+
+            var receivableMainAccount = receivableAccounts
+                .FirstOrDefault(a => a.OfficialCode == "1103")
+                ?? receivableAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "Accounts Receivable" };
 
             var accountsReceivableLine = new BalanceSheetLineDto
             {
                 PrintedNo = "1103",
-                LineText = "Accounts Receivable",
+                LineText = receivableMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 2,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Asset &&
-                           a.OfficialCode.StartsWith("1103"))
-                    .Select(a => a.Id)
-                    .ToArray()
+                AccountIds = receivableAccounts.Select(a => a.Id).ToArray()
             };
+
+            // Find account for inventory or use first matching account
+            var inventoryAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Asset && a.OfficialCode.StartsWith("1105"))
+                .ToList();
+
+            var inventoryMainAccount = inventoryAccounts
+                .FirstOrDefault(a => a.OfficialCode == "1105")
+                ?? inventoryAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "Inventory" };
 
             var inventoryLine = new BalanceSheetLineDto
             {
                 PrintedNo = "1105",
-                LineText = "Inventory",
+                LineText = inventoryMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 2,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Asset &&
-                           a.OfficialCode.StartsWith("1105"))
-                    .Select(a => a.Id)
-                    .ToArray()
-            };// Create standard balance sheet structure for liabilities and equity            // Print top liability accounts to help with mapping
+                AccountIds = inventoryAccounts.Select(a => a.Id).ToArray()
+            };// Create standard balance sheet structure for liabilities and equity
+            // Print top liability accounts to help with mapping
             var topLiabilities = _accounts.Values
                 .Where(a => a.AccountType == AccountType.Liability)
                 .OrderBy(a => a.OfficialCode)
@@ -571,107 +601,163 @@ namespace Sivar.Erp.Tests.Integration
                 Console.WriteLine($"- {liability.AccountName} ({liability.OfficialCode})");
             }
 
+            // Find liability root account
+            var liabilityRootAccount = _accounts.Values
+                .FirstOrDefault(a => a.AccountType == AccountType.Liability && a.OfficialCode == "2")
+                ?? new AccountDto { AccountName = "LIABILITIES" };
+
             var liabilitiesHeader = new BalanceSheetLineDto
             {
                 PrintedNo = "2",
-                LineText = "LIABILITIES",
+                LineText = liabilityRootAccount.AccountName.ToUpper(),
                 IsHeader = true,
                 IndentLevel = 0,
                 LineType = BalanceIncomeLineType.BaseHeader
             };
+
+            // Find current liabilities account
+            var currentLiabilitiesAccount = _accounts.Values
+                .FirstOrDefault(a => a.AccountType == AccountType.Liability && a.OfficialCode == "21")
+                ?? new AccountDto { AccountName = "Current Liabilities" };
 
             var currentLiabilitiesHeader = new BalanceSheetLineDto
             {
                 PrintedNo = "21",
-                LineText = "Current Liabilities",
+                LineText = currentLiabilitiesAccount.AccountName,
                 IsHeader = true,
                 IndentLevel = 1,
                 LineType = BalanceIncomeLineType.BalanceHeader
-            }; var accountsPayableLine = new BalanceSheetLineDto
+            };
+
+            // Find account for accounts payable
+            var payableAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Liability &&
+                      a.OfficialCode.StartsWith("2102") &&
+                      !a.OfficialCode.StartsWith("21020"))
+                .ToList();
+
+            var payableMainAccount = payableAccounts
+                .FirstOrDefault(a => a.OfficialCode == "2102")
+                ?? payableAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "Accounts Payable" };
+
+            var accountsPayableLine = new BalanceSheetLineDto
             {
                 PrintedNo = "2102",
-                LineText = "Accounts Payable",
+                LineText = payableMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 2,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Liability &&
-                           a.OfficialCode.StartsWith("2102") &&
-                           !a.OfficialCode.StartsWith("21020")) // Exclude the 21020 prefix that gets handled in retentions
-                    .Select(a => a.Id)
-                    .ToArray()
+                AccountIds = payableAccounts.Select(a => a.Id).ToArray()
             };
+
+            // Find account for taxes payable
+            var taxesAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Liability && a.OfficialCode.StartsWith("2106"))
+                .ToList();
+
+            var taxesMainAccount = taxesAccounts
+                .FirstOrDefault(a => a.OfficialCode == "2106")
+                ?? taxesAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "Taxes Payable" };
 
             var taxesPayableLine = new BalanceSheetLineDto
             {
                 PrintedNo = "2106",
-                LineText = "Taxes Payable",
+                LineText = taxesMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 2,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Liability &&
-                           a.OfficialCode.StartsWith("2106"))
-                    .Select(a => a.Id)
-                    .ToArray()
-            }; var retentionsPayableLine = new BalanceSheetLineDto
+                AccountIds = taxesAccounts.Select(a => a.Id).ToArray()
+            };
+
+            // Find account for employee retentions
+            var retentionAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Liability &&
+                     (a.OfficialCode.StartsWith("21020") || a.OfficialCode.StartsWith("2103")))
+                .ToList();
+
+            var retentionMainAccount = retentionAccounts
+                .FirstOrDefault(a => a.OfficialCode == "2103")
+                ?? retentionAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "Employee Retentions Payable" };
+
+            var retentionsPayableLine = new BalanceSheetLineDto
             {
                 PrintedNo = "2103",
-                LineText = "Employee Retentions Payable",
+                LineText = retentionMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 2,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Liability &&
-                           (a.OfficialCode.StartsWith("21020") ||
-                            a.OfficialCode.StartsWith("2103")))
-                    .Select(a => a.Id)
-                    .ToArray()
-            }; var equityHeader = new BalanceSheetLineDto
+                AccountIds = retentionAccounts.Select(a => a.Id).ToArray()
+            };
+
+            // Find equity root account
+            var equityRootAccount = _accounts.Values
+                .FirstOrDefault(a => a.AccountType == AccountType.Equity && a.OfficialCode == "3")
+                ?? new AccountDto { AccountName = "EQUITY" };
+
+            var equityHeader = new BalanceSheetLineDto
             {
                 PrintedNo = "3",
-                LineText = "EQUITY",
+                LineText = equityRootAccount.AccountName.ToUpper(),
                 IsHeader = true,
                 IndentLevel = 0,
                 LineType = BalanceIncomeLineType.BaseHeader
             };
+
+            // Find capital accounts
+            var capitalAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Equity && a.OfficialCode.StartsWith("31"))
+                .ToList();
+
+            var capitalMainAccount = capitalAccounts
+                .FirstOrDefault(a => a.OfficialCode == "31")
+                ?? capitalAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "Capital" };
 
             // Add common equity accounts like capital
             var capitalLine = new BalanceSheetLineDto
             {
                 PrintedNo = "31",
-                LineText = "Capital",
+                LineText = capitalMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 1,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Equity &&
-                           a.OfficialCode.StartsWith("31"))
-                    .Select(a => a.Id)
-                    .ToArray()
-            }; var retainedEarningsLine = new BalanceSheetLineDto
+                AccountIds = capitalAccounts.Select(a => a.Id).ToArray()
+            };
+            // Find retained earnings accounts
+            var retainedEarningsAccounts = _accounts.Values
+                .Where(a => a.AccountType == AccountType.Equity && a.OfficialCode.StartsWith("33"))
+                .ToList();
+
+            var retainedEarningsMainAccount = retainedEarningsAccounts
+                .FirstOrDefault(a => a.OfficialCode == "33")
+                ?? retainedEarningsAccounts.FirstOrDefault()
+                ?? new AccountDto { AccountName = "UTILIDADES NO DISTRIBUIDAS" };
+
+            var retainedEarningsLine = new BalanceSheetLineDto
             {
                 PrintedNo = "33",
-                LineText = "Retained Earnings",
+                LineText = retainedEarningsMainAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 1,
                 LineType = BalanceIncomeLineType.BalanceLine,
-                AccountIds = _accounts.Values
-                    .Where(a => a.AccountType == AccountType.Equity &&
-                           a.OfficialCode.StartsWith("33"))
-                    .Select(a => a.Id)
-                    .ToArray()
-            };
+                AccountIds = retainedEarningsAccounts.Select(a => a.Id).ToArray()
+            };            // Find current earnings account or create default
+            var currentEarningsAccount = _accounts.Values
+                .FirstOrDefault(a => a.AccountType == AccountType.Equity && a.OfficialCode == "34")
+                ?? new AccountDto { AccountName = "UTILIDADES DEL EJERCICIO" };
 
             var currentEarningsLine = new BalanceSheetLineDto
             {
                 PrintedNo = "34",
-                LineText = "Current Earnings",
+                LineText = currentEarningsAccount.AccountName,
                 IsHeader = false,
                 IndentLevel = 1,
                 LineType = BalanceIncomeLineType.BalanceLine
                 // No AccountIds as this will be set using SetRetainedEarnings
-            };            // Add all lines to the balance sheet
+            };// Add all lines to the balance sheet
             balanceSheetBuilder
                 .AddLine(assetHeader)
                 .AddLine(currentAssetsHeader)
