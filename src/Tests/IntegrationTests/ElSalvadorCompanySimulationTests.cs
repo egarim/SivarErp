@@ -292,7 +292,7 @@ namespace Sivar.Erp.Tests.Integration
 
             // Prepare account list for import helper
             var accountList = _accounts.Values.ToList();
-            var importHelper = new TransactionImportHelper(accountList);            // Import transactions and ledger entries
+            var importHelper = new TransactionsImportExportService(accountList);            // Import transactions and ledger entries
             var imported = importHelper.Import(transactionsText);
 
             // Filter out transactions with no entries
