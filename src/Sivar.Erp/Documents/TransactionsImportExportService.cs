@@ -22,6 +22,7 @@ namespace Sivar.Erp.Documents
             _accountCodeToId = accounts.ToDictionary(a => a.OfficialCode, a => a.Id);
         }
 
+        [Obsolete("Use ImportFromCsv instead. This method will be removed in future versions.", true)]
         public List<(TransactionDto Transaction, List<LedgerEntryDto> Entries)> Import(string text)
         {
             var result = new List<(TransactionDto, List<LedgerEntryDto>)>();
@@ -89,12 +90,14 @@ namespace Sivar.Erp.Documents
                         {
                             Console.WriteLine($"Failed to parse credit amount: {cols[4]}");
                         }
-                    }                    // Only skip if both debit and credit are non-zero (which is invalid)
+                    }
+                    // Only skip if both debit and credit are non-zero (which is invalid)
                     if (debitAmount != 0 && creditAmount != 0)
                     {
                         Console.WriteLine($"Invalid entry: both debit and credit have values - debit={debitAmount}, credit={creditAmount}");
                         continue;
-                    }                    // Allow entries where both debit and credit are 0
+                    }
+                    // Allow entries where both debit and credit are 0
                     // Find the account to get its name and official code
                     var account = _accounts.FirstOrDefault(a => a.Id == accountId);
 
@@ -366,13 +369,21 @@ namespace Sivar.Erp.Documents
                     return (null, Guid.Empty);
 
                 var transactionId = Guid.Parse(parts[1]);
+                var officialCode = parts[3];
+
+                // Look up AccountId using OfficialCode
+                if (!_accountCodeToId.TryGetValue(officialCode, out var accountId))
+                {
+                    Console.WriteLine($"Account code '{officialCode}' not found in provided accounts.");
+                    accountId = Guid.Parse(parts[2]); // Fallback to the AccountId from CSV
+                }
 
                 var entry = new LedgerEntryDto
                 {
                     Id = Guid.Parse(parts[0]),
                     TransactionId = transactionId,
-                    AccountId = Guid.Parse(parts[2]),
-                    OfficialCode = parts[3],
+                    AccountId = accountId, // Use the looked up accountId
+                    OfficialCode = officialCode,
                     AccountName = parts[4],
                     EntryType = Enum.Parse<EntryType>(parts[5]),
                     Amount = decimal.Parse(parts[6], CultureInfo.InvariantCulture)
