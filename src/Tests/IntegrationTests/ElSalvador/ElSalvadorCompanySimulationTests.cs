@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ChartOfAccounts;
+using Sivar.Erp;
 
-
-
-namespace Sivar.Erp.Tests.Integration
+namespace Tests.IntegrationTests.ElSalvador
 {
     /// <summary>
     /// Integration tests simulating a complete accounting cycle for El Salvador S.A de C.V
