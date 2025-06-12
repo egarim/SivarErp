@@ -8,7 +8,7 @@ using NUnit.Framework;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ChartOfAccounts;
 
-using static Sivar.Erp.Tests.Integration.AccountingIntegrationTests;
+
 
 namespace Sivar.Erp.Tests.Integration
 {
@@ -19,7 +19,7 @@ namespace Sivar.Erp.Tests.Integration
     public class ElSalvadorCompanySimulationTests
     {
         private IAuditService _auditService;
-        private IDocumentService _documentService;
+  
         private TransactionService _transactionService;
         private AccountValidator _accountValidator;
         private AccountBalanceCalculator _accountBalanceCalculator;
@@ -28,8 +28,7 @@ namespace Sivar.Erp.Tests.Integration
         // Dictionary to store our accounts
         private Dictionary<string, AccountDto> _accounts;
 
-        // Dictionary to store our completed documents
-        private Dictionary<string, IDocument> _documents;
+
 
         // Dictionary to store our completed transactions
         private Dictionary<string, ITransaction> _transactions;
@@ -47,7 +46,7 @@ namespace Sivar.Erp.Tests.Integration
         {
             // Initialize services
             _auditService = new AuditService();
-            _documentService = new DocumentService(_auditService);
+          
             _transactionService = new TransactionService();
             // Use El Salvador account type prefixes for validator
             _accountValidator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
@@ -56,7 +55,7 @@ namespace Sivar.Erp.Tests.Integration
 
             // Initialize storage
             _accounts = new Dictionary<string, AccountDto>();
-            _documents = new Dictionary<string, IDocument>();
+
             _transactions = new Dictionary<string, ITransaction>();
 
             // Create Chart of Accounts
@@ -476,7 +475,7 @@ namespace Sivar.Erp.Tests.Integration
                 }
             }
 
-           
+
         }
     }
 }
