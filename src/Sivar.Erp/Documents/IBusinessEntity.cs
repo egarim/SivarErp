@@ -9,6 +9,7 @@ namespace Sivar.Erp.Documents
 {
     public interface IBusinessEntity
     {
+        System.Guid Oid { get; set; }
         string Code { get; set; }
         string Name { get; set; }
         string Address { get; set; }

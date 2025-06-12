@@ -4,8 +4,9 @@ using System.Linq;
 
 namespace Sivar.Erp.Documents
 {
-    internal interface IDocument : INotifyPropertyChanged
+    public interface IDocument : INotifyPropertyChanged
     {
+        System.Guid Oid { get; set; }
         DateOnly Date { get; set; }
         TimeOnly Time { get; set; }
         IBusinessEntity BusinessEntity { get; set; }
