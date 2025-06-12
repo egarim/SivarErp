@@ -16,6 +16,7 @@ namespace Sivar.Erp.Documents
         private DateOnly _date;
         private TimeOnly _time;
         private IBusinessEntity _businessEntity;
+        private IDocumentType _documentType;
         private ObservableCollection<IDocumentLine> _lines;
         private ObservableCollection<ITotal> _documentTotals;
 
@@ -92,6 +93,33 @@ namespace Sivar.Erp.Documents
                     }
 
                     OnPropertyChanged(nameof(BusinessEntity), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+        
+        public IDocumentType DocumentType
+        {
+            get => _documentType;
+            set
+            {
+                if (_documentType != value)
+                {
+                    // Unsubscribe from old document type if it supports change notification
+                    if (_documentType is INotifyPropertyChanged oldDocType)
+                    {
+                        oldDocType.PropertyChanged -= DocumentType_PropertyChanged;
+                    }
+
+                    var oldValue = _documentType;
+                    _documentType = value;
+
+                    // Subscribe to new document type if it supports change notification
+                    if (_documentType is INotifyPropertyChanged newDocType)
+                    {
+                        newDocType.PropertyChanged += DocumentType_PropertyChanged;
+                    }
+
+                    OnPropertyChanged(nameof(DocumentType), ChangeType.PropertyChanged, oldValue, value);
                 }
             }
         }
@@ -173,6 +201,22 @@ namespace Sivar.Erp.Documents
                 oldValue,
                 newValue,
                 propertyPath));
+        }
+
+        private void DocumentType_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // When a property in the document type changes, include path information
+            string propertyPath = $"DocumentType.{e.PropertyName}";
+            object newValue = null;
+
+            // Try to get the new value
+            var property = _documentType.GetType().GetProperty(e.PropertyName);
+            if (property != null)
+            {
+                newValue = property.GetValue(_documentType);
+            }
+
+            OnPropertyChanged(nameof(DocumentType), ChangeType.NestedPropertyChanged, null, newValue, propertyPath);
         }
 
         private void Lines_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
