@@ -17,8 +17,10 @@ namespace Sivar.Erp.Xpo.Documents
         /// </summary>
         public XpoLedgerEntry(Session session) : base(session) { }
 
-        
 
+
+        string accountName;
+        string officialCode;
         private XpoTransaction _transaction;
 
         /// <summary>
@@ -121,6 +123,20 @@ namespace Sivar.Erp.Xpo.Documents
         {
             get => _costCentreId;
             set => SetPropertyValue(nameof(CostCentreId), ref _costCentreId, value);
+        }
+
+        [Size(SizeAttribute.DefaultStringMappingFieldSize)]
+        public string OfficialCode
+        {
+            get => officialCode;
+            set => SetPropertyValue(nameof(OfficialCode), ref officialCode, value);
+        }
+        
+        [Size(SizeAttribute.DefaultStringMappingFieldSize)]
+        public string AccountName
+        {
+            get => accountName;
+            set => SetPropertyValue(nameof(AccountName), ref accountName, value);
         }
     }
 }
