@@ -78,6 +78,22 @@ namespace Sivar.Erp.Documents
             }
         }
 
+        DocumentCategory category;
+        public DocumentCategory Category
+        {
+            get => category;
+            set
+            {
+                if (category == value)
+                {
+                    return;
+                }
+
+                category = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
