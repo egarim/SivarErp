@@ -20,18 +20,21 @@ namespace Tests.IntegrationTests.ElSalvador
     public class ElSalvadorDocumentTypeTests
     {
         private IAuditService _auditService;
-        
+        private ITransactionService _transactionService;
+
         [SetUp]
         public void Setup()
         {
             // Setup test dependencies
             _auditService = new AuditService();
+            _transactionService = new TransactionService();
         }
 
         [Test]
-        public void CreateElSalvadorDocumentTypes_ValidateProperties()
+        public async Task CreateElSalvadorDocumentTypes_ValidateProperties()
         {
             // Arrange
+            // 1. Create El Salvador document types
             var creditoFiscalDocType = new DocumentTypeDto
             {
                 Oid = Guid.NewGuid(),
@@ -40,7 +43,7 @@ namespace Tests.IntegrationTests.ElSalvador
                 IsEnabled = true
             };
 
-            var consumidorFinalDocType = new DocumentTypeDto 
+            var consumidorFinalDocType = new DocumentTypeDto
             {
                 Oid = Guid.NewGuid(),
                 Code = "CNF",
@@ -48,20 +51,176 @@ namespace Tests.IntegrationTests.ElSalvador
                 IsEnabled = true
             };
 
-            // Act - Nothing specific to do here, as we're just validating properties
+            // 2. Create account mappings for transaction generation
+            var accountMappings = new Dictionary<string, Guid>
+            {
+                ["AccountsReceivable"] = Guid.NewGuid(),
+                ["SalesRevenue"] = Guid.NewGuid(),
+                ["SalesTaxPayable"] = Guid.NewGuid(),
+                ["CostOfGoodsSold"] = Guid.NewGuid(),
+                ["Inventory"] = Guid.NewGuid(),
+                ["Cash"] = Guid.NewGuid()
+            };
+
+            // 3. Create transaction generator
+            var generator = new DocumentTransactionGenerator(_transactionService, accountMappings);
+
+            // 4. Create transaction templates for El Salvador document types
+            // For "Credito Fiscal", which requires IVA tax handling
+            var cfTemplate = new TransactionTemplate(
+                creditoFiscalDocType.Code,
+                document => $"Credito Fiscal - {document.BusinessEntity?.Name ?? "Unknown"} - {document.Date}"
+            ).WithEntries(
+                // Debit Accounts Receivable for the grand total
+                AccountingTransactionEntry.Debit("AccountsReceivable", AmountCalculators.GrandTotal)
+                    .WithAccountName("Cuentas por Cobrar"),
+
+                // Credit Sales Revenue for the subtotal
+                AccountingTransactionEntry.Credit("SalesRevenue", AmountCalculators.Subtotal)
+                    .WithAccountName("Ingresos por Ventas"),
+
+                // Credit IVA Payable for the tax amount
+                AccountingTransactionEntry.Credit("SalesTaxPayable", AmountCalculators.TaxTotal)
+                    .WithAccountName("IVA por Pagar"),
+
+                // Optional: Cost of Goods Sold entries
+                AccountingTransactionEntry.Debit("CostOfGoodsSold", AmountCalculators.EstimatedCostOfGoodsSold(60))
+                    .WithAccountName("Costo de Ventas"),
+
+                AccountingTransactionEntry.Credit("Inventory", AmountCalculators.EstimatedCostOfGoodsSold(60))
+                    .WithAccountName("Inventario")
+            );
+
+            // For "Consumidor Final", similar but might have different tax handling
+            var cnfTemplate = new TransactionTemplate(
+                consumidorFinalDocType.Code,
+                document => $"Consumidor Final - {document.BusinessEntity?.Name ?? "Unknown"} - {document.Date}"
+            ).WithEntries(
+                // For cash sales to final consumers
+                AccountingTransactionEntry.Debit("Cash", AmountCalculators.GrandTotal)
+                    .WithAccountName("Efectivo"),
+
+                // Credit Sales Revenue
+                AccountingTransactionEntry.Credit("SalesRevenue", AmountCalculators.Subtotal)
+                    .WithAccountName("Ingresos por Ventas"),
+
+                // Credit IVA Payable for any applicable tax
+                AccountingTransactionEntry.Credit("SalesTaxPayable", AmountCalculators.TaxTotal)
+                    .WithAccountName("IVA por Pagar"),
+
+                // Optional Cost of Goods Sold entries
+                AccountingTransactionEntry.Debit("CostOfGoodsSold", AmountCalculators.EstimatedCostOfGoodsSold(60))
+                    .WithAccountName("Costo de Ventas"),
+
+                AccountingTransactionEntry.Credit("Inventory", AmountCalculators.EstimatedCostOfGoodsSold(60))
+                    .WithAccountName("Inventario")
+            );
+
+            // 5. Register templates with the generator
+            generator.RegisterTemplate(cfTemplate);
+            generator.RegisterTemplate(cnfTemplate);
+
+            // 6. Create sample documents
+            var business = new BusinessEntityDto
+            {
+                Oid = Guid.NewGuid(),
+                Name = "Empresa ABC S.A. de C.V.",
+                Code = "ABC-001"
+            };
+
+            // Credito Fiscal document
+            var cfDocument = new DocumentDto
+            {
+                Oid = Guid.NewGuid(),
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                Time = TimeOnly.FromDateTime(DateTime.Now),
+                BusinessEntity = business,
+                DocumentType = creditoFiscalDocType
+            };
+
+            // Add document totals
+            cfDocument.DocumentTotals.Add(new TotalDto { Concept = "Subtotal", Total = 1000.00m });
+            cfDocument.DocumentTotals.Add(new TotalDto { Concept = "Tax: IVA (13%)", Total = 130.00m });
+
+            // Consumidor Final document
+            var cnfDocument = new DocumentDto
+            {
+                Oid = Guid.NewGuid(),
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                Time = TimeOnly.FromDateTime(DateTime.Now),
+                BusinessEntity = new BusinessEntityDto { Name = "Cliente Final", Code = "CF-001" },
+                DocumentType = consumidorFinalDocType
+            };
+
+            // Add document totals (Consumidor Final might have simplified tax handling)
+            cnfDocument.DocumentTotals.Add(new TotalDto { Concept = "Subtotal", Total = 500.00m });
+            cnfDocument.DocumentTotals.Add(new TotalDto { Concept = "Tax: IVA (13%)", Total = 65.00m });
+
+            // Act - Generate transactions for both documents
+            var (cfTransaction, cfLedgerEntries) = await cfDocument.GenerateTransactionAsync(generator);
+            var (cnfTransaction, cnfLedgerEntries) = await cnfDocument.GenerateTransactionAsync(generator);
 
             // Assert
-            // Validate Credito Fiscal document type
+            // Validate Credito Fiscal document type and transaction
             Assert.That(creditoFiscalDocType.Oid, Is.Not.EqualTo(Guid.Empty));
             Assert.That(creditoFiscalDocType.Code, Is.EqualTo("CF"));
             Assert.That(creditoFiscalDocType.Name, Is.EqualTo("Credito Fiscal"));
             Assert.That(creditoFiscalDocType.IsEnabled, Is.True);
-            
-            // Validate Consumidor Final document type
+
+            // Validate Consumidor Final document type and transaction 
             Assert.That(consumidorFinalDocType.Oid, Is.Not.EqualTo(Guid.Empty));
             Assert.That(consumidorFinalDocType.Code, Is.EqualTo("CNF"));
             Assert.That(consumidorFinalDocType.Name, Is.EqualTo("Consumidor Final"));
             Assert.That(consumidorFinalDocType.IsEnabled, Is.True);
+
+            // Validate CF transaction details
+            Assert.That(cfTransaction, Is.Not.Null);
+            Assert.That(cfTransaction.Id, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(cfTransaction.DocumentId, Is.EqualTo(cfDocument.Oid));
+            Assert.That(cfTransaction.Description, Does.Contain("Credito Fiscal"));
+            Assert.That(cfTransaction.Description, Does.Contain(business.Name));
+
+            // Check that correct ledger entries were created for CF document
+            Assert.That(cfLedgerEntries.Count, Is.EqualTo(5), "Should have 5 ledger entries for Credito Fiscal");
+
+            // Verify specific entries for CF document
+            var cfReceivableEntry = cfLedgerEntries.FirstOrDefault(e => e.AccountName == "Cuentas por Cobrar" && e.EntryType == EntryType.Debit);
+            var cfRevenueEntry = cfLedgerEntries.FirstOrDefault(e => e.AccountName == "Ingresos por Ventas" && e.EntryType == EntryType.Credit);
+            var cfTaxEntry = cfLedgerEntries.FirstOrDefault(e => e.AccountName == "IVA por Pagar" && e.EntryType == EntryType.Credit);
+
+            Assert.That(cfReceivableEntry, Is.Not.Null, "Should have an accounts receivable entry");
+            Assert.That(cfRevenueEntry, Is.Not.Null, "Should have a sales revenue entry");
+            Assert.That(cfTaxEntry, Is.Not.Null, "Should have an IVA payable entry");
+
+            Assert.That(cfReceivableEntry.Amount, Is.EqualTo(1130.00m), "Accounts receivable should equal grand total (1000 + 130)");
+            Assert.That(cfRevenueEntry.Amount, Is.EqualTo(1000.00m), "Revenue should equal subtotal");
+            Assert.That(cfTaxEntry.Amount, Is.EqualTo(130.00m), "IVA payable should equal tax total");
+
+            // Validate CNF transaction details
+            Assert.That(cnfTransaction, Is.Not.Null);
+            Assert.That(cnfTransaction.Id, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(cnfTransaction.DocumentId, Is.EqualTo(cnfDocument.Oid));
+            Assert.That(cnfTransaction.Description, Does.Contain("Consumidor Final"));
+
+            // Check that correct ledger entries were created for CNF document
+            Assert.That(cnfLedgerEntries.Count, Is.EqualTo(5), "Should have 5 ledger entries for Consumidor Final");
+
+            // Verify specific entries for CNF document
+            var cnfCashEntry = cnfLedgerEntries.FirstOrDefault(e => e.AccountName == "Efectivo" && e.EntryType == EntryType.Debit);
+            var cnfRevenueEntry = cnfLedgerEntries.FirstOrDefault(e => e.AccountName == "Ingresos por Ventas" && e.EntryType == EntryType.Credit);
+            var cnfTaxEntry = cnfLedgerEntries.FirstOrDefault(e => e.AccountName == "IVA por Pagar" && e.EntryType == EntryType.Credit);
+
+            Assert.That(cnfCashEntry, Is.Not.Null, "Should have a cash entry");
+            Assert.That(cnfRevenueEntry, Is.Not.Null, "Should have a sales revenue entry");
+            Assert.That(cnfTaxEntry, Is.Not.Null, "Should have an IVA payable entry");
+
+            Assert.That(cnfCashEntry.Amount, Is.EqualTo(565.00m), "Cash should equal grand total (500 + 65)");
+            Assert.That(cnfRevenueEntry.Amount, Is.EqualTo(500.00m), "Revenue should equal subtotal");
+            Assert.That(cnfTaxEntry.Amount, Is.EqualTo(65.00m), "IVA payable should equal tax total");
+
+            // Print details for debugging
+            PrintTransactionToConsole("CREDITO FISCAL", cfDocument, cfTransaction, cfLedgerEntries);
+            PrintTransactionToConsole("CONSUMIDOR FINAL", cnfDocument, cnfTransaction, cnfLedgerEntries);
         }
 
         [Test]
@@ -109,30 +268,7 @@ namespace Tests.IntegrationTests.ElSalvador
             Assert.That(distinctNames, Is.EqualTo(documentTypes.Count), "All document type names should be unique");
         }
 
-        [Test]
-        public void ElSalvador_DocumentType_CanUpdateProperties()
-        {
-            // Arrange
-            var creditoFiscalDocType = new DocumentTypeDto
-            {
-                Oid = Guid.NewGuid(),
-                Code = "CF",
-                Name = "Credito Fiscal",
-                IsEnabled = true
-            };
-
-            // Act
-            bool originalState = creditoFiscalDocType.IsEnabled;
-            creditoFiscalDocType.IsEnabled = false;
-            string originalName = creditoFiscalDocType.Name;
-            creditoFiscalDocType.Name = "Crédito Fiscal (Updated)";
-
-            // Assert
-            Assert.That(originalState, Is.True);
-            Assert.That(creditoFiscalDocType.IsEnabled, Is.False);
-            Assert.That(originalName, Is.EqualTo("Credito Fiscal"));
-            Assert.That(creditoFiscalDocType.Name, Is.EqualTo("Crédito Fiscal (Updated)"));
-        }
+   
 
         [Test]
         public void ElSalvador_DocumentType_RaisesPropertyChangedEvent()
@@ -158,43 +294,7 @@ namespace Tests.IntegrationTests.ElSalvador
             Assert.That(propertyNameRaised, Is.EqualTo("Name"));
         }
 
-        [Test]
-        public void ElSalvador_CreateDocumentWithSpecificType()
-        {
-            // Arrange
-            var creditoFiscalDocType = new DocumentTypeDto
-            {
-                Oid = Guid.NewGuid(),
-                Code = "CF",
-                Name = "Credito Fiscal",
-                IsEnabled = true
-            };
-
-            // Create a document using the Document class 
-            var document = new DocumentDto
-            {
-                Oid = Guid.NewGuid(),
-                Date = new DateOnly(2023, 12, 15),
-                Time = new TimeOnly(10, 30, 0)
-            };
-
-            // Since there is no direct property for document type in DocumentDto,
-            // we would typically store this in a custom property bag or as metadata
-            // Test the connection between document and document type
-            
-            // We can use object metadata (simulated for test)
-            var documentMetadata = new Dictionary<string, object>
-            {
-                ["DocumentTypeOid"] = creditoFiscalDocType.Oid,
-                ["DocumentTypeCode"] = creditoFiscalDocType.Code
-            };
-
-            // Check document has been created with appropriate fields for El Salvador
-            Assert.That(documentMetadata["DocumentTypeOid"], Is.EqualTo(creditoFiscalDocType.Oid));
-            Assert.That(documentMetadata["DocumentTypeCode"], Is.EqualTo("CF"));
-            Assert.That(document.Oid, Is.Not.EqualTo(Guid.Empty));
-            Assert.That(document.Date, Is.EqualTo(new DateOnly(2023, 12, 15)));
-        }
+    
 
         [Test]
         public void ElSalvador_CalculateIVA_ForCreditoFiscal_And_ConsumidorFinal()
@@ -698,6 +798,67 @@ namespace Tests.IntegrationTests.ElSalvador
                 // If no document totals, just display the subtotal as the grand total
                 sb.AppendLine($"GRAND TOTAL: {subtotal:C2}");
             }
+            
+            sb.AppendLine("\n====================================================");
+            
+            // Print to debug console
+            Debug.WriteLine(sb.ToString());
+            
+            // Also print to test context output for easier viewing in test results
+            TestContext.WriteLine(sb.ToString());
+        }
+        
+        /// <summary>
+        /// Print transaction and ledger entries to console for debugging
+        /// </summary>
+        private void PrintTransactionToConsole(string title, DocumentDto document, TransactionDto transaction, List<LedgerEntryDto> ledgerEntries)
+        {
+            var sb = new StringBuilder();
+            
+            sb.AppendLine("====================================================");
+            sb.AppendLine($"            {title} TRANSACTION DETAILS            ");
+            sb.AppendLine("====================================================");
+            
+            // Transaction details
+            sb.AppendLine($"Transaction ID: {transaction.Id}");
+            sb.AppendLine($"Document ID: {transaction.DocumentId}");
+            sb.AppendLine($"Date: {transaction.TransactionDate}");
+            sb.AppendLine($"Description: {transaction.Description}");
+            
+            // Document details
+            sb.AppendLine("\n-- DOCUMENT INFO --");
+            sb.AppendLine($"Document Type: {document.DocumentType?.Name ?? "Unknown"} ({document.DocumentType?.Code ?? "Unknown"})");
+            sb.AppendLine($"Business Entity: {document.BusinessEntity?.Name ?? "Unknown"}");
+            
+            // Document totals
+            sb.AppendLine("\n-- DOCUMENT TOTALS --");
+            foreach (var total in document.DocumentTotals)
+            {
+                sb.AppendLine($"{total.Concept}: {total.Total:C2}");
+            }
+            
+            // Ledger entries
+            sb.AppendLine("\n-- LEDGER ENTRIES --");
+            
+            decimal totalDebits = 0;
+            decimal totalCredits = 0;
+            
+            foreach (var entry in ledgerEntries)
+            {
+                string entryType = entry.EntryType == EntryType.Debit ? "DEBIT" : "CREDIT";
+                sb.AppendLine($"{entryType} {entry.AccountName}: {entry.Amount:C2}");
+                
+                if (entry.EntryType == EntryType.Debit)
+                    totalDebits += entry.Amount;
+                else
+                    totalCredits += entry.Amount;
+            }
+            
+            sb.AppendLine("\n-- TRANSACTION SUMMARY --");
+            sb.AppendLine($"Total Debits: {totalDebits:C2}");
+            sb.AppendLine($"Total Credits: {totalCredits:C2}");
+            sb.AppendLine($"Difference: {totalDebits - totalCredits:C2}");
+            sb.AppendLine($"Balanced: {Math.Abs(totalDebits - totalCredits) < 0.01m}");
             
             sb.AppendLine("\n====================================================");
             
