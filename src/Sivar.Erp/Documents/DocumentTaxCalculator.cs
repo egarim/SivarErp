@@ -37,6 +37,12 @@ namespace Sivar.Erp.Documents
         public void CalculateDocumentTaxes()
         {
             RemoveExistingDocumentTaxes();
+            
+            // Calculate and add the sum of distinct totals from line items (except taxes)
+            CalculateDistinctTotalsFromLines();
+            
+            // Sum line taxes and add to document totals
+            SumLineItemTaxesToDocumentTotals();
 
             // Get applicable document-level taxes based on document type and entity group
             var applicableTaxes = _taxRuleEvaluator.GetApplicableDocumentTaxes(_document, _documentTypeCode);
@@ -60,6 +66,82 @@ namespace Sivar.Erp.Documents
                 };
                 
                 _document.DocumentTotals.Add(taxTotal);
+            }
+        }
+
+        /// <summary>
+        /// Sums all line tax totals and adds them to document totals
+        /// </summary>
+        private void SumLineItemTaxesToDocumentTotals()
+        {
+            // Get all lines that are LineDto
+            var lines = _document.Lines.OfType<LineDto>().ToList();
+            
+            if (!lines.Any())
+                return;
+
+            // Group line tax totals by concept and sum their values
+            var taxTotals = lines
+                .SelectMany(l => l.LineTotals)
+                // Select only totals that start with "Tax:"
+                .Where(t => t.Concept.StartsWith("Tax:", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(t => t.Concept)
+                .Select(g => new
+                {
+                    Concept = g.Key,
+                    Total = g.Sum(t => t.Total)
+                })
+                .ToList();
+
+            // Add the summed tax totals to the document totals
+            foreach (var tax in taxTotals)
+            {
+                var documentTaxTotal = new TotalDto
+                {
+                    Oid = Guid.NewGuid(),
+                    Concept = tax.Concept,
+                    Total = tax.Total
+                };
+                
+                _document.DocumentTotals.Add(documentTaxTotal);
+            }
+        }
+
+        /// <summary>
+        /// Calculates the sum of distinct totals from all document lines and adds them to document totals
+        /// </summary>
+        private void CalculateDistinctTotalsFromLines()
+        {
+            // Get all lines that are LineDto
+            var lines = _document.Lines.OfType<LineDto>().ToList();
+            
+            if (!lines.Any())
+                return;
+
+            // Group line totals by concept and sum their values (excluding tax totals)
+            var distinctTotals = lines
+                .SelectMany(l => l.LineTotals)
+                // Filter out totals that start with "Tax:" as they are handled separately
+                .Where(t => !t.Concept.StartsWith("Tax:", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(t => t.Concept)
+                .Select(g => new
+                {
+                    Concept = g.Key,
+                    Total = g.Sum(t => t.Total)
+                })
+                .ToList();
+
+            // Add the distinct totals to the document totals
+            foreach (var total in distinctTotals)
+            {
+                var documentTotal = new TotalDto
+                {
+                    Oid = Guid.NewGuid(),
+                    Concept = total.Concept,
+                    Total = total.Total
+                };
+                
+                _document.DocumentTotals.Add(documentTotal);
             }
         }
 
@@ -103,11 +185,8 @@ namespace Sivar.Erp.Documents
             for (int i = _document.DocumentTotals.Count - 1; i >= 0; i--)
             {
                 var total = _document.DocumentTotals[i];
-                // Assume tax totals have concept starting with "Tax:"
-                if (total.Concept.StartsWith("Tax:", StringComparison.OrdinalIgnoreCase))
-                {
-                    _document.DocumentTotals.RemoveAt(i);
-                }
+                // Remove all existing document totals, as we'll recalculate them all
+                _document.DocumentTotals.RemoveAt(i);
             }
         }
         

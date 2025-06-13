@@ -8,7 +8,6 @@ namespace Sivar.Erp.Documents
     {
         IItem Item { get; set; }
         IList<ITotal> LineTotals { get; set; }
-        string LineItem { get; set; }
         decimal Amount { get; set; }
     }
 }
