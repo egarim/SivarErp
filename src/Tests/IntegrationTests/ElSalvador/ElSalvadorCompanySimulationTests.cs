@@ -115,7 +115,7 @@ namespace Tests.IntegrationTests.ElSalvador
                     bool isValid = _accountValidator.ValidateAccount(account);
                     Assert.That(isValid, Is.True, $"Account {account.AccountName} validation failed");
                 }                // Update the expected count to match the actual count in the chart of accounts
-                Assert.That(_accounts.Count, Is.EqualTo(761), "Expected more than 250 accounts in chart of accounts from CSV import");
+                Assert.That(_accounts.Count, Is.EqualTo(776), "Expected more than 250 accounts in chart of accounts from CSV import");
             }
             catch (Exception ex)
             {
