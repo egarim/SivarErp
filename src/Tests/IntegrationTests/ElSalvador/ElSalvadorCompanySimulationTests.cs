@@ -21,7 +21,7 @@ namespace Tests.IntegrationTests.ElSalvador
   
         private TransactionService _transactionService;
         private AccountValidator _accountValidator;
-        private AccountBalanceCalculator _accountBalanceCalculator;
+        private AccountBalanceCalculatorBase _accountBalanceCalculator;
         private IAccountImportExportService _accountImportExportService;
 
         // Dictionary to store our accounts
@@ -49,7 +49,7 @@ namespace Tests.IntegrationTests.ElSalvador
             _transactionService = new TransactionService();
             // Use El Salvador account type prefixes for validator
             _accountValidator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
-            _accountBalanceCalculator = new AccountBalanceCalculator();
+            _accountBalanceCalculator = new AccountBalanceCalculatorBase();
             _accountImportExportService = new AccountImportExportService(_auditService, _accountValidator);
 
             // Initialize storage

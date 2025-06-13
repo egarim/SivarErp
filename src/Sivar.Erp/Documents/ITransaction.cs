@@ -22,5 +22,7 @@ namespace Sivar.Erp.Documents
         /// Description of the transaction
         /// </summary>
         string Description { get; set; }
+
+        IEnumerable<ILedgerEntry> LedgerEntries { get; set; }
     }
 }

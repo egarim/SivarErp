@@ -1,4 +1,5 @@
-﻿namespace Sivar.Erp.Documents
+﻿
+namespace Sivar.Erp.Documents
 {
     /// <summary>
     /// Implementation of the transaction entity
@@ -24,5 +25,6 @@
         /// Description of the transaction
         /// </summary>
         public string Description { get; set; } = string.Empty;
+        public IEnumerable<ILedgerEntry> LedgerEntries { get; set; }
     }
 }

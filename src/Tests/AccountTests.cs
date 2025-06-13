@@ -360,7 +360,7 @@ namespace Sivar.Erp.Tests.ChartOfAccounts
         public void AccountBalanceCalculator_CalculateAccountBalance_ReturnsZeroForNewAccount()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculator();
+            var calculator = new AccountBalanceCalculatorBase();
             var accountId = Guid.NewGuid();
             var asOfDate = DateOnly.FromDateTime(DateTime.Today);
 
@@ -375,7 +375,7 @@ namespace Sivar.Erp.Tests.ChartOfAccounts
         public void AccountBalanceCalculator_CalculateAccountTurnover_ReturnsZerosForNewAccount()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculator();
+            var calculator = new AccountBalanceCalculatorBase();
             var accountId = Guid.NewGuid();
             var startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-30));
             var endDate = DateOnly.FromDateTime(DateTime.Today);
@@ -392,7 +392,7 @@ namespace Sivar.Erp.Tests.ChartOfAccounts
         public void AccountBalanceCalculator_HasTransactions_ReturnsFalseForNewAccount()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculator();
+            var calculator = new AccountBalanceCalculatorBase();
             var accountId = Guid.NewGuid();
 
             // Act
