@@ -14,6 +14,7 @@ namespace Sivar.Erp.Documents
         private readonly DocumentDto _document;
         private readonly string _documentTypeCode;
         private readonly TaxRuleEvaluator _taxRuleEvaluator;
+        private readonly ITaxAccountingProfileService _taxAccountingService;
 
         /// <summary>
         /// Initializes a new instance of the DocumentTaxCalculator
@@ -21,14 +22,17 @@ namespace Sivar.Erp.Documents
         /// <param name="document">The document to calculate taxes for</param>
         /// <param name="documentTypeCode">The document type code to use for tax rule evaluation</param>
         /// <param name="taxRuleEvaluator">The evaluator for determining applicable taxes</param>
+        /// <param name="taxAccountingService">Optional service for tax accounting profiles</param>
         public DocumentTaxCalculator(
             DocumentDto document, 
             string documentTypeCode, 
-            TaxRuleEvaluator taxRuleEvaluator)
+            TaxRuleEvaluator taxRuleEvaluator,
+            ITaxAccountingProfileService taxAccountingService = null)
         {
             _document = document ?? throw new ArgumentNullException(nameof(document));
             _documentTypeCode = documentTypeCode ?? throw new ArgumentNullException(nameof(documentTypeCode));
             _taxRuleEvaluator = taxRuleEvaluator ?? throw new ArgumentNullException(nameof(taxRuleEvaluator));
+            _taxAccountingService = taxAccountingService;
         }
 
         /// <summary>
@@ -65,6 +69,9 @@ namespace Sivar.Erp.Documents
                     Total = taxAmount
                 };
                 
+                // Add accounting information if available
+                ApplyTaxAccountingInfo(taxTotal, tax);
+                
                 _document.DocumentTotals.Add(taxTotal);
             }
         }
@@ -89,7 +96,9 @@ namespace Sivar.Erp.Documents
                 .Select(g => new
                 {
                     Concept = g.Key,
-                    Total = g.Sum(t => t.Total)
+                    Total = g.Sum(t => t.Total),
+                    // Copy accounting properties from the first total
+                    FirstTotal = g.FirstOrDefault()
                 })
                 .ToList();
 
@@ -102,6 +111,14 @@ namespace Sivar.Erp.Documents
                     Concept = tax.Concept,
                     Total = tax.Total
                 };
+                
+                // Copy accounting properties if available
+                if (tax.FirstTotal != null && tax.FirstTotal is TotalDto firstTotal)
+                {
+                    documentTaxTotal.DebitAccountCode = firstTotal.DebitAccountCode;
+                    documentTaxTotal.CreditAccountCode = firstTotal.CreditAccountCode;
+                    documentTaxTotal.IncludeInTransaction = firstTotal.IncludeInTransaction;
+                }
                 
                 _document.DocumentTotals.Add(documentTaxTotal);
             }
@@ -127,7 +144,9 @@ namespace Sivar.Erp.Documents
                 .Select(g => new
                 {
                     Concept = g.Key,
-                    Total = g.Sum(t => t.Total)
+                    Total = g.Sum(t => t.Total),
+                    // Copy accounting properties from the first total
+                    FirstTotal = g.FirstOrDefault()
                 })
                 .ToList();
 
@@ -140,6 +159,14 @@ namespace Sivar.Erp.Documents
                     Concept = total.Concept,
                     Total = total.Total
                 };
+                
+                // Copy accounting properties if available
+                if (total.FirstTotal != null && total.FirstTotal is TotalDto firstTotal)
+                {
+                    documentTotal.DebitAccountCode = firstTotal.DebitAccountCode;
+                    documentTotal.CreditAccountCode = firstTotal.CreditAccountCode;
+                    documentTotal.IncludeInTransaction = firstTotal.IncludeInTransaction;
+                }
                 
                 _document.DocumentTotals.Add(documentTotal);
             }
@@ -173,7 +200,30 @@ namespace Sivar.Erp.Documents
                     Total = taxAmount
                 };
                 
+                // Add accounting information if available
+                ApplyTaxAccountingInfo(taxTotal, tax);
+                
                 line.LineTotals.Add(taxTotal);
+            }
+        }
+
+        /// <summary>
+        /// Apply tax accounting info to a total if available
+        /// </summary>
+        private void ApplyTaxAccountingInfo(TotalDto total, TaxDto tax)
+        {
+            if (_taxAccountingService != null && _document.DocumentType != null)
+            {
+                var accountingInfo = _taxAccountingService.GetTaxAccountingInfo(
+                    _document.DocumentType.Category, 
+                    tax.Code);
+                    
+                if (accountingInfo != null)
+                {
+                    total.DebitAccountCode = accountingInfo.DebitAccountCode;
+                    total.CreditAccountCode = accountingInfo.CreditAccountCode;
+                    total.IncludeInTransaction = accountingInfo.IncludeInTransaction;
+                }
             }
         }
 

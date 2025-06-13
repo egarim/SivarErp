@@ -12,6 +12,9 @@ namespace Sivar.Erp.Documents
         private System.Guid _oid;
         private string _concept;
         private decimal _total;
+        private string _debitAccountCode;
+        private string _creditAccountCode;
+        private bool _includeInTransaction;
 
         public System.Guid Oid
         {
@@ -51,6 +54,48 @@ namespace Sivar.Erp.Documents
                     var oldValue = _total;
                     _total = value;
                     OnPropertyChanged(nameof(Total), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+
+        public string DebitAccountCode
+        {
+            get => _debitAccountCode;
+            set
+            {
+                if (_debitAccountCode != value)
+                {
+                    var oldValue = _debitAccountCode;
+                    _debitAccountCode = value;
+                    OnPropertyChanged(nameof(DebitAccountCode), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+
+        public string CreditAccountCode
+        {
+            get => _creditAccountCode;
+            set
+            {
+                if (_creditAccountCode != value)
+                {
+                    var oldValue = _creditAccountCode;
+                    _creditAccountCode = value;
+                    OnPropertyChanged(nameof(CreditAccountCode), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+
+        public bool IncludeInTransaction
+        {
+            get => _includeInTransaction;
+            set
+            {
+                if (_includeInTransaction != value)
+                {
+                    var oldValue = _includeInTransaction;
+                    _includeInTransaction = value;
+                    OnPropertyChanged(nameof(IncludeInTransaction), ChangeType.PropertyChanged, oldValue, value);
                 }
             }
         }
