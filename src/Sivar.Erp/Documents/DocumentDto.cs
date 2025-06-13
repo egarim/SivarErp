@@ -12,6 +12,7 @@ namespace Sivar.Erp.Documents
     /// </summary>
     public class DocumentDto : IDocument, INotifyPropertyChanged
     {
+        string documentNumber;
         Guid oid;
         private DateOnly _date;
         private TimeOnly _time;
@@ -28,6 +29,19 @@ namespace Sivar.Erp.Documents
             // Subscribe to collection change notifications
             _lines.CollectionChanged += Lines_CollectionChanged;
             _documentTotals.CollectionChanged += DocumentTotals_CollectionChanged;
+        }
+
+        
+        public string DocumentNumber
+        {
+            get => documentNumber;
+            set
+            {
+                if (documentNumber == value)
+                    return;
+                documentNumber = value;
+                OnPropertyChanged();
+            }
         }
         
         public Guid Oid
