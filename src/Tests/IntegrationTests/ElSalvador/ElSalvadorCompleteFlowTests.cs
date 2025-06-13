@@ -49,10 +49,8 @@ namespace Tests.IntegrationTests.ElSalvador
         // Company details
         private readonly string _companyName = "El Salvador Complete Flow Test Company S.A de C.V";
         private readonly string _companyAddress = "Avenida Principal #456, San Salvador, El Salvador";
-        private readonly string _companyCurrency = "USD";
-
-        [SetUp]
-        public async Task Setup()
+        private readonly string _companyCurrency = "USD"; [SetUp]
+        public void Setup()
         {
             // Initialize services
             _transactionService = new TransactionService();
@@ -107,9 +105,11 @@ namespace Tests.IntegrationTests.ElSalvador
             Console.WriteLine("\n=== Step 7: Create Customers ===");
             CreateCustomers();
 
-            // Step 8: Get trial balance
-            Console.WriteLine("\n=== Step 8: Get Trial Balance ===");
-            await GetTrialBalance();
+            // Step 8: Create and execute tax transactions
+            Console.WriteLine("\n=== Step 8: Create and Execute Tax Transactions ===");
+            await CreateTaxTransactions();            // Step 9: Get trial balance (moved from step 8)
+            Console.WriteLine("\n=== Step 9: Get Trial Balance ===");
+            GetTrialBalance();
 
             Console.WriteLine("\n=== Complete Flow Test Completed Successfully ===");
         }
@@ -1357,17 +1357,143 @@ namespace Tests.IntegrationTests.ElSalvador
 
         #endregion
 
-        #region Step 8: Get Trial Balance
+        #region Step 8: Create and Execute Tax Transactions
 
         /// <summary>
-        /// Step 8: Generate trial balance report
+        /// Step 8: Create and execute tax-inclusive transactions
         /// </summary>
-        private async Task GetTrialBalance()
+        private async Task CreateTaxTransactions()
         {
             try
             {
-                // Create some sample transactions to have data for trial balance
-                await CreateSampleTransactions();
+                // Get specific accounts
+                var cashAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "11010101"); // CAJA GENERAL
+                var salesRevenueAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "51010101"); // VENTA DE PRODUCTO 1
+                var clientsAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "11030101"); // CLIENTES NACIONALES
+                var ivaDebitoAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "21060101"); // IVA DEBITO FISCAL - CONTRIBUYENTES
+
+                // Log which accounts were found
+                Console.WriteLine("Account lookup results for tax transactions:");
+                Console.WriteLine($"- Cash account (11010101): {(cashAccount != null ? "FOUND" : "NOT FOUND")}");
+                Console.WriteLine($"- Sales revenue account (51010101): {(salesRevenueAccount != null ? "FOUND" : "NOT FOUND")}");
+                Console.WriteLine($"- Clients account (11030101): {(clientsAccount != null ? "FOUND" : "NOT FOUND")}");
+                Console.WriteLine($"- IVA Debito account (21060101): {(ivaDebitoAccount != null ? "FOUND" : "NOT FOUND")}");
+
+                if (cashAccount == null || salesRevenueAccount == null || clientsAccount == null)
+                {
+                    Console.WriteLine("Warning: Could not find required accounts for tax transactions");
+                    return;
+                }
+
+                // Template 1: Cash Sale with IVA (Cash -> Sales Revenue + IVA)
+                var cashSaleWithIva = new TransactionDto
+                {
+                    Id = Guid.NewGuid(),
+                    DocumentId = Guid.NewGuid(),
+                    TransactionDate = _testStartDate,
+                    Description = "Cash Sale with IVA",
+                    LedgerEntries = new List<ILedgerEntry>
+                    {
+                        new LedgerEntryDto
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = cashAccount.Id,
+                            EntryType = EntryType.Debit,
+                            Amount = 1130m, // $1000 + $130 IVA
+                            AccountName = cashAccount.AccountName,
+                            OfficialCode = cashAccount.OfficialCode
+                        },
+                        new LedgerEntryDto
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = salesRevenueAccount.Id,
+                            EntryType = EntryType.Credit,
+                            Amount = 1000m,
+                            AccountName = salesRevenueAccount.AccountName,
+                            OfficialCode = salesRevenueAccount.OfficialCode
+                        },
+                        new LedgerEntryDto
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = ivaDebitoAccount.Id,
+                            EntryType = EntryType.Credit,
+                            Amount = 130m, // 13% IVA
+                            AccountName = ivaDebitoAccount.AccountName,
+                            OfficialCode = ivaDebitoAccount.OfficialCode
+                        }
+                    }
+                };
+
+                // Template 2: Credit Sale with IVA (Accounts Receivable -> Sales Revenue + IVA)
+                var creditSaleWithIva = new TransactionDto
+                {
+                    Id = Guid.NewGuid(),
+                    DocumentId = Guid.NewGuid(),
+                    TransactionDate = _testStartDate,
+                    Description = "Credit Sale with IVA",
+                    LedgerEntries = new List<ILedgerEntry>
+                    {
+                        new LedgerEntryDto
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = clientsAccount.Id,
+                            EntryType = EntryType.Debit,
+                            Amount = 2260m, // $2000 + $260 IVA
+                            AccountName = clientsAccount.AccountName,
+                            OfficialCode = clientsAccount.OfficialCode
+                        },
+                        new LedgerEntryDto
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = salesRevenueAccount.Id,
+                            EntryType = EntryType.Credit,
+                            Amount = 2000m,
+                            AccountName = salesRevenueAccount.AccountName,
+                            OfficialCode = salesRevenueAccount.OfficialCode
+                        },
+                        new LedgerEntryDto
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = ivaDebitoAccount.Id,
+                            EntryType = EntryType.Credit,
+                            Amount = 260m, // 13% IVA
+                            AccountName = ivaDebitoAccount.AccountName,
+                            OfficialCode = ivaDebitoAccount.OfficialCode
+                        }
+                    }
+                };
+
+                // Add transactions to be executed
+                var transactionsToExecute = new List<ITransaction>
+                {
+                    cashSaleWithIva,
+                    creditSaleWithIva
+                };                // Create transactions (for demonstration purposes)
+                foreach (var transaction in transactionsToExecute)
+                {
+                    await _transactionService.CreateTransactionAsync(transaction);
+                    Console.WriteLine($"Created transaction: {transaction.Description}");
+                }
+
+                Console.WriteLine($"Created and executed {transactionsToExecute.Count} tax transactions");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating or executing tax transactions: {ex.Message}");
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Step 9: Get Trial Balance        /// <summary>
+        /// Step 9: Generate trial balance report
+        /// </summary>
+        private void GetTrialBalance()
+        {
+            try
+            {                // Create some sample transactions to have data for trial balance
+                CreateSampleTransactions();
 
                 // Calculate trial balance manually using our account balance calculator
                 var trialBalanceEntries = new List<TrialBalanceEntry>();
@@ -1461,7 +1587,7 @@ namespace Tests.IntegrationTests.ElSalvador
         }        /// <summary>
                  /// Create some sample transactions to populate the trial balance
                  /// </summary>
-        private async Task CreateSampleTransactions()
+        private void CreateSampleTransactions()
         {
             try
             {
@@ -1511,45 +1637,137 @@ namespace Tests.IntegrationTests.ElSalvador
                             OfficialCode = equityAccount.OfficialCode
                         }
                     }
-                };
+                };                // Transaction 2: Cash Sale with IVA (showing tax collected)
+                ITransaction salesTransaction;
+                var ivaDebitoAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "21060101"); // IVA DEBITO FISCAL - CONTRIBUYENTES
 
-                // Transaction 2: Sales transaction
-                var salesTransaction = new TransactionDto
+                if (ivaDebitoAccount != null)
                 {
-                    Id = Guid.NewGuid(),
-                    DocumentId = Guid.NewGuid(),
-                    TransactionDate = _testStartDate.AddDays(30),
-                    Description = "Sales transaction",
-                    LedgerEntries = new List<ILedgerEntry>
+                    salesTransaction = new TransactionDto
                     {
-                        new LedgerEntryDto
+                        Id = Guid.NewGuid(),
+                        DocumentId = Guid.NewGuid(),
+                        TransactionDate = _testStartDate.AddDays(15),
+                        Description = "Cash Sale with IVA - El Salvador Tax Demo",
+                        LedgerEntries = new List<ILedgerEntry>
                         {
-                            Id = Guid.NewGuid(),
-                            AccountId = cashAccount.Id,
-                            EntryType = EntryType.Debit,
-                            Amount = 2500.00m,
-                            AccountName = cashAccount.AccountName,
-                            OfficialCode = cashAccount.OfficialCode
-                        },
-                        new LedgerEntryDto
-                        {
-                            Id = Guid.NewGuid(),
-                            AccountId = salesAccount.Id,
-                            EntryType = EntryType.Credit,
-                            Amount = 2500.00m,
-                            AccountName = salesAccount.AccountName,
-                            OfficialCode = salesAccount.OfficialCode
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = cashAccount.Id,
+                                EntryType = EntryType.Debit,
+                                Amount = 2825.00m, // $2500 + $325 IVA (13%)
+                                AccountName = cashAccount.AccountName,
+                                OfficialCode = cashAccount.OfficialCode
+                            },
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = salesAccount.Id,
+                                EntryType = EntryType.Credit,
+                                Amount = 2500.00m,
+                                AccountName = salesAccount.AccountName,
+                                OfficialCode = salesAccount.OfficialCode
+                            },
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = ivaDebitoAccount.Id,
+                                EntryType = EntryType.Credit,
+                                Amount = 325.00m, // 13% El Salvador IVA
+                                AccountName = ivaDebitoAccount.AccountName,
+                                OfficialCode = ivaDebitoAccount.OfficialCode
+                            }
                         }
-                    }
-                };
-
+                    };
+                }
+                else
+                {
+                    // Fallback to simple sales transaction if IVA account not found
+                    salesTransaction = new TransactionDto
+                    {
+                        Id = Guid.NewGuid(),
+                        DocumentId = Guid.NewGuid(),
+                        TransactionDate = _testStartDate.AddDays(15),
+                        Description = "Cash Sale (no tax account found)",
+                        LedgerEntries = new List<ILedgerEntry>
+                        {
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = cashAccount.Id,
+                                EntryType = EntryType.Debit,
+                                Amount = 2500.00m,
+                                AccountName = cashAccount.AccountName,
+                                OfficialCode = cashAccount.OfficialCode
+                            },
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = salesAccount.Id,
+                                EntryType = EntryType.Credit,
+                                Amount = 2500.00m,
+                                AccountName = salesAccount.AccountName,
+                                OfficialCode = salesAccount.OfficialCode
+                            }
+                        }
+                    };
+                }
                 transactions.Add(capitalTransaction);
                 transactions.Add(salesTransaction);
+
+                // Transaction 3: Purchase with IVA Credit (if accounts available)
+                var inventoryAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "11050102"); // INVENTARIO DE PRODUCTO TERMINADO
+                var providersAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "21020101"); // PROVEEDORES LOCALES
+                var ivaCreditoAccount = _accounts.Values.FirstOrDefault(a => a.OfficialCode == "11070101"); // CREDITO FISCAL- COMPRA LOCAL
+
+                if (inventoryAccount != null && providersAccount != null && ivaCreditoAccount != null)
+                {
+                    var purchaseTransaction = new TransactionDto
+                    {
+                        Id = Guid.NewGuid(),
+                        DocumentId = Guid.NewGuid(),
+                        TransactionDate = _testStartDate.AddDays(30),
+                        Description = "Inventory Purchase with IVA Credit",
+                        LedgerEntries = new List<ILedgerEntry>
+                        {
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = inventoryAccount.Id,
+                                EntryType = EntryType.Debit,
+                                Amount = 1000.00m,
+                                AccountName = inventoryAccount.AccountName,
+                                OfficialCode = inventoryAccount.OfficialCode
+                            },
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = ivaCreditoAccount.Id,
+                                EntryType = EntryType.Debit,
+                                Amount = 130.00m, // 13% IVA Credit
+                                AccountName = ivaCreditoAccount.AccountName,
+                                OfficialCode = ivaCreditoAccount.OfficialCode
+                            },
+                            new LedgerEntryDto
+                            {
+                                Id = Guid.NewGuid(),
+                                AccountId = providersAccount.Id,
+                                EntryType = EntryType.Credit,
+                                Amount = 1130.00m, // $1000 + $130 IVA
+                                AccountName = providersAccount.AccountName,
+                                OfficialCode = providersAccount.OfficialCode
+                            }
+                        }
+                    };
+                    transactions.Add(purchaseTransaction);
+                    Console.WriteLine("Added purchase transaction with IVA Credit to demonstrate tax accounts");
+                }
 
                 // Update the account balance calculator with our transactions
                 _accountBalanceCalculator = new AccountBalanceCalculatorBase(transactions);
 
-                Console.WriteLine($"Created {transactions.Count} sample transactions for trial balance");
+                Console.WriteLine($"Created {transactions.Count} sample transactions for trial balance (including tax accounts)");
             }
             catch (Exception ex)
             {
@@ -1796,43 +2014,50 @@ namespace Tests.IntegrationTests.ElSalvador
                     "2101" => "Accounts Payable",
                     "2102" => "Providers",
                     "2103" => "Accrued Expenses",
-                    "2106" => "Tax Liabilities",
+                    "2104" => "Deferred Revenue",
+                    "2105" => "Tax Liabilities",
                     _ => $"Liabilities ({firstFourDigits})"
+                },
+                AccountType.Equity => firstFourDigits switch
+                {
+                    "3101" => "Capital Contributions",
+                    "3102" => "Retained Earnings",
+                    "3103" => "Other Comprehensive Income",
+                    _ => $"Equity ({firstFourDigits})"
                 },
                 AccountType.Revenue => firstFourDigits switch
                 {
                     "5101" => "Product Sales",
-                    "5102" => "Service Revenue",
+                    "5102" => "Service Income",
+                    "5103" => "Other Revenue",
                     _ => $"Revenue ({firstFourDigits})"
                 },
                 AccountType.Expense => firstFourDigits switch
                 {
                     "4101" => "Cost of Goods Sold",
-                    "4201" => "Salaries & Benefits",
-                    "4202" => "Administrative Costs",
+                    "4102" => "Selling Expenses",
+                    "4103" => "Administrative Expenses",
+                    "4104" => "Financial Expenses",
+                    "4105" => "Tax Expenses",
                     _ => $"Expenses ({firstFourDigits})"
                 },
-                _ => GetMajorCategoryName(accountCode, accountType)
+                _ => $"Subcategory ({firstFourDigits})"
             };
         }
 
         #endregion
+    }
 
-        #region Helper Classes
-
-        /// <summary>
-        /// Represents an entry in the trial balance
-        /// </summary>
-        private class TrialBalanceEntry
-        {
-            public Guid AccountId { get; set; }
-            public string AccountCode { get; set; } = string.Empty;
-            public string AccountName { get; set; } = string.Empty;
-            public AccountType AccountType { get; set; }
-            public decimal DebitBalance { get; set; }
-            public decimal CreditBalance { get; set; }
-        }
-
-        #endregion
+    /// <summary>
+    /// Represents a trial balance entry for reporting
+    /// </summary>
+    public class TrialBalanceEntry
+    {
+        public Guid AccountId { get; set; }
+        public string AccountCode { get; set; } = string.Empty;
+        public string AccountName { get; set; } = string.Empty;
+        public AccountType AccountType { get; set; }
+        public decimal DebitBalance { get; set; }
+        public decimal CreditBalance { get; set; }
     }
 }
