@@ -9,6 +9,9 @@ namespace Sivar.Erp.Documents
     /// </summary>
     public interface IDocument : INotifyPropertyChanged
     {
+
+        [BusinessKey()]
+        string DocumentNumber { get; set; }
         /// <summary>
         /// Unique identifier for the document
         /// </summary>

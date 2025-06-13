@@ -39,10 +39,11 @@
         /// Type of account (asset, liability, etc.)
         /// </summary>
         AccountType AccountType { get; set; }
-        
+
         /// <summary>
         /// Official code/identifier for the account (e.g., for SAF-T reporting)
         /// </summary>
+        [BusinessKey()]
         string OfficialCode { get; set; }
 
         /// <summary>

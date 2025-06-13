@@ -1,4 +1,19 @@
 Financial Statement Module Implementation Task List
+
+FLow
+
+import chart of accounting
+create document types
+create transaction templates
+Create fiscal period
+create items
+
+create taxgroups
+
+create customers
+
+Get trial of balance
+
 Overview
 The Financial Statement Module handles the preparation of financial statements including Balance Sheet, Income Statement, Cash Flow Statement, and Equity Statement. These statements are built using a hierarchical nested set model for organizing lines and accounts.
 1. Core Interfaces and Enums
