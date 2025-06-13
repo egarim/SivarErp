@@ -7,16 +7,16 @@ namespace Sivar.Erp.ChartOfAccounts
     /// </summary>
     public class AccountImportExportService : IAccountImportExportService
     {
-        private readonly IAuditService _auditService;
+    
         private readonly AccountValidator _accountValidator;
 
         /// <summary>
         /// Initializes a new instance of the AccountImportExportService class
         /// </summary>
         /// <param name="auditService">Audit service for setting audit information</param>
-        public AccountImportExportService(IAuditService auditService)
+        public AccountImportExportService()
         {
-            _auditService = auditService;
+            
             _accountValidator = new AccountValidator();
         }
 
@@ -25,20 +25,24 @@ namespace Sivar.Erp.ChartOfAccounts
         /// </summary>
         /// <param name="auditService">Audit service for setting audit information</param>
         /// <param name="accountValidator">Custom account validator</param>
-        public AccountImportExportService(IAuditService auditService, AccountValidator accountValidator)
+        public AccountImportExportService( AccountValidator accountValidator)
         {
-            _auditService = auditService;
+           
             _accountValidator = accountValidator ?? new AccountValidator();
-        }        /// <summary>
-                 /// Imports accounts from a CSV file
-                 /// </summary>
-                 /// <param name="csvContent">Content of the CSV file as a string</param>
-                 /// <param name="userName">User performing the operation</param>
-                 /// <returns>Collection of imported accounts and any validation errors</returns>
+        }
+
+        /// <summary>
+        /// Imports accounts from a CSV file
+        /// </summary>
+        /// <param name="csvContent">Content of the CSV file as a string</param>
+        /// <param name="userName">User performing the operation</param>
+        /// <returns>Collection of imported accounts and any validation errors</returns>
         public Task<(IEnumerable<IAccount> ImportedAccounts, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
             List<AccountDto> importedAccounts = new List<AccountDto>();
-            List<string> errors = new List<string>(); if (string.IsNullOrEmpty(csvContent))
+            List<string> errors = new List<string>();
+
+            if (string.IsNullOrEmpty(csvContent))
             {
                 errors.Add("CSV content is empty");
                 return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
@@ -85,8 +89,7 @@ namespace Sivar.Erp.ChartOfAccounts
                         continue;
                     }
 
-                    // Set audit information
-                    _auditService.SetCreationAudit(account, userName);
+                   
                     importedAccounts.Add(account);
                 }
 
@@ -228,18 +231,22 @@ namespace Sivar.Erp.ChartOfAccounts
             }
 
             return account;
-        }        /// <summary>
-                 /// Gets the CSV header row
-                 /// </summary>
-                 /// <returns>CSV header as a string</returns>
+        }
+
+        /// <summary>
+        /// Gets the CSV header row
+        /// </summary>
+        /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
             return "AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId";
-        }        /// <summary>
-                 /// Gets a CSV row for an account
-                 /// </summary>
-                 /// <param name="account">Account to convert to CSV</param>
-                 /// <returns>CSV row as a string</returns>
+        }
+
+        /// <summary>
+        /// Gets a CSV row for an account
+        /// </summary>
+        /// <param name="account">Account to convert to CSV</param>
+        /// <returns>CSV row as a string</returns>
         private string GetCsvRow(IAccount account)
         {
             string balanceAndIncomeLineId = account.BalanceAndIncomeLineId.HasValue

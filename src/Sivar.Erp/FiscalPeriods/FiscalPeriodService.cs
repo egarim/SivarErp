@@ -4,18 +4,19 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sivar.Erp.FiscalPeriods
-{    /// <summary>
-     /// Implementation of fiscal period service
-     /// </summary>
+{
+    /// <summary>
+    /// Implementation of fiscal period service
+    /// </summary>
     public class FiscalPeriodService : IFiscalPeriodService
     {
-        private readonly IAuditService _auditService;
+  
         private readonly FiscalPeriodValidator _validator;
         private static readonly List<IFiscalPeriod> _fiscalPeriods = new List<IFiscalPeriod>();
 
-        public FiscalPeriodService(IAuditService auditService)
+        public FiscalPeriodService()
         {
-            _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
+           
             _validator = new FiscalPeriodValidator();
         }
 
@@ -28,7 +29,9 @@ namespace Sivar.Erp.FiscalPeriods
         public async Task<IFiscalPeriod> CreateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod, string userId)
         {
             if (fiscalPeriod == null)
-                throw new ArgumentNullException(nameof(fiscalPeriod)); if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentNullException(nameof(fiscalPeriod));
+
+            if (string.IsNullOrWhiteSpace(userId))
                 throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
 
             // Validate the fiscal period including overlap check
@@ -40,8 +43,7 @@ namespace Sivar.Erp.FiscalPeriods
             if (fiscalPeriod.Id == Guid.Empty)
                 fiscalPeriod.Id = Guid.NewGuid();
 
-            // Set audit information
-            _auditService.SetCreationAudit(fiscalPeriod, userId);
+          
 
             // Store the fiscal period (in a real implementation, this would be saved to database)
             _fiscalPeriods.Add(fiscalPeriod);
@@ -61,7 +63,9 @@ namespace Sivar.Erp.FiscalPeriods
                 throw new ArgumentNullException(nameof(fiscalPeriod));
 
             if (string.IsNullOrWhiteSpace(userId))
-                throw new ArgumentException("User ID cannot be null or empty", nameof(userId));            // Find existing fiscal period
+                throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
+
+            // Find existing fiscal period
             var existingPeriod = _fiscalPeriods.FirstOrDefault(fp => fp.Id == fiscalPeriod.Id);
             if (existingPeriod == null)
                 throw new InvalidOperationException("Fiscal period not found");
@@ -78,8 +82,7 @@ namespace Sivar.Erp.FiscalPeriods
             existingPeriod.Name = fiscalPeriod.Name;
             existingPeriod.Description = fiscalPeriod.Description;
 
-            // Set audit information
-            _auditService.SetUpdateAudit(existingPeriod, userId);
+           
 
             return existingPeriod;
         }
@@ -139,8 +142,7 @@ namespace Sivar.Erp.FiscalPeriods
                 throw new InvalidOperationException("Fiscal period not found");
 
             fiscalPeriod.Status = FiscalPeriodStatus.Closed;
-            _auditService.SetUpdateAudit(fiscalPeriod, userId);
-
+        
             return fiscalPeriod;
         }
 
@@ -157,14 +159,16 @@ namespace Sivar.Erp.FiscalPeriods
                 throw new InvalidOperationException("Fiscal period not found");
 
             fiscalPeriod.Status = FiscalPeriodStatus.Open;
-            _auditService.SetUpdateAudit(fiscalPeriod, userId);
+          
 
             return fiscalPeriod;
-        }        /// <summary>
-                 /// Validates a fiscal period for creation or update
-                 /// </summary>
-                 /// <param name="fiscalPeriod">Fiscal period to validate</param>
-                 /// <returns>True if valid, false otherwise</returns>
+        }
+
+        /// <summary>
+        /// Validates a fiscal period for creation or update
+        /// </summary>
+        /// <param name="fiscalPeriod">Fiscal period to validate</param>
+        /// <returns>True if valid, false otherwise</returns>
         public Task<bool> ValidateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod)
         {
             if (fiscalPeriod == null)
@@ -189,13 +193,15 @@ namespace Sivar.Erp.FiscalPeriods
             // Use the validator for comprehensive validation including overlap check
             var isValid = _validator.ValidateFiscalPeriodWithOverlapCheck(fiscalPeriod, _fiscalPeriods, excludeId);
             return Task.FromResult(isValid);
-        }/// <summary>
-         /// Checks if fiscal periods overlap
-         /// </summary>
-         /// <param name="startDate">Start date of period to check</param>
-         /// <param name="endDate">End date of period to check</param>
-         /// <param name="excludeId">Optional ID to exclude from overlap check (for updates)</param>
-         /// <returns>True if there is an overlap, false otherwise</returns>
+        }
+
+        /// <summary>
+        /// Checks if fiscal periods overlap
+        /// </summary>
+        /// <param name="startDate">Start date of period to check</param>
+        /// <param name="endDate">End date of period to check</param>
+        /// <param name="excludeId">Optional ID to exclude from overlap check (for updates)</param>
+        /// <returns>True if there is an overlap, false otherwise</returns>
         public Task<bool> HasOverlappingPeriodsAsync(DateOnly startDate, DateOnly endDate, Guid? excludeId = null)
         {
             var periodsToCheck = _fiscalPeriods.Where(fp => excludeId == null || fp.Id != excludeId);

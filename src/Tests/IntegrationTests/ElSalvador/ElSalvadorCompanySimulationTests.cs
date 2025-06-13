@@ -17,7 +17,7 @@ namespace Tests.IntegrationTests.ElSalvador
     [TestFixture]
     public class ElSalvadorCompanySimulationTests
     {
-        private IAuditService _auditService;
+  
   
         private TransactionService _transactionService;
         private AccountValidator _accountValidator;
@@ -44,13 +44,13 @@ namespace Tests.IntegrationTests.ElSalvador
         public async Task Setup()
         {
             // Initialize services
-            _auditService = new AuditService();
+         
           
             _transactionService = new TransactionService();
             // Use El Salvador account type prefixes for validator
             _accountValidator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
             _accountBalanceCalculator = new AccountBalanceCalculatorBase();
-            _accountImportExportService = new AccountImportExportService(_auditService, _accountValidator);
+            _accountImportExportService = new AccountImportExportService( _accountValidator);
 
             // Initialize storage
             _accounts = new Dictionary<string, AccountDto>();

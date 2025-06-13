@@ -11,13 +11,13 @@ namespace Sivar.Erp.Tests.FiscalPeriods
     [TestFixture]
     public class FiscalPeriodTests
     {
-        private IAuditService _auditService;
+     
         private IFiscalPeriodService _fiscalPeriodService;
         private FiscalPeriodValidator _validator; [SetUp]
         public void Setup()
         {
-            _auditService = new AuditService();
-            _fiscalPeriodService = new FiscalPeriodService(_auditService);
+           
+          
             _validator = new FiscalPeriodValidator();
 
             // Clear any existing fiscal periods from previous tests

@@ -19,14 +19,14 @@ namespace Tests.IntegrationTests.ElSalvador
     [TestFixture]
     public class ElSalvadorDocumentTypeTests
     {
-        private IAuditService _auditService;
+    
         private ITransactionService _transactionService;
 
         [SetUp]
         public void Setup()
         {
             // Setup test dependencies
-            _auditService = new AuditService();
+          
             _transactionService = new TransactionService();
         }
 

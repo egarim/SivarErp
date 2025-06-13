@@ -14,7 +14,7 @@ namespace Tests.IntegrationTests.ElSalvador
     [TestFixture]
     public class ElSalvadorDocumentWorkflowTests
     {
-        private IAuditService _auditService;
+     
         private Dictionary<string, IDocumentType> _documentTypes;
         private Dictionary<string, DocumentDto> _documents;
         
@@ -22,7 +22,7 @@ namespace Tests.IntegrationTests.ElSalvador
         public void Setup()
         {
             // Setup test dependencies
-            _auditService = new AuditService();
+          
             _documentTypes = new Dictionary<string, IDocumentType>();
             _documents = new Dictionary<string, DocumentDto>();
             

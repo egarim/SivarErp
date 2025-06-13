@@ -12,14 +12,14 @@ namespace Sivar.Erp.Tests.ChartOfAccounts
     [TestFixture]
     public class AccountImportExportServiceTests
     {
-        private IAuditService _auditService;
+   
         private IAccountImportExportService _importExportService;
 
         [SetUp]
         public void Setup()
         {
-            _auditService = new AuditService();
-            _importExportService = new AccountImportExportService(_auditService);
+         
+           
         }
 
         #region Import Tests
