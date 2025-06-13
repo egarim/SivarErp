@@ -1377,9 +1377,7 @@ namespace Tests.IntegrationTests.ElSalvador
                 foreach (var account in _accounts.Values.OrderBy(a => a.OfficialCode))
                 {
                     // Calculate balance for this account as of test end date
-                    decimal balance = _accountBalanceCalculator.CalculateAccountBalance(account.Id, _testEndDate);
-
-                    if (Math.Abs(balance) > 0.01m) // Only include accounts with meaningful balances
+                    decimal balance = _accountBalanceCalculator.CalculateAccountBalance(account.Id, _testEndDate); if (Math.Abs(balance) > 0.01m) // Only include accounts with meaningful balances
                     {
                         var entry = new TrialBalanceEntry
                         {
@@ -1419,22 +1417,9 @@ namespace Tests.IntegrationTests.ElSalvador
 
                         trialBalanceEntries.Add(entry);
                     }
-                }
-
-                Console.WriteLine($"\n=== TRIAL BALANCE as of {_testEndDate:yyyy-MM-dd} ===");
-                Console.WriteLine($"{"Account Code",-12} {"Account Name",-40} {"Debit",-15} {"Credit",-15}");
-                Console.WriteLine(new string('-', 85));
-
-                foreach (var entry in trialBalanceEntries)
-                {
-                    Console.WriteLine($"{entry.AccountCode,-12} {entry.AccountName,-40} " +
-                                    $"{(entry.DebitBalance > 0 ? entry.DebitBalance.ToString("F2") : ""),-15} " +
-                                    $"{(entry.CreditBalance > 0 ? entry.CreditBalance.ToString("F2") : ""),-15}");
-                }
-
-                Console.WriteLine(new string('-', 85));
-                Console.WriteLine($"{"TOTALS",-52} {totalDebits,-15:F2} {totalCredits,-15:F2}");
-                Console.WriteLine(new string('=', 85));
+                }                // Display trial balance in cascade format
+                Console.WriteLine($"\n=== TRIAL BALANCE (CASCADE FORMAT) as of {_testEndDate:yyyy-MM-dd} ===");
+                DisplayTrialBalanceInCascadeFormat(trialBalanceEntries, totalDebits, totalCredits);
 
                 // Verify trial balance is balanced
                 decimal difference = Math.Abs(totalDebits - totalCredits);
@@ -1571,6 +1556,264 @@ namespace Tests.IntegrationTests.ElSalvador
                 Console.WriteLine($"Error creating sample transactions: {ex.Message}");
                 throw;
             }
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Display trial balance in cascade (hierarchical) format grouped by account type and sorted by account code
+        /// </summary>
+        private void DisplayTrialBalanceInCascadeFormat(List<TrialBalanceEntry> trialBalanceEntries, decimal totalDebits, decimal totalCredits)
+        {
+            // Group by account type and order accounts within each group hierarchically
+            var groupedEntries = trialBalanceEntries
+                .GroupBy(e => e.AccountType)
+                .OrderBy(g => GetAccountTypeOrder(g.Key))
+                .ToList();
+
+            Console.WriteLine($"{"Account Structure",-60} {"Debit",-15} {"Credit",-15}");
+            Console.WriteLine(new string('=', 90));
+
+            decimal typeDebitsTotal = 0m;
+            decimal typeCreditsTotal = 0m;
+
+            foreach (var accountTypeGroup in groupedEntries)
+            {
+                var typeDebits = accountTypeGroup.Sum(e => e.DebitBalance);
+                var typeCredits = accountTypeGroup.Sum(e => e.CreditBalance);
+                typeDebitsTotal += typeDebits;
+                typeCreditsTotal += typeCredits;
+
+                // Display account type header
+                Console.WriteLine($"\n{accountTypeGroup.Key.ToString().ToUpper(),-60} {typeDebits,-15:F2} {typeCredits,-15:F2}");
+                Console.WriteLine(new string('-', 90));
+
+                // Group accounts by major category (first 2 digits) for cascade effect
+                var accountsByMajorCategory = accountTypeGroup
+                    .GroupBy(e => e.AccountCode.Length >= 2 ? e.AccountCode.Substring(0, 2) : e.AccountCode)
+                    .OrderBy(g => g.Key)
+                    .ToList();
+
+                foreach (var majorCategoryGroup in accountsByMajorCategory)
+                {
+                    var categoryDebits = majorCategoryGroup.Sum(e => e.DebitBalance);
+                    var categoryCredits = majorCategoryGroup.Sum(e => e.CreditBalance);
+
+                    // Find a representative account to get the major category name
+                    var representativeAccount = majorCategoryGroup.First();
+                    var majorCategoryName = GetMajorCategoryName(representativeAccount.AccountCode, representativeAccount.AccountType);
+
+                    // Display major category subtotal (if more than one account in this category)
+                    if (majorCategoryGroup.Count() > 1)
+                    {
+                        Console.WriteLine($"  {majorCategoryName,-58} {categoryDebits,-15:F2} {categoryCredits,-15:F2}");
+                    }
+
+                    // Group by subcategory (first 4 digits) for further cascade
+                    var accountsBySubCategory = majorCategoryGroup
+                        .GroupBy(e => e.AccountCode.Length >= 4 ? e.AccountCode.Substring(0, 4) : e.AccountCode)
+                        .OrderBy(g => g.Key)
+                        .ToList();
+
+                    foreach (var subCategoryGroup in accountsBySubCategory)
+                    {
+                        var subCategoryDebits = subCategoryGroup.Sum(e => e.DebitBalance);
+                        var subCategoryCredits = subCategoryGroup.Sum(e => e.CreditBalance);
+
+                        // Display subcategory subtotal (if more than one account and major category has multiple subcategories)
+                        if (subCategoryGroup.Count() > 1 && accountsBySubCategory.Count > 1)
+                        {
+                            var subCategoryName = GetSubCategoryName(subCategoryGroup.First().AccountCode, subCategoryGroup.First().AccountType);
+                            Console.WriteLine($"    {subCategoryName,-56} {subCategoryDebits,-15:F2} {subCategoryCredits,-15:F2}");
+                        }                        // Display individual accounts
+                        foreach (var entry in subCategoryGroup.OrderBy(e => e.AccountCode))
+                        {
+                            var indent = majorCategoryGroup.Count() > 1 && subCategoryGroup.Count() > 1 ? "      " :
+                                        majorCategoryGroup.Count() > 1 ? "    " : "  ";
+                            var displayName = $"{entry.AccountCode} - {entry.AccountName}";
+                            var fullDisplayName = $"{indent}{displayName}";
+
+                            Console.WriteLine($"{fullDisplayName,-60} " +
+                                            $"{(entry.DebitBalance > 0 ? entry.DebitBalance.ToString("F2") : ""),-15} " +
+                                            $"{(entry.CreditBalance > 0 ? entry.CreditBalance.ToString("F2") : ""),-15}");
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine(new string('=', 90));
+            Console.WriteLine($"{"GRAND TOTALS",-60} {totalDebits,-15:F2} {totalCredits,-15:F2}");
+            Console.WriteLine(new string('=', 90));
+
+            // Balance verification
+            decimal difference = Math.Abs(totalDebits - totalCredits);
+            Console.WriteLine($"\nBalance Verification:");
+            Console.WriteLine($"Total Debits:  ${totalDebits:F2}");
+            Console.WriteLine($"Total Credits: ${totalCredits:F2}");
+            Console.WriteLine($"Difference:    ${difference:F2} {(difference < 0.01m ? "✓ BALANCED" : "⚠ NOT BALANCED")}");
+
+            // Account Balance Calculator Verification
+            Console.WriteLine($"\n=== ACCOUNT BALANCE CALCULATOR VERIFICATION ===");
+            Console.WriteLine($"Accounts with balances: {trialBalanceEntries.Count}");
+            Console.WriteLine($"Total accounts imported: {_accounts.Count}");
+            Console.WriteLine($"Accounts with zero balances: {_accounts.Count - trialBalanceEntries.Count}");
+            // Sample detailed verification for key accounts
+            Console.WriteLine($"\nDetailed verification for key accounts:");
+            var keyAccounts = new[] { "11010101", "51010101", "31010101" }; // Cash, Sales, Equity
+            foreach (var accountCode in keyAccounts)
+            {
+                var account = _accounts.Values.FirstOrDefault(a => a.OfficialCode == accountCode);
+                if (account != null)
+                {
+                    var calculatedBalance = _accountBalanceCalculator.CalculateAccountBalance(account.Id, _testEndDate);
+                    var trialBalanceEntry = trialBalanceEntries.FirstOrDefault(e => e.AccountCode == accountCode);
+
+                    // Determine expected trial balance representation
+                    bool isDebitAccount = account.HasDebitBalance();
+                    decimal expectedTrialBalanceAmount;
+                    string balanceType;
+
+                    if (isDebitAccount)
+                    {
+                        // For debit accounts: positive calculator balance = debit, negative = credit
+                        expectedTrialBalanceAmount = calculatedBalance >= 0 ? calculatedBalance : Math.Abs(calculatedBalance);
+                        balanceType = calculatedBalance >= 0 ? "(Debit)" : "(Credit)";
+                    }
+                    else
+                    {
+                        // For credit accounts: negative calculator balance = credit, positive = debit
+                        expectedTrialBalanceAmount = calculatedBalance <= 0 ? Math.Abs(calculatedBalance) : calculatedBalance;
+                        balanceType = calculatedBalance <= 0 ? "(Credit)" : "(Debit)";
+                    }
+                    var actualTrialBalanceAmount = trialBalanceEntry?.DebitBalance > 0 ? trialBalanceEntry.DebitBalance :
+                                                trialBalanceEntry?.CreditBalance > 0 ? trialBalanceEntry.CreditBalance : 0m;
+                    var actualBalanceType = trialBalanceEntry?.DebitBalance > 0 ? "(Debit)" : "(Credit)";
+
+                    bool isMatch = Math.Abs(expectedTrialBalanceAmount - actualTrialBalanceAmount) < 0.01m;
+
+                    Console.WriteLine($"  {accountCode} - {account.AccountName}:");
+                    Console.WriteLine($"    Calculator balance: ${calculatedBalance:F2}");
+                    Console.WriteLine($"    Expected in trial balance: ${expectedTrialBalanceAmount:F2} {balanceType}");
+                    Console.WriteLine($"    Actual in trial balance: ${actualTrialBalanceAmount:F2} {actualBalanceType}");
+                    Console.WriteLine($"    Account type: {account.AccountType} ({(isDebitAccount ? "Debit Normal" : "Credit Normal")})");
+                    Console.WriteLine($"    Verification: {(isMatch ? "✓ MATCH" : "⚠ MISMATCH")}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the sort order for account types to display them in logical order
+        /// </summary>
+        private int GetAccountTypeOrder(AccountType accountType)
+        {
+            return accountType switch
+            {
+                AccountType.Asset => 1,
+                AccountType.Liability => 2,
+                AccountType.Equity => 3,
+                AccountType.Revenue => 4,
+                AccountType.Expense => 5,
+                _ => 6
+            };
+        }
+
+        /// <summary>
+        /// Get a descriptive name for major account categories based on the first 2 digits
+        /// </summary>
+        private string GetMajorCategoryName(string accountCode, AccountType accountType)
+        {
+            if (accountCode.Length < 2) return "Unknown Category";
+
+            var firstTwoDigits = accountCode.Substring(0, 2);
+
+            return accountType switch
+            {
+                AccountType.Asset => firstTwoDigits switch
+                {
+                    "11" => "Current Assets",
+                    "12" => "Fixed Assets",
+                    "13" => "Intangible Assets",
+                    "14" => "Other Assets",
+                    _ => $"Assets ({firstTwoDigits})"
+                },
+                AccountType.Liability => firstTwoDigits switch
+                {
+                    "21" => "Current Liabilities",
+                    "22" => "Long-term Liabilities",
+                    _ => $"Liabilities ({firstTwoDigits})"
+                },
+                AccountType.Equity => firstTwoDigits switch
+                {
+                    "31" => "Capital",
+                    "32" => "Retained Earnings",
+                    "33" => "Other Equity",
+                    _ => $"Equity ({firstTwoDigits})"
+                },
+                AccountType.Revenue => firstTwoDigits switch
+                {
+                    "51" => "Operating Revenue",
+                    "52" => "Other Revenue",
+                    _ => $"Revenue ({firstTwoDigits})"
+                },
+                AccountType.Expense => firstTwoDigits switch
+                {
+                    "41" => "Cost of Sales",
+                    "42" => "Operating Expenses",
+                    "43" => "Administrative Expenses",
+                    "44" => "Financial Expenses",
+                    _ => $"Expenses ({firstTwoDigits})"
+                },
+                _ => $"Category ({firstTwoDigits})"
+            };
+        }
+
+        /// <summary>
+        /// Get a descriptive name for subcategories based on the first 4 digits
+        /// </summary>
+        private string GetSubCategoryName(string accountCode, AccountType accountType)
+        {
+            if (accountCode.Length < 4) return GetMajorCategoryName(accountCode, accountType);
+
+            var firstFourDigits = accountCode.Substring(0, 4);
+
+            return accountType switch
+            {
+                AccountType.Asset => firstFourDigits switch
+                {
+                    "1101" => "Cash & Banks",
+                    "1102" => "Investments",
+                    "1103" => "Accounts Receivable",
+                    "1104" => "Other Receivables",
+                    "1105" => "Inventory",
+                    "1106" => "Prepaid Expenses",
+                    "1107" => "Tax Assets",
+                    _ => $"Assets ({firstFourDigits})"
+                },
+                AccountType.Liability => firstFourDigits switch
+                {
+                    "2101" => "Accounts Payable",
+                    "2102" => "Providers",
+                    "2103" => "Accrued Expenses",
+                    "2106" => "Tax Liabilities",
+                    _ => $"Liabilities ({firstFourDigits})"
+                },
+                AccountType.Revenue => firstFourDigits switch
+                {
+                    "5101" => "Product Sales",
+                    "5102" => "Service Revenue",
+                    _ => $"Revenue ({firstFourDigits})"
+                },
+                AccountType.Expense => firstFourDigits switch
+                {
+                    "4101" => "Cost of Goods Sold",
+                    "4201" => "Salaries & Benefits",
+                    "4202" => "Administrative Costs",
+                    _ => $"Expenses ({firstFourDigits})"
+                },
+                _ => GetMajorCategoryName(accountCode, accountType)
+            };
         }
 
         #endregion
