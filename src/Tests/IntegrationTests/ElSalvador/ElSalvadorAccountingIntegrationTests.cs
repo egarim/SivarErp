@@ -51,7 +51,7 @@ namespace Tests.IntegrationTests.ElSalvador
         {
             // For sales invoices (like Credito Fiscal), IVA is a credit to tax payable
             _taxAccountingService.RegisterTaxAccountingProfile(
-                DocumentCategory.SalesInvoice, 
+                DocumentOperation.SalesInvoice, 
                 "IVA", 
                 new TaxAccountingInfo
                 {
@@ -62,7 +62,7 @@ namespace Tests.IntegrationTests.ElSalvador
                 
             // For sales credit notes, IVA is a debit to tax payable
             _taxAccountingService.RegisterTaxAccountingProfile(
-                DocumentCategory.CreditNote, 
+                DocumentOperation.CreditNote, 
                 "IVA", 
                 new TaxAccountingInfo
                 {
@@ -73,7 +73,7 @@ namespace Tests.IntegrationTests.ElSalvador
                 
             // For purchase invoices, IVA is a debit to input tax
             _taxAccountingService.RegisterTaxAccountingProfile(
-                DocumentCategory.PurchaseInvoice, 
+                DocumentOperation.PurchaseInvoice, 
                 "IVA", 
                 new TaxAccountingInfo
                 {
@@ -93,7 +93,7 @@ namespace Tests.IntegrationTests.ElSalvador
                 Oid = Guid.NewGuid(),
                 Code = "CF",
                 Name = "Credito Fiscal",
-                Category = DocumentCategory.SalesInvoice,
+                DocumentOperation = DocumentOperation.SalesInvoice,
                 IsEnabled = true
             };
             
@@ -233,7 +233,7 @@ namespace Tests.IntegrationTests.ElSalvador
                 Oid = Guid.NewGuid(),
                 Code = "CF",
                 Name = "Credito Fiscal",
-                Category = DocumentCategory.SalesInvoice,
+                DocumentOperation = DocumentOperation.SalesInvoice,
                 IsEnabled = true
             };
             

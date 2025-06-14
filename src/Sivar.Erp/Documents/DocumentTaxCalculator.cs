@@ -215,7 +215,7 @@ namespace Sivar.Erp.Documents
             if (_taxAccountingService != null && _document.DocumentType != null)
             {
                 var accountingInfo = _taxAccountingService.GetTaxAccountingInfo(
-                    _document.DocumentType.Category, 
+                    _document.DocumentType.DocumentOperation, 
                     tax.Code);
                     
                 if (accountingInfo != null)

@@ -7,10 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sivar.Erp", "Sivar.Erp\Siva
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{E5162534-6D37-4021-BB90-6D7D706F631E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sivar.Erp.Xpo", "Sivar.Erp.Xpo\Sivar.Erp.Xpo.csproj", "{0FD3BE1E-E833-4B3B-866D-4E23B95170B3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Xpo", "Tests.Xpo\Tests.Xpo.csproj", "{16A17C7F-3F04-474C-A676-0E99E7EF4DF4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requirements", "Requirements", "{D5DF175A-70C6-830F-AEB8-D1143C81ACB0}"
 	ProjectSection(SolutionItems) = preProject
 		FinancialStatementsModule.txt = FinancialStatementsModule.txt
@@ -30,14 +26,6 @@ Global
 		{E5162534-6D37-4021-BB90-6D7D706F631E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5162534-6D37-4021-BB90-6D7D706F631E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5162534-6D37-4021-BB90-6D7D706F631E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0FD3BE1E-E833-4B3B-866D-4E23B95170B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0FD3BE1E-E833-4B3B-866D-4E23B95170B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0FD3BE1E-E833-4B3B-866D-4E23B95170B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0FD3BE1E-E833-4B3B-866D-4E23B95170B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{16A17C7F-3F04-474C-A676-0E99E7EF4DF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{16A17C7F-3F04-474C-A676-0E99E7EF4DF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{16A17C7F-3F04-474C-A676-0E99E7EF4DF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{16A17C7F-3F04-474C-A676-0E99E7EF4DF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

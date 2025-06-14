@@ -10,8 +10,8 @@ namespace Sivar.Erp.Documents
     public class DocumentTypeDto : IDocumentType
     {
         private Guid _oid;
-        private string _code;
-        private string _name;
+        private string _code = string.Empty;
+        private string _name = string.Empty;
         private bool _isEnabled = true;
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace Sivar.Erp.Documents
             }
         }
 
-        DocumentCategory category;
-        public DocumentCategory Category
+        DocumentOperation category;
+        public DocumentOperation DocumentOperation
         {
             get => category;
             set
@@ -94,9 +94,9 @@ namespace Sivar.Erp.Documents
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

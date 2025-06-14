@@ -30,8 +30,8 @@ namespace Sivar.Erp.Documents
         bool IsEnabled { get; set; }
 
         /// <summary>
-        /// The category of the document type
+        /// The document operation
         /// </summary>
-        DocumentCategory Category { get; set; }
+        DocumentOperation DocumentOperation { get; set; }
     }
 }

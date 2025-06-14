@@ -9,13 +9,13 @@ namespace Sivar.Erp.Documents.Tax
     public class TaxAccountingProfileService : ITaxAccountingProfileService
     {
         // Dictionary with document category, tax code, and accounting info
-        private readonly Dictionary<DocumentCategory, Dictionary<string, TaxAccountingInfo>> _profiles =
-            new Dictionary<DocumentCategory, Dictionary<string, TaxAccountingInfo>>();
+        private readonly Dictionary<DocumentOperation, Dictionary<string, TaxAccountingInfo>> _profiles =
+            new Dictionary<DocumentOperation, Dictionary<string, TaxAccountingInfo>>();
         
         /// <summary>
         /// Get accounting mapping for a tax in a specific document category
         /// </summary>
-        public TaxAccountingInfo GetTaxAccountingInfo(DocumentCategory category, string taxCode)
+        public TaxAccountingInfo GetTaxAccountingInfo(DocumentOperation category, string taxCode)
         {
             if (string.IsNullOrEmpty(taxCode))
                 throw new ArgumentNullException(nameof(taxCode));
@@ -34,7 +34,7 @@ namespace Sivar.Erp.Documents.Tax
         /// <summary>
         /// Register a tax accounting profile
         /// </summary>
-        public void RegisterTaxAccountingProfile(DocumentCategory category, string taxCode, TaxAccountingInfo accountingInfo)
+        public void RegisterTaxAccountingProfile(DocumentOperation category, string taxCode, TaxAccountingInfo accountingInfo)
         {
             if (string.IsNullOrEmpty(taxCode))
                 throw new ArgumentNullException(nameof(taxCode));
@@ -54,7 +54,7 @@ namespace Sivar.Erp.Documents.Tax
         /// <summary>
         /// Get all tax accounting mappings for a document category
         /// </summary>
-        public Dictionary<string, TaxAccountingInfo> GetTaxAccountingMapForCategory(DocumentCategory category)
+        public Dictionary<string, TaxAccountingInfo> GetTaxAccountingMapForCategory(DocumentOperation category)
         {
             if (_profiles.TryGetValue(category, out var categoryProfiles))
             {

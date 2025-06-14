@@ -5,7 +5,7 @@ namespace Sivar.Erp.Documents
     /// <summary>
     /// Defines the category of a document.
     /// </summary>
-    public enum DocumentCategory
+    public enum DocumentOperation
     {
         /// <summary>
         /// Purchase Requisition

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Sivar.Erp.Documents;
 using Sivar.Erp.Documents.Tax;
 
 namespace Sivar.Erp.Taxes.TaxRule
@@ -13,6 +14,7 @@ namespace Sivar.Erp.Taxes.TaxRule
         private Guid _oid;
         private Guid _taxId;
         private string _documentTypeCode;
+        private DocumentOperation? _documentOperation;
         private Guid? _businessEntityGroupId;
         private Guid? _itemGroupId;
         private bool _isEnabled = true;
@@ -53,6 +55,7 @@ namespace Sivar.Erp.Taxes.TaxRule
         /// <summary>
         /// Document type code this rule applies to (null means any document type)
         /// </summary>
+        [Obsolete("Use DocumentOperation property instead")]
         public string DocumentTypeCode
         {
             get => _documentTypeCode;
@@ -61,6 +64,22 @@ namespace Sivar.Erp.Taxes.TaxRule
                 if (_documentTypeCode != value)
                 {
                     _documentTypeCode = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Document operation this rule applies to (null means any document operation)
+        /// </summary>
+        public DocumentOperation? DocumentOperation
+        {
+            get => _documentOperation;
+            set
+            {
+                if (_documentOperation != value)
+                {
+                    _documentOperation = value;
                     OnPropertyChanged();
                 }
             }

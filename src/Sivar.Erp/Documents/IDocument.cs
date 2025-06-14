@@ -46,5 +46,7 @@ namespace Sivar.Erp.Documents
         /// Totals for this document
         /// </summary>
         IList<ITotal> DocumentTotals { get; set; }
+
+
     }
 }
