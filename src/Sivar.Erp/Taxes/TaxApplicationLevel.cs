@@ -1,4 +1,4 @@
-namespace Sivar.Erp.Documents.Tax
+namespace Sivar.Erp.Taxes
 {
     /// <summary>
     /// Defines where the tax should be applied

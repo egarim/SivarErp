@@ -1,7 +1,8 @@
+using Sivar.Erp.Documents;
 using System;
 using System.Collections.Generic;
 
-namespace Sivar.Erp.Documents.Tax
+namespace Sivar.Erp.Taxes
 {
     /// <summary>
     /// Implementation of the tax accounting profile service

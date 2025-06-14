@@ -10,6 +10,7 @@ using Sivar.Erp.Documents.Tax;
 using Sivar.Erp.Taxes.TaxRule;
 using Sivar.Erp.Taxes.TaxGroup;
 using System.Diagnostics;
+using Sivar.Erp.Taxes;
 
 namespace Tests.IntegrationTests.ElSalvador
 {

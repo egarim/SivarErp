@@ -1,4 +1,4 @@
-namespace Sivar.Erp.Documents.Tax
+namespace Sivar.Erp.Taxes
 {
     /// <summary>
     /// Defines how a tax amount is calculated

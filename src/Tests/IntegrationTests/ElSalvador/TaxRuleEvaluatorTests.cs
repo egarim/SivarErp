@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using Sivar.Erp.Documents;
 using Sivar.Erp.Documents.Tax;
+using Sivar.Erp.Taxes;
 using Sivar.Erp.Taxes.TaxGroup;
 using Sivar.Erp.Taxes.TaxRule;
 

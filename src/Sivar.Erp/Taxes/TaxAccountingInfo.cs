@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.Documents.Tax
+namespace Sivar.Erp.Taxes
 {
     /// <summary>
     /// Holds accounting information for a specific tax
