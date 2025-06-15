@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Sivar.Erp.Documents.Tax;
+using Sivar.Erp.Taxes;
 
-namespace Sivar.Erp.Taxes
+namespace Sivar.Erp.ImportExport
 {
     /// <summary>
     /// Implementation of tax import/export service
@@ -289,7 +290,7 @@ namespace Sivar.Erp.Taxes
         private string GetCsvRow(TaxDto tax)
         {
             string percentage = tax.TaxType == TaxType.Percentage ? tax.Percentage.ToString() : string.Empty;
-            string amount = (tax.TaxType == TaxType.FixedAmount || tax.TaxType == TaxType.AmountPerUnit) ? tax.Amount.ToString() : string.Empty;
+            string amount = tax.TaxType == TaxType.FixedAmount || tax.TaxType == TaxType.AmountPerUnit ? tax.Amount.ToString() : string.Empty;
             
             // Note: debitAccountCode, creditAccountCode, and accountDescription would come from TaxAccountingInfo
             // which is not directly part of TaxDto. For now, we leave them empty.

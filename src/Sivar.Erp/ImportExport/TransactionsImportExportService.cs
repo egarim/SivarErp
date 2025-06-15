@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.ImportExport
 {
     /// <summary>
     /// Helper to import transactions and ledger entries from tabular text.

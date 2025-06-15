@@ -1,8 +1,9 @@
+using Sivar.Erp.Documents;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.ImportExport
 {
     /// <summary>
     /// Interface for document type import/export operations

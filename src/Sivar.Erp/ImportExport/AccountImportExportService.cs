@@ -1,50 +1,52 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Sivar.Erp.ChartOfAccounts;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Sivar.Erp.Taxes.TaxGroup
+namespace Sivar.Erp.ImportExport
 {
     /// <summary>
-    /// Implementation of tax group import/export service
+    /// Implementation of account import/export service
     /// </summary>
-    public class TaxGroupImportExportService : ITaxGroupImportExportService
+    public class AccountImportExportService : IAccountImportExportService
     {
-        private readonly TaxGroupValidator _taxGroupValidator;
+    
+        private readonly AccountValidator _accountValidator;
 
         /// <summary>
-        /// Initializes a new instance of the TaxGroupImportExportService class
+        /// Initializes a new instance of the AccountImportExportService class
         /// </summary>
-        public TaxGroupImportExportService()
+        /// <param name="auditService">Audit service for setting audit information</param>
+        public AccountImportExportService()
         {
-            _taxGroupValidator = new TaxGroupValidator();
+            
+            _accountValidator = new AccountValidator();
         }
 
         /// <summary>
-        /// Initializes a new instance of the TaxGroupImportExportService class with a custom validator
+        /// Initializes a new instance of the AccountImportExportService class with a custom validator
         /// </summary>
-        /// <param name="taxGroupValidator">Custom tax group validator</param>
-        public TaxGroupImportExportService(TaxGroupValidator taxGroupValidator)
+        /// <param name="auditService">Audit service for setting audit information</param>
+        /// <param name="accountValidator">Custom account validator</param>
+        public AccountImportExportService( AccountValidator accountValidator)
         {
-            _taxGroupValidator = taxGroupValidator ?? new TaxGroupValidator();
+           
+            _accountValidator = accountValidator ?? new AccountValidator();
         }
 
         /// <summary>
-        /// Imports tax groups from a CSV file
+        /// Imports accounts from a CSV file
         /// </summary>
         /// <param name="csvContent">Content of the CSV file as a string</param>
         /// <param name="userName">User performing the operation</param>
-        /// <returns>Collection of imported tax groups and any validation errors</returns>
-        public Task<(IEnumerable<ITaxGroup> ImportedTaxGroups, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        /// <returns>Collection of imported accounts and any validation errors</returns>
+        public Task<(IEnumerable<IAccount> ImportedAccounts, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
-            List<TaxGroupDto> importedTaxGroups = new List<TaxGroupDto>();
+            List<AccountDto> importedAccounts = new List<AccountDto>();
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(csvContent))
             {
                 errors.Add("CSV content is empty");
-                return Task.FromResult<(IEnumerable<ITaxGroup>, IEnumerable<string>)>((importedTaxGroups, errors));
+                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
             }
 
             try
@@ -55,7 +57,7 @@ namespace Sivar.Erp.Taxes.TaxGroup
                 if (lines.Length <= 1)
                 {
                     errors.Add("CSV file contains no data rows");
-                    return Task.FromResult<(IEnumerable<ITaxGroup>, IEnumerable<string>)>((importedTaxGroups, errors));
+                    return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
                 }
 
                 // Assume first line is header
@@ -64,7 +66,7 @@ namespace Sivar.Erp.Taxes.TaxGroup
                 // Validate headers
                 if (!ValidateHeaders(headers, errors))
                 {
-                    return Task.FromResult<(IEnumerable<ITaxGroup>, IEnumerable<string>)>((importedTaxGroups, errors));
+                    return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
                 }
 
                 // Process data rows
@@ -79,35 +81,36 @@ namespace Sivar.Erp.Taxes.TaxGroup
                         continue;
                     }
 
-                    var taxGroup = CreateTaxGroupFromCsvFields(headers, fields);
+                    var account = CreateAccountFromCsvFields(headers, fields);
 
-                    // Validate tax group
-                    if (!_taxGroupValidator.ValidateTaxGroup(taxGroup))
+                    // Validate account
+                    if (!_accountValidator.ValidateAccount(account))
                     {
-                        errors.Add($"Line {i + 1}: Tax group validation failed for {taxGroup.Name}");
+                        errors.Add($"Line {i + 1}: Account validation failed for account {account.AccountName}");
                         continue;
                     }
 
-                    importedTaxGroups.Add(taxGroup);
+                   
+                    importedAccounts.Add(account);
                 }
 
-                return Task.FromResult<(IEnumerable<ITaxGroup>, IEnumerable<string>)>((importedTaxGroups, errors));
+                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
             }
             catch (Exception ex)
             {
                 errors.Add($"Error importing CSV: {ex.Message}");
-                return Task.FromResult<(IEnumerable<ITaxGroup>, IEnumerable<string>)>((importedTaxGroups, errors));
+                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
             }
         }
 
         /// <summary>
-        /// Exports tax groups to a CSV format
+        /// Exports accounts to a CSV format
         /// </summary>
-        /// <param name="taxGroups">Tax groups to export</param>
+        /// <param name="accounts">Accounts to export</param>
         /// <returns>CSV content as a string</returns>
-        public Task<string> ExportToCsvAsync(IEnumerable<ITaxGroup> taxGroups)
+        public Task<string> ExportToCsvAsync(IEnumerable<IAccount> accounts)
         {
-            if (taxGroups == null || !taxGroups.Any())
+            if (accounts == null || !accounts.Any())
             {
                 return Task.FromResult(GetCsvHeader());
             }
@@ -118,9 +121,9 @@ namespace Sivar.Erp.Taxes.TaxGroup
             csvBuilder.AppendLine(GetCsvHeader());
 
             // Add data rows
-            foreach (var taxGroup in taxGroups)
+            foreach (var account in accounts)
             {
-                csvBuilder.AppendLine(GetCsvRow(taxGroup));
+                csvBuilder.AppendLine(GetCsvRow(account));
             }
 
             return Task.FromResult(csvBuilder.ToString());
@@ -165,7 +168,7 @@ namespace Sivar.Erp.Taxes.TaxGroup
         private bool ValidateHeaders(string[] headers, List<string> errors)
         {
             // Define required headers
-            string[] requiredHeaders = { "Code", "Name", "GroupType" };
+            string[] requiredHeaders = { "AccountName", "OfficialCode", "AccountType" };
 
             foreach (var requiredHeader in requiredHeaders)
             {
@@ -180,17 +183,17 @@ namespace Sivar.Erp.Taxes.TaxGroup
         }
 
         /// <summary>
-        /// Creates a tax group from CSV fields
+        /// Creates an account from CSV fields
         /// </summary>
         /// <param name="headers">CSV header fields</param>
         /// <param name="fields">CSV data fields</param>
-        /// <returns>New tax group with populated properties</returns>
-        private TaxGroupDto CreateTaxGroupFromCsvFields(string[] headers, string[] fields)
+        /// <returns>New account with populated properties</returns>
+        private AccountDto CreateAccountFromCsvFields(string[] headers, string[] fields)
         {
-            var taxGroup = new TaxGroupDto
+            var account = new AccountDto
             {
-                Oid = Guid.NewGuid(),
-                IsEnabled = true  // Default to enabled
+                Id = Guid.NewGuid(),
+                IsArchived = false
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -199,29 +202,36 @@ namespace Sivar.Erp.Taxes.TaxGroup
 
                 switch (headers[i].ToLowerInvariant())
                 {
-                    case "code":
-                        taxGroup.Code = value;
+                    case "accountname":
+                        account.AccountName = value;
                         break;
-                    case "name":
-                        taxGroup.Name = value;
+                    case "officialcode":
+                        account.OfficialCode = value;
                         break;
-                    case "description":
-                        taxGroup.Description = value;
-                        break;
-                    case "isenabled":
-                        if (bool.TryParse(value, out var isEnabled))
+                    case "accounttype":
+                        if (Enum.TryParse<AccountType>(value, true, out var accountType))
                         {
-                            taxGroup.IsEnabled = isEnabled;
+                            account.AccountType = accountType;
+                        }
+                        else
+                        {
+                            // Default to Asset if invalid
+                            account.AccountType = AccountType.Asset;
                         }
                         break;
-                    case "grouptype":
-                        // This is just for documentation in the CSV, not an actual property of TaxGroupDto
-                        // But useful for users to distinguish between business entity groups and item groups
+                    case "balanceandincomelineid":
+                        if (Guid.TryParse(value, out var lineId))
+                        {
+                            account.BalanceAndIncomeLineId = lineId;
+                        }
+                        break;
+                    case "parentofficialcode":
+                        account.ParentOfficialCode = string.IsNullOrWhiteSpace(value) ? null : value;
                         break;
                 }
             }
 
-            return taxGroup;
+            return account;
         }
 
         /// <summary>
@@ -230,24 +240,25 @@ namespace Sivar.Erp.Taxes.TaxGroup
         /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
-            return "Code,Name,Description,IsEnabled,GroupType";
+            return "AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId";
         }
 
         /// <summary>
-        /// Gets a CSV row for a tax group
+        /// Gets a CSV row for an account
         /// </summary>
-        /// <param name="taxGroup">Tax group to convert to CSV</param>
+        /// <param name="account">Account to convert to CSV</param>
         /// <returns>CSV row as a string</returns>
-        private string GetCsvRow(ITaxGroup taxGroup)
+        private string GetCsvRow(IAccount account)
         {
-            string description = string.IsNullOrWhiteSpace(taxGroup.Description)
-                ? string.Empty
-                : taxGroup.Description;
+            string balanceAndIncomeLineId = account.BalanceAndIncomeLineId.HasValue
+                ? account.BalanceAndIncomeLineId.Value.ToString()
+                : string.Empty;
 
-            // Note: GroupType is not a property of ITaxGroup, so we're leaving it empty
-            // Users would need to fill this in manually or it could be determined from another source
-            
-            return $"\"{taxGroup.Code}\",\"{taxGroup.Name}\",\"{description}\",{taxGroup.IsEnabled},";
+            string parentOfficialCode = string.IsNullOrWhiteSpace(account.ParentOfficialCode)
+                ? string.Empty
+                : account.ParentOfficialCode;
+
+            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},\"{parentOfficialCode}\",{balanceAndIncomeLineId}";
         }
     }
 }

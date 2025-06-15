@@ -1,4 +1,6 @@
-﻿namespace Sivar.Erp.ChartOfAccounts
+﻿using Sivar.Erp.ChartOfAccounts;
+
+namespace Sivar.Erp.ImportExport
 {
     /// <summary>
     /// Interface for chart of accounts import/export operations
