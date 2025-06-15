@@ -20,7 +20,7 @@ namespace Sivar.Erp.Services.Accounting
         protected IFiscalPeriodService FiscalPeriodService;
         protected IAccountBalanceCalculator AccountBalanceCalculator;
         protected IDocumentToTransactionService transactionService;
-        protected ISequencerService sequencerService;
+   
 
         // Constants for transaction number sequence codes
         private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
@@ -34,12 +34,12 @@ namespace Sivar.Erp.Services.Accounting
             IAccountBalanceCalculator accountBalanceCalculator, 
             IDocumentToTransactionService transactionService,
             ISequencerService sequencerService) 
-            : base(optionService, activityStreamService, dateTimeZoneService)
+            : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
         {
             FiscalPeriodService = fiscalPeriodService;
             AccountBalanceCalculator = accountBalanceCalculator;
             this.transactionService = transactionService;
-            this.sequencerService = sequencerService;
+           
         }
 
         /// <summary>
@@ -269,6 +269,29 @@ namespace Sivar.Erp.Services.Accounting
         {
             var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(date);
             return fiscalPeriod != null && fiscalPeriod.Status == FiscalPeriodStatus.Open;
+        }
+
+        public override void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos)
+        {
+            SequenceDto sequence = new SequenceDto();
+            sequence.Code = TRANSACTION_SEQUENCE_CODE;
+            sequence.CurrentNumber = 1;
+            sequence.Name = "Transactions";
+            sequence.Prefix = "T";
+            sequence.Suffix = "S";
+
+
+            SequenceDto BatchSequence = new SequenceDto();
+            BatchSequence.Code = BATCH_SEQUENCE_CODE;
+            BatchSequence.CurrentNumber = 1;
+            BatchSequence.Name = "Batch";
+            BatchSequence.Prefix = "B";
+            BatchSequence.Suffix = "S";
+            
+          
+
+            this.sequencerService.CreateSequenceAsync(sequence);
+            this.sequencerService.CreateSequenceAsync(BatchSequence);
         }
     }
 }

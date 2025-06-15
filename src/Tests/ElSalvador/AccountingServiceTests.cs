@@ -114,7 +114,7 @@ namespace Tests.ElSalvador
                     }
                 }
             };
-
+            _accountingService.RegisterSequence(null);
             // Act
             bool posted = await _accountingService.PostTransactionAsync(transaction);
 

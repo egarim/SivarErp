@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.TimeService;
+using Sivar.Erp.ErpSystem.Sequencers;
 
 namespace Sivar.Erp.ErpSystem.Services
 {
@@ -16,6 +17,7 @@ namespace Sivar.Erp.ErpSystem.Services
         /// </summary>
         protected readonly IOptionService OptionService;
 
+        protected ISequencerService sequencerService;
 
         protected readonly IDateTimeZoneService DateTimeZoneService;
 
@@ -34,11 +36,12 @@ namespace Sivar.Erp.ErpSystem.Services
         /// </summary>
         /// <param name="optionService">The option service</param>
         /// <param name="activityStreamService">The activity stream service</param>
-        protected ServiceBase(IOptionService optionService, IActivityStreamService activityStreamService,IDateTimeZoneService dateTimeZoneService)
+        protected ServiceBase(IOptionService optionService, IActivityStreamService activityStreamService,IDateTimeZoneService dateTimeZoneService, ISequencerService sequencerService)
         {
             OptionService = optionService ?? throw new ArgumentNullException(nameof(optionService));
             ActivityStreamService = activityStreamService ?? throw new ArgumentNullException(nameof(activityStreamService));
             DateTimeZoneService= dateTimeZoneService ?? throw new ArgumentNullException(nameof(DateTimeZoneService));
+            this.sequencerService = sequencerService;
         }
         
         /// <summary>
@@ -53,7 +56,10 @@ namespace Sivar.Erp.ErpSystem.Services
             var value = await OptionService.GetCurrentOptionValueAsync(optionCode, moduleName);
             return value ?? defaultValue;
         }
-        
+
+        public abstract void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos);
+     
+
         /// <summary>
         /// Sets an option value for the specified module
         /// </summary>
