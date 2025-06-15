@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Sivar.Erp.BusinesEntities;
+using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.ChartOfAccounts;
 using Sivar.Erp.Documents;
 using Sivar.Erp.Documents.Tax;

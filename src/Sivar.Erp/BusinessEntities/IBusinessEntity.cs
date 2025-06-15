@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.BusinesEntities
+namespace Sivar.Erp.BusinessEntities
 {
     public interface IBusinessEntity
     {

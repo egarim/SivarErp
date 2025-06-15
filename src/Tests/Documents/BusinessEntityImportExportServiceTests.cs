@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Sivar.Erp.Services.ImportExport;
-using Sivar.Erp.BusinesEntities;
+using Sivar.Erp.BusinessEntities;
 
 namespace Tests.Documents
 {

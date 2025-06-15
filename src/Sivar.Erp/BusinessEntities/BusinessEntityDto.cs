@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Sivar.Erp.BusinesEntities
+namespace Sivar.Erp.BusinessEntities
 {
     /// <summary>
     /// Data Transfer Object implementation for IBusinessEntity with change notification

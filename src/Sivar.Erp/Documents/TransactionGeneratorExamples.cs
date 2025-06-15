@@ -1,4 +1,4 @@
-using Sivar.Erp.BusinesEntities;
+using Sivar.Erp.BusinessEntities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
