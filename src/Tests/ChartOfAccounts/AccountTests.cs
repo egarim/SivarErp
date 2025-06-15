@@ -1,8 +1,7 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Sivar.Erp.ChartOfAccounts;
 
-namespace Sivar.Erp.Tests.ChartOfAccounts
+namespace Tests.ChartOfAccounts
 {
     /// <summary>
     /// Unit tests for the Chart of Accounts module

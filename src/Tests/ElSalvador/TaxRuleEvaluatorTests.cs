@@ -9,7 +9,7 @@ using Sivar.Erp.Taxes;
 using Sivar.Erp.Taxes.TaxGroup;
 using Sivar.Erp.Taxes.TaxRule;
 
-namespace Tests.IntegrationTests.ElSalvador
+namespace Tests.ElSalvador
 {
     /// <summary>
     /// Tests for El Salvador tax rule evaluation

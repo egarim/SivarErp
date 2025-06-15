@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Sivar.Erp.ChartOfAccounts;
 
-namespace Sivar.Erp.Tests.ChartOfAccounts
+namespace Tests.ChartOfAccounts
 {
     /// <summary>
     /// Tests for the account import/export service

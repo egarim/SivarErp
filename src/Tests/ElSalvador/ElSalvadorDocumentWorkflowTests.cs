@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Sivar.Erp;
 using Sivar.Erp.Documents;
 
-namespace Tests.IntegrationTests.ElSalvador
+namespace Tests.ElSalvador
 {
     /// <summary>
     /// Integration tests simulating document workflows using El Salvador document types

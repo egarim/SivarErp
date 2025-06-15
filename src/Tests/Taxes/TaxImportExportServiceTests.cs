@@ -5,7 +5,7 @@ using NUnit.Framework;
 using Sivar.Erp.Documents.Tax;
 using Sivar.Erp.Taxes;
 
-namespace Sivar.Erp.Tests.Taxes
+namespace Tests.Taxes
 {
     /// <summary>
     /// Tests for the tax import/export service

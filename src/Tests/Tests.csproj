@@ -10,18 +10,18 @@
 
   <ItemGroup>
     <None Remove="IntegrationTests\chart_of_accounts_csv_complete.txt" />
-    <None Remove="IntegrationTests\ElSalvador\Data\New\ComercialChartOfAccounts.txt" />
-    <None Remove="IntegrationTests\ElSalvador\Data\New\ElSalvadorTaxes.txt" />
-    <None Remove="IntegrationTests\ElSalvador\Data\New\ElSalvadorTaxGroups.txt" />
+    <None Remove="ElSalvador\Data\New\ComercialChartOfAccounts.txt" />
+    <None Remove="ElSalvador\Data\New\ElSalvadorTaxes.txt" />
+    <None Remove="ElSalvador\Data\New\ElSalvadorTaxGroups.txt" />
     <None Remove="IntegrationTests\transactions.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="IntegrationTests\ElSalvador\Data\New\ComercialChartOfAccounts.txt" />
-    <EmbeddedResource Include="IntegrationTests\ElSalvador\Data\New\ElSalvadorTaxes.txt" />
-    <EmbeddedResource Include="IntegrationTests\ElSalvador\Data\New\ElSalvadorTaxGroups.txt" />
-    <EmbeddedResource Include="IntegrationTests\ElSalvador\Data\Old\chart_of_accounts_csv_complete.txt" />
-    <EmbeddedResource Include="IntegrationTests\ElSalvador\Data\Old\transactions.txt" />
+    <EmbeddedResource Include="ElSalvador\Data\New\ComercialChartOfAccounts.txt" />
+    <EmbeddedResource Include="ElSalvador\Data\New\ElSalvadorTaxes.txt" />
+    <EmbeddedResource Include="ElSalvador\Data\New\ElSalvadorTaxGroups.txt" />
+    <EmbeddedResource Include="ElSalvador\Data\Old\chart_of_accounts_csv_complete.txt" />
+    <EmbeddedResource Include="ElSalvador\Data\Old\transactions.txt" />
   </ItemGroup>
 
   <ItemGroup>
