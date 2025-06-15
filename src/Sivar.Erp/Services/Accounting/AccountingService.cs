@@ -1,6 +1,7 @@
-﻿using Sivar.Erp.Documents.DocumentToTransactions;
+using Sivar.Erp.Documents.DocumentToTransactions;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
+using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.Services;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Services.Accounting.BalanceCalculators;
@@ -19,14 +20,26 @@ namespace Sivar.Erp.Services.Accounting
         protected IFiscalPeriodService FiscalPeriodService;
         protected IAccountBalanceCalculator AccountBalanceCalculator;
         protected IDocumentToTransactionService transactionService;
+        protected ISequencerService sequencerService;
 
-        public AccountingService(IOptionService optionService, IActivityStreamService activityStreamService, IDateTimeZoneService dateTimeZoneService,
-            IFiscalPeriodService fiscalPeriodService, IAccountBalanceCalculator accountBalanceCalculator, IDocumentToTransactionService transactionService) 
+        // Constants for transaction number sequence codes
+        private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
+        private const string BATCH_SEQUENCE_CODE = "BATCH";
+
+        public AccountingService(
+            IOptionService optionService, 
+            IActivityStreamService activityStreamService, 
+            IDateTimeZoneService dateTimeZoneService,
+            IFiscalPeriodService fiscalPeriodService, 
+            IAccountBalanceCalculator accountBalanceCalculator, 
+            IDocumentToTransactionService transactionService,
+            ISequencerService sequencerService) 
             : base(optionService, activityStreamService, dateTimeZoneService)
         {
             FiscalPeriodService = fiscalPeriodService;
             AccountBalanceCalculator = accountBalanceCalculator;
             this.transactionService = transactionService;
+            this.sequencerService = sequencerService;
         }
 
         /// <summary>
@@ -60,6 +73,12 @@ namespace Sivar.Erp.Services.Accounting
             if (!isValid)
                 throw new InvalidOperationException("Transaction has unbalanced debits and credits");
 
+            // Generate transaction number if not already set
+            if (string.IsNullOrEmpty(transaction.TransactionNumber))
+            {
+                transaction.TransactionNumber = await sequencerService.GetNextNumberAsync(TRANSACTION_SEQUENCE_CODE);
+            }
+
             // Post the transaction
             transaction.Post();
             
@@ -68,7 +87,7 @@ namespace Sivar.Erp.Services.Accounting
             var transactionTarget = CreateStreamObject(
                 "Transaction", 
                 transaction.Oid.ToString(), 
-                $"Transaction on {transaction.TransactionDate}");
+                $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
                 
             await RecordActivityAsync(
                 systemActor,
@@ -109,7 +128,7 @@ namespace Sivar.Erp.Services.Accounting
             var transactionTarget = CreateStreamObject(
                 "Transaction", 
                 transaction.Oid.ToString(), 
-                $"Transaction on {transaction.TransactionDate}");
+                $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
                 
             await RecordActivityAsync(
                 systemActor,
@@ -142,6 +161,12 @@ namespace Sivar.Erp.Services.Accounting
             if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
                 throw new InvalidOperationException($"Cannot post batch: Fiscal period '{fiscalPeriod.Name}' is closed");
 
+            // Generate batch transaction number if not already set
+            if (string.IsNullOrEmpty(batch.TransactionNumber))
+            {
+                batch.TransactionNumber = await sequencerService.GetNextNumberAsync(BATCH_SEQUENCE_CODE);
+            }
+
             // Get all transactions in this batch
             // Assuming we can access transactions through a cast to TransactionBatchDto
             // In a real implementation, we would use a repository or other data access method
@@ -167,7 +192,7 @@ namespace Sivar.Erp.Services.Accounting
             var batchTarget = CreateStreamObject(
                 "TransactionBatch", 
                 batch.Oid.ToString(), 
-                $"Transaction batch '{batch.ReferenceCode}'");
+                $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
                 
             await RecordActivityAsync(
                 systemActor,
@@ -225,7 +250,7 @@ namespace Sivar.Erp.Services.Accounting
             var batchTarget = CreateStreamObject(
                 "TransactionBatch", 
                 batch.Oid.ToString(), 
-                $"Transaction batch '{batch.ReferenceCode}'");
+                $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
                 
             await RecordActivityAsync(
                 systemActor,

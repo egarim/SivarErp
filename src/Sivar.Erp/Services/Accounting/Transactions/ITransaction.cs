@@ -13,6 +13,9 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// </summary>
         Guid DocumentId { get; set; }
 
+        [BusinessKey()]
+        string TransactionNumber { get; set; }
+
         /// <summary>
         /// Date of the transaction (may differ from document date)
         /// </summary>

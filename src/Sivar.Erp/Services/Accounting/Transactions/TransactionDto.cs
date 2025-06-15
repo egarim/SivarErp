@@ -26,6 +26,7 @@
         public string Description { get; set; } = string.Empty;
         public IEnumerable<ILedgerEntry> LedgerEntries { get; set; }
         public bool IsPosted { get; set; }
+        public string TransactionNumber { get; set; }
 
         public void Post()
         {

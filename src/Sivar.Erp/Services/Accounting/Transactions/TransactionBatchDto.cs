@@ -38,6 +38,7 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// </summary>
         public List<TransactionDto> Transactions { get; set; } = new List<TransactionDto>();
         public bool IsPosted { get; set; }
+        public string TransactionNumber { get; set; }
 
         public void Post()
         {

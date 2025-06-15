@@ -13,6 +13,9 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// </summary>
         string ReferenceCode { get; set; }
 
+
+
+        string TransactionNumber { get; set; }
         /// <summary>
         /// Date when the batch was created
         /// </summary>
