@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sivar.Erp.Sequencers;
+using Sivar.Erp.System.Sequencers;
 
 namespace Sivar.Erp.Services.Sequencers
 {

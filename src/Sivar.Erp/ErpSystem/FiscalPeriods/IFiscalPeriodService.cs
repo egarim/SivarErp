@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.FiscalPeriods
+namespace Sivar.Erp.System.FiscalPeriods
 {
     /// <summary>
     /// Interface for fiscal period service operations

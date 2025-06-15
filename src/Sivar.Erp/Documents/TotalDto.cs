@@ -1,4 +1,4 @@
-using System;
+
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -9,14 +9,14 @@ namespace Sivar.Erp.Documents
     /// </summary>
     public class TotalDto : ITotal, INotifyPropertyChanged
     {
-        private System.Guid _oid;
+        private Guid _oid;
         private string _concept;
         private decimal _total;
         private string _debitAccountCode;
         private string _creditAccountCode;
         private bool _includeInTransaction;
 
-        public System.Guid Oid
+        public Guid Oid
         {
             get => _oid;
             set

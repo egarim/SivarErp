@@ -7,9 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="FiscalPeriods\" />
-    <Folder Include="Modules\" />
-    <Folder Include="Services\NewFolder\" />
+    <Folder Include="ErpSystem\ActivityStream\" />
+    <Folder Include="ErpSystem\TimeService\" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.FiscalPeriods
+namespace Sivar.Erp.System.FiscalPeriods
 {
     /// <summary>
     /// Implementation of fiscal period service
@@ -207,9 +207,9 @@ namespace Sivar.Erp.FiscalPeriods
             var periodsToCheck = _fiscalPeriods.Where(fp => excludeId == null || fp.Id != excludeId);
 
             var hasOverlap = periodsToCheck.Any(fp =>
-                (startDate >= fp.StartDate && startDate <= fp.EndDate) ||
-                (endDate >= fp.StartDate && endDate <= fp.EndDate) ||
-                (startDate <= fp.StartDate && endDate >= fp.EndDate));
+                startDate >= fp.StartDate && startDate <= fp.EndDate ||
+                endDate >= fp.StartDate && endDate <= fp.EndDate ||
+                startDate <= fp.StartDate && endDate >= fp.EndDate);
 
             return Task.FromResult(hasOverlap);
         }

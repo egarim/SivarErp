@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace Sivar.Erp
 {
-    public class ErpSystem
-    {
-    }
+
 }

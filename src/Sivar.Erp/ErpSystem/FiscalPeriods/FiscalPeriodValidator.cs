@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.FiscalPeriods
+namespace Sivar.Erp.System.FiscalPeriods
 {
     /// <summary>
     /// Validator for fiscal period entities
@@ -97,9 +97,9 @@ namespace Sivar.Erp.FiscalPeriods
             var periodsToCheck = existingPeriods.Where(fp => excludeId == null || fp.Id != excludeId);
 
             var hasOverlap = periodsToCheck.Any(fp =>
-                (startDate >= fp.StartDate && startDate <= fp.EndDate) ||
-                (endDate >= fp.StartDate && endDate <= fp.EndDate) ||
-                (startDate <= fp.StartDate && endDate >= fp.EndDate));
+                startDate >= fp.StartDate && startDate <= fp.EndDate ||
+                endDate >= fp.StartDate && endDate <= fp.EndDate ||
+                startDate <= fp.StartDate && endDate >= fp.EndDate);
 
             return !hasOverlap;
         }
