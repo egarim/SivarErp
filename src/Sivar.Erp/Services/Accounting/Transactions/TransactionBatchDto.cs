@@ -37,5 +37,16 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// Collection of transactions in this batch
         /// </summary>
         public List<TransactionDto> Transactions { get; set; } = new List<TransactionDto>();
+        public bool IsPosted { get; set; }
+
+        public void Post()
+        {
+           this.IsPosted = true;
+        }
+
+        public void UnPost()
+        {
+            this.IsPosted = false;
+        }
     }
 }

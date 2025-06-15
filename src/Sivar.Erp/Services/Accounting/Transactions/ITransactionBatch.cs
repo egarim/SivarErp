@@ -27,5 +27,9 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// Status of the batch
         /// </summary>
         BatchStatus Status { get; set; }
+
+        void Post();
+        void UnPost();
+        bool IsPosted { get; set; }
     }
 }

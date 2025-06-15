@@ -30,13 +30,7 @@
         /// </summary>
         public decimal Amount { get; set; }
 
-        /// <summary>
-        /// Optional reference to a person for analysis
-        /// </summary>
-        public Guid? PersonId { get; set; }        /// <summary>
-                                                   /// Optional reference to a cost center for analysis
-                                                   /// </summary>
-        public Guid? CostCentreId { get; set; }
+     
 
         /// <summary>
         /// Name of the account
