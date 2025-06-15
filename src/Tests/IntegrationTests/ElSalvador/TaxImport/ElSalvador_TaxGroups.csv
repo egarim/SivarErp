@@ -1,0 +1,11 @@
+Code,Name,Description,IsEnabled,GroupType
+SV-VAT-IN,"IVA Credito Fiscal","Grupo para IVA por compras locales e importaciones",true,Tax
+SV-VAT-OUT,"IVA Debito Fiscal","Grupo para IVA por ventas",true,Tax
+SV-VAT-RET,"IVA Retenido","Grupo para IVA retenido",true,Tax
+SV-INCOME-TAX,"Impuesto sobre la Renta","Grupo para impuesto sobre la renta anual",true,Tax
+SV-INCOME-TAX-ADV,"Pago a Cuenta","Grupo para pago a cuenta mensual",true,Tax
+SV-INCOME-TAX-RET,"Retención de Renta","Grupo para impuesto retenido sobre la renta",true,Tax
+SV-ENTITY-LOCAL,"Entidades Locales","Entidades comerciales en El Salvador",true,Entity
+SV-ENTITY-FOREIGN,"Entidades Extranjeras","Entidades comerciales fuera de El Salvador",true,Entity
+SV-ITEMS-TAXABLE,"Artículos Gravados","Artículos sujetos a IVA",true,Item
+SV-ITEMS-EXEMPT,"Artículos Exentos","Artículos exentos de IVA",true,Item

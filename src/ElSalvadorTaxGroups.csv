@@ -1,0 +1,11 @@
+Code,Name,Description,IsEnabled,GroupType
+REGISTERED_TAXPAYERS,Contribuyentes Registrados,Entidades registradas con NRC (Número de Registro de Contribuyente),true,BusinessEntity
+FINAL_CONSUMERS,Consumidores Finales,Consumidores finales sin NRC,true,BusinessEntity
+EXEMPT_ENTITIES,Entidades Exentas,Entidades exentas de impuestos (iglesias ONGs etc.),true,BusinessEntity
+GOVERNMENT,Entidades de Gobierno,Entidades gubernamentales,true,BusinessEntity
+SMALL_TAXPAYERS,Pequeños Contribuyentes,Contribuyentes con ingresos anuales inferiores a $50000,true,BusinessEntity
+TAXABLE_ITEMS,Artículos Gravados,Productos y servicios sujetos a IVA,true,Item
+EXEMPT_ITEMS,Artículos Exentos,Productos y servicios exentos de IVA,true,Item
+FUEL_ITEMS,Combustibles,Productos sujetos a FOVIAL y COTRANS,true,Item
+TELECOM_ITEMS,Telecomunicaciones,Servicios sujetos a CESC,true,Item
+TOURISM_ITEMS,Turismo,Servicios de alojamiento sujetos a contribución al turismo,true,Item

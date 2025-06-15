@@ -1,0 +1,2 @@
+Code,Name,TaxType,ApplicationLevel,Percentage,Amount,IsEnabled,IsIncludedInPrice,DebitAccountCode,CreditAccountCode,AccountDescription
+IVA-CRED,"IVA Credito Fiscal 13%",Percentage,Line,13.00,0.00,true,false,11070101,,"IVA por compras locales"
