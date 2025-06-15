@@ -2,29 +2,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Sivar.Erp.Services.DateTimeZone;
+using Sivar.Erp.ErpSystem.DateTimeZone;
+using Sivar.Erp.Services;
 
 namespace Sivar.Erp.ErpSystem.ActivityStream
 {
     /// <summary>
-    /// Implementation of the activity stream service
+    /// Implementation of the activity stream service using IObjectDb
     /// </summary>
     public class ActivityStreamService : IActivityStreamService
     {
         private readonly IDateTimeZoneService _dateTimeZoneService;
-        private readonly IRepository<ActivityRecord> _repository;
+        private readonly IObjectDb _objectDb;
         
         /// <summary>
         /// Initializes a new instance of the activity stream service
         /// </summary>
         /// <param name="dateTimeZoneService">Service for handling date/time with timezone</param>
-        /// <param name="repository">Repository for activity records</param>
+        /// <param name="objectDb">Object database for activity records</param>
         public ActivityStreamService(
             IDateTimeZoneService dateTimeZoneService,
-            IRepository<ActivityRecord> repository)
+            IObjectDb objectDb)
         {
             _dateTimeZoneService = dateTimeZoneService;
-            _repository = repository;
+            _objectDb = objectDb;
         }
         
         /// <summary>
@@ -32,7 +33,7 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
         /// </summary>
         /// <param name="activity">The activity to record</param>
         /// <returns>The created activity record</returns>
-        public async Task<ActivityRecord> RecordActivityAsync(ActivityRecord activity)
+        public Task<ActivityRecord> RecordActivityAsync(ActivityRecord activity)
         {
             // Generate ID if not provided
             if (activity.Id == Guid.Empty)
@@ -43,7 +44,13 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
             // Set current date/time if not provided
             if (activity.Date == default && activity.Time == default)
             {
-                var now = _dateTimeZoneService.GetCurrentDateTime(activity.TimeZoneId);
+                DateTime now = DateTime.UtcNow;
+                if (!string.IsNullOrEmpty(activity.TimeZoneId))
+                {
+                    // Convert UTC to the activity's timezone
+                    now = TimeZoneInfo.ConvertTimeFromUtc(now, 
+                        TimeZoneInfo.FindSystemTimeZoneById(activity.TimeZoneId));
+                }
                 activity.Date = DateOnly.FromDateTime(now);
                 activity.Time = TimeOnly.FromDateTime(now);
             }
@@ -55,9 +62,9 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
             }
             
             // Store activity record
-            await _repository.AddAsync(activity);
+            _objectDb.ActivityRecords.Add(activity);
             
-            return activity;
+            return Task.FromResult(activity);
         }
         
         /// <summary>
@@ -93,17 +100,21 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public async Task<IEnumerable<ActivityRecord>> GetActorActivityStreamAsync(
+        public Task<IEnumerable<ActivityRecord>> GetActorActivityStreamAsync(
             string actorType, 
             string actorKey, 
             int page = 1, 
             int pageSize = 20)
         {
-            return await _repository.QueryAsync(
-                a => a.Actor.ObjectType == actorType && a.Actor.ObjectKey == actorKey,
-                page,
-                pageSize,
-                a => a.Date.Descending().ThenBy(x => x.Time.Descending()));
+            var result = _objectDb.ActivityRecords
+                .Where(a => a.Actor.ObjectType == actorType && a.Actor.ObjectKey == actorKey)
+                .OrderByDescending(a => a.Date)
+                .ThenByDescending(a => a.Time)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+                
+            return Task.FromResult(result.AsEnumerable());
         }
         
         /// <summary>
@@ -114,17 +125,21 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public async Task<IEnumerable<ActivityRecord>> GetTargetActivityStreamAsync(
+        public Task<IEnumerable<ActivityRecord>> GetTargetActivityStreamAsync(
             string targetType, 
             string targetKey, 
             int page = 1, 
             int pageSize = 20)
         {
-            return await _repository.QueryAsync(
-                a => a.Target.ObjectType == targetType && a.Target.ObjectKey == targetKey,
-                page,
-                pageSize,
-                a => a.Date.Descending().ThenBy(x => x.Time.Descending()));
+            var result = _objectDb.ActivityRecords
+                .Where(a => a.Target.ObjectType == targetType && a.Target.ObjectKey == targetKey)
+                .OrderByDescending(a => a.Date)
+                .ThenByDescending(a => a.Time)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+                
+            return Task.FromResult(result.AsEnumerable());
         }
         
         /// <summary>
@@ -134,17 +149,26 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public async Task<IEnumerable<ActivityRecord>> GetGlobalActivityStreamAsync(
+        public Task<IEnumerable<ActivityRecord>> GetGlobalActivityStreamAsync(
             bool onlyPublic = true,
             int page = 1, 
             int pageSize = 20)
         {
-            var query = onlyPublic ? a => a.IsPublic : null;
-            return await _repository.QueryAsync(
-                query,
-                page,
-                pageSize,
-                a => a.Date.Descending().ThenBy(x => x.Time.Descending()));
+            var query = _objectDb.ActivityRecords.AsEnumerable();
+            
+            if (onlyPublic)
+            {
+                query = query.Where(a => a.IsPublic);
+            }
+            
+            var result = query
+                .OrderByDescending(a => a.Date)
+                .ThenByDescending(a => a.Time)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+                
+            return Task.FromResult(result.AsEnumerable());
         }
         
         /// <summary>
@@ -158,7 +182,7 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public async Task<IEnumerable<ActivityRecord>> SearchActivitiesAsync(
+        public Task<IEnumerable<ActivityRecord>> SearchActivitiesAsync(
             string query = null,
             IEnumerable<string> tags = null,
             DateOnly? startDate = null, 
@@ -167,40 +191,46 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
             int page = 1, 
             int pageSize = 20)
         {
-            // Build query based on provided parameters
-            Func<ActivityRecord, bool> predicate = a => true;
+            var result = _objectDb.ActivityRecords.AsEnumerable();
             
+            // Filter by query text
             if (!string.IsNullOrEmpty(query))
             {
-                predicate = predicate.And(a => 
+                result = result.Where(a => 
                     a.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    a.Details?.Contains(query, StringComparison.OrdinalIgnoreCase) == true ||
+                    (a.Details?.Contains(query, StringComparison.OrdinalIgnoreCase) == true) ||
                     a.Actor.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                     a.Target.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    a.Object?.DisplayName?.Contains(query, StringComparison.OrdinalIgnoreCase) == true
+                    (a.Object?.DisplayName?.Contains(query, StringComparison.OrdinalIgnoreCase) == true)
                 );
             }
             
+            // Filter by tags
             if (tags != null && tags.Any())
             {
-                predicate = predicate.And(a => tags.Any(tag => a.Tags.Contains(tag)));
+                result = result.Where(a => tags.Any(tag => a.Tags.Contains(tag)));
             }
             
+            // Filter by start date
             if (startDate.HasValue)
             {
-                predicate = predicate.And(a => a.Date >= startDate.Value);
+                result = result.Where(a => a.Date >= startDate.Value);
             }
             
+            // Filter by end date
             if (endDate.HasValue)
             {
-                predicate = predicate.And(a => a.Date <= endDate.Value);
+                result = result.Where(a => a.Date <= endDate.Value);
             }
             
-            return await _repository.QueryAsync(
-                predicate,
-                page,
-                pageSize,
-                a => a.Date.Descending().ThenBy(x => x.Time.Descending()));
+            // Apply paging and ordering
+            result = result
+                .OrderByDescending(a => a.Date)
+                .ThenByDescending(a => a.Time)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+                
+            return Task.FromResult(result);
         }
         
         /// <summary>
@@ -221,22 +251,6 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
             }
             
             return description;
-        }
-    }
-    
-    /// <summary>
-    /// Extension methods for building predicates
-    /// </summary>
-    internal static class PredicateBuilder
-    {
-        public static Func<T, bool> And<T>(this Func<T, bool> first, Func<T, bool> second)
-        {
-            return x => first(x) && second(x);
-        }
-        
-        public static Func<T, bool> Or<T>(this Func<T, bool> first, Func<T, bool> second)
-        {
-            return x => first(x) || second(x);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Sivar.Erp.Accounting.ChartOfAccounts;
 using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
+using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.Taxes;
 using Sivar.Erp.Taxes.TaxGroup;
 using System;
@@ -16,5 +17,6 @@ namespace Sivar.Erp.Services
         IList<IItem> Items { get; set; }
         IList<ITax> Taxes { get; set; }
         IList<ITaxGroup> TaxGroups { get; set; }
+        IList<ActivityRecord> ActivityRecords { get; set; }
     }
 }

@@ -6,7 +6,6 @@ using System.Text;
 using NUnit.Framework;
 using Sivar.Erp.Accounting.ChartOfAccounts;
 using Sivar.Erp.Accounting.Transactions;
-using Sivar.Erp.Documents;
 using Sivar.Erp.Services.ImportExport;
 
 namespace Sivar.Erp.Tests.Documents

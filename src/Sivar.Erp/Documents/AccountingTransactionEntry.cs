@@ -1,3 +1,4 @@
+using Sivar.Erp.Accounting.Transactions;
 using System;
 
 namespace Sivar.Erp.Documents

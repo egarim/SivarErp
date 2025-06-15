@@ -1,5 +1,4 @@
-﻿using Sivar.Erp.Documents;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace Sivar.Erp.Accounting.Transactions
