@@ -17,13 +17,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <returns>Created fiscal period with ID</returns>
         Task<IFiscalPeriod> CreateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod, string userId);
 
-        /// <summary>
-        /// Updates an existing fiscal period
-        /// </summary>
-        /// <param name="fiscalPeriod">Fiscal period to update</param>
-        /// <param name="userId">User updating the fiscal period</param>
-        /// <returns>Updated fiscal period</returns>
-        Task<IFiscalPeriod> UpdateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod, string userId);
+       
 
         /// <summary>
         /// Gets a fiscal period by ID
@@ -32,11 +26,6 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <returns>Fiscal period if found, null otherwise</returns>
         Task<IFiscalPeriod?> GetFiscalPeriodByIdAsync(Guid id);
 
-        /// <summary>
-        /// Gets all fiscal periods
-        /// </summary>
-        /// <returns>Collection of fiscal periods</returns>
-        Task<IEnumerable<IFiscalPeriod>> GetAllFiscalPeriodsAsync();
 
         /// <summary>
         /// Gets fiscal periods by status

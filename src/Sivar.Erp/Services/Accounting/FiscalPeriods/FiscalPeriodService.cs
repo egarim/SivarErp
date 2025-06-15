@@ -51,41 +51,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
             return fiscalPeriod;
         }
 
-        /// <summary>
-        /// Updates an existing fiscal period
-        /// </summary>
-        /// <param name="fiscalPeriod">Fiscal period to update</param>
-        /// <param name="userId">User updating the fiscal period</param>
-        /// <returns>Updated fiscal period</returns>
-        public async Task<IFiscalPeriod> UpdateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod, string userId)
-        {
-            if (fiscalPeriod == null)
-                throw new ArgumentNullException(nameof(fiscalPeriod));
-
-            if (string.IsNullOrWhiteSpace(userId))
-                throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
-
-            // Find existing fiscal period
-            var existingPeriod = this.objectDb.fiscalPeriods.FirstOrDefault(fp => fp.Oid == fiscalPeriod.Oid);
-            if (existingPeriod == null)
-                throw new InvalidOperationException("Fiscal period not found");
-
-            // Validate the fiscal period including overlap check (excluding current period)
-            var isValid = await ValidateFiscalPeriodWithOverlapAsync(fiscalPeriod, fiscalPeriod.Oid);
-            if (!isValid)
-                throw new InvalidOperationException("Invalid fiscal period or fiscal period overlaps with existing period");
-
-            // Update properties
-            existingPeriod.StartDate = fiscalPeriod.StartDate;
-            existingPeriod.EndDate = fiscalPeriod.EndDate;
-            existingPeriod.Status = fiscalPeriod.Status;
-            existingPeriod.Name = fiscalPeriod.Name;
-            existingPeriod.Description = fiscalPeriod.Description;
-
-           
-
-            return existingPeriod;
-        }
+      
 
         /// <summary>
         /// Gets a fiscal period by ID
@@ -98,14 +64,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
             return Task.FromResult(fiscalPeriod);
         }
 
-        /// <summary>
-        /// Gets all fiscal periods
-        /// </summary>
-        /// <returns>Collection of fiscal periods</returns>
-        public Task<IEnumerable<IFiscalPeriod>> GetAllFiscalPeriodsAsync()
-        {
-            return Task.FromResult(this.objectDb.fiscalPeriods.AsEnumerable());
-        }
+       
 
         /// <summary>
         /// Gets fiscal periods by status
