@@ -1,7 +1,7 @@
 using Sivar.Erp.Taxes;
 using System;
 
-namespace Sivar.Erp.Documents.Tax
+namespace Sivar.Erp.Taxes
 {
     public interface ITax
     {

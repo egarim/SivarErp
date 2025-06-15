@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sivar.Erp.Documents;
-using Sivar.Erp.Documents.Tax;
 using Sivar.Erp.Taxes.TaxGroup;
 
 namespace Sivar.Erp.Taxes.TaxRule

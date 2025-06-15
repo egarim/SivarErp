@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Sivar.Erp.Documents;
-using Sivar.Erp.Documents.Tax;
 
 namespace Sivar.Erp.Taxes.TaxRule
 {

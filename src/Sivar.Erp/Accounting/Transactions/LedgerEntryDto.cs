@@ -1,4 +1,6 @@
-﻿namespace Sivar.Erp.Documents
+﻿using Sivar.Erp.Documents;
+
+namespace Sivar.Erp.Accounting.Transactions
 {
     /// <summary>
     /// Implementation of the ledger entry entity

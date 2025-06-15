@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Sivar.Erp.Documents.Tax;
 using Sivar.Erp.Taxes;
 
 namespace Sivar.Erp.Documents

@@ -1,7 +1,7 @@
-﻿using Sivar.Erp.BusinessEntities;
-using Sivar.Erp.ChartOfAccounts;
+﻿using Sivar.Erp.Accounting.ChartOfAccounts;
+using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
-using Sivar.Erp.Documents.Tax;
+using Sivar.Erp.Taxes;
 using Sivar.Erp.Taxes.TaxGroup;
 using System;
 using System.Collections.Generic;

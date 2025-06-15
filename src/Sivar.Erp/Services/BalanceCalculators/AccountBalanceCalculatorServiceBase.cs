@@ -1,6 +1,7 @@
-﻿using Sivar.Erp.Documents;
+﻿using Sivar.Erp.Accounting.Transactions;
+using Sivar.Erp.Documents;
 
-namespace Sivar.Erp.Services.ChartsOfAccounts
+namespace Sivar.Erp.Services.BalanceCalculators
 {
     /// <summary>
     /// Utility class for account balance calculations

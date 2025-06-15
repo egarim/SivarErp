@@ -1,4 +1,4 @@
-﻿namespace Sivar.Erp.ChartOfAccounts
+﻿namespace Sivar.Erp.Accounting.ChartOfAccounts
 {
     /// <summary>
     /// Implementation of an account in the chart of accounts

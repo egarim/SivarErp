@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Sivar.Erp.Documents;
+using System;
 using System.Linq;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Accounting.Transactions
 {
     /// <summary>
     /// Interface for ledger entries

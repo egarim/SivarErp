@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Folder Include="FiscalPeriods\" />
+    <Folder Include="Modules\" />
+    <Folder Include="Services\NewFolder\" />
   </ItemGroup>
 
 </Project>

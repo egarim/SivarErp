@@ -1,9 +1,9 @@
-﻿namespace Sivar.Erp.ChartOfAccounts
+﻿namespace Sivar.Erp.Accounting.ChartOfAccounts
 {
     /// <summary>
     /// Interface for chart of accounts entries
     /// </summary>
-    public interface IAccount : IEntity, IArchivable
+    public interface IAccount : IEntity
     {
         /// <summary>
         /// UTC timestamp when the entity was created

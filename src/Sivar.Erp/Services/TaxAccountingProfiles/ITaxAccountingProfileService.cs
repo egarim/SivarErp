@@ -3,7 +3,7 @@ using Sivar.Erp.Taxes;
 using System;
 using System.Collections.Generic;
 
-namespace Sivar.Erp.Services.AccountingProfiles
+namespace Sivar.Erp.Services.TaxAccountingProfiles
 {
     /// <summary>
     /// Service for managing tax accounting profiles

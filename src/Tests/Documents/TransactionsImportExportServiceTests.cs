@@ -4,7 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using Sivar.Erp.ChartOfAccounts;
+using Sivar.Erp.Accounting.ChartOfAccounts;
+using Sivar.Erp.Accounting.Transactions;
 using Sivar.Erp.Documents;
 using Sivar.Erp.Services.ImportExport;
 

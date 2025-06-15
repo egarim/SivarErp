@@ -1,5 +1,4 @@
-﻿
-namespace Sivar.Erp.Documents
+﻿namespace Sivar.Erp.Accounting.Transactions
 {
     /// <summary>
     /// Implementation of the transaction entity

@@ -1,7 +1,8 @@
+using Sivar.Erp.Accounting.ChartOfAccounts;
 using System;
 using System.Collections.Generic;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Accounting.Transactions
 {
     /// <summary>
     /// Implementation of the transaction batch entity

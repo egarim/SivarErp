@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Accounting.ChartOfAccounts
 {
     /// <summary>
     /// Status of transaction batch

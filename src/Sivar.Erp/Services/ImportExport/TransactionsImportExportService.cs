@@ -1,4 +1,5 @@
-using Sivar.Erp.ChartOfAccounts;
+using Sivar.Erp.Accounting.ChartOfAccounts;
+using Sivar.Erp.Accounting.Transactions;
 using Sivar.Erp.Documents;
 using System;
 using System.Collections.Generic;
