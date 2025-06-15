@@ -1,3 +1,4 @@
+using Sivar.Erp.BusinesEntities;
 using Sivar.Erp.Documents;
 using System;
 using System.Collections.Generic;

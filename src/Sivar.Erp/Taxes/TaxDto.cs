@@ -8,7 +8,7 @@ namespace Sivar.Erp.Documents.Tax
     /// <summary>
     /// Represents a tax item that can be applied to document lines
     /// </summary>
-    public class TaxDto : INotifyPropertyChanged
+    public class TaxDto : INotifyPropertyChanged, ITax
     {
         private Guid _oid;
         private string _name;

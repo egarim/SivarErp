@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using NUnit.Framework;
+using Sivar.Erp.BusinesEntities;
 using Sivar.Erp.Documents;
 
 namespace Sivar.Erp.Tests.Documents

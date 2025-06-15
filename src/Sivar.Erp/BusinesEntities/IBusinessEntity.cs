@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.BusinesEntities
 {
     public interface IBusinessEntity
     {
-        System.Guid Oid { get; set; }
+        Guid Oid { get; set; }
         string Code { get; set; }
         string Name { get; set; }
         string Address { get; set; }

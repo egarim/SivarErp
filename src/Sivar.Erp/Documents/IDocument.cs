@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Collections.Generic;
+using Sivar.Erp.BusinesEntities;
 
 namespace Sivar.Erp.Documents
 {

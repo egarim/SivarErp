@@ -1,8 +1,9 @@
+using Sivar.Erp.Documents;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.BusinesEntities
 {
     /// <summary>
     /// Data Transfer Object implementation for IBusinessEntity with change notification
