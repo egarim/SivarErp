@@ -37,7 +37,7 @@ namespace Tests.ChartOfAccounts
         public void CalculateAccountBalance_WithEmptyCollection_ReturnsZero()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase();
+            var calculator = new AccountBalanceCalculatorServiceBase();
             var accountId = Guid.NewGuid();
             var asOfDate = DateOnly.FromDateTime(DateTime.Today);
 
@@ -52,7 +52,7 @@ namespace Tests.ChartOfAccounts
         public void CalculateAccountTurnover_WithEmptyCollection_ReturnsZeros()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase();
+            var calculator = new AccountBalanceCalculatorServiceBase();
             var accountId = Guid.NewGuid();
             var startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-30));
             var endDate = DateOnly.FromDateTime(DateTime.Today);
@@ -69,7 +69,7 @@ namespace Tests.ChartOfAccounts
         public void HasTransactions_WithEmptyCollection_ReturnsFalse()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase();
+            var calculator = new AccountBalanceCalculatorServiceBase();
             var accountId = Guid.NewGuid();
 
             // Act
@@ -87,7 +87,7 @@ namespace Tests.ChartOfAccounts
         public void CalculateAccountBalance_WithTransactions_ReturnsCorrectBalance()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase(_transactions);
+            var calculator = new AccountBalanceCalculatorServiceBase(_transactions);
             var asOfDate = DateOnly.FromDateTime(DateTime.Today.AddDays(10));
 
             // Act
@@ -107,7 +107,7 @@ namespace Tests.ChartOfAccounts
         public void CalculateAccountBalance_WithDateFiltering_ReturnsCorrectBalance()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase(_transactions);
+            var calculator = new AccountBalanceCalculatorServiceBase(_transactions);
             
             // Use a date that only includes the first transaction
             var earlyDate = DateOnly.FromDateTime(DateTime.Today);
@@ -125,7 +125,7 @@ namespace Tests.ChartOfAccounts
         public void CalculateAccountTurnover_WithTransactions_ReturnsCorrectTurnover()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase(_transactions);
+            var calculator = new AccountBalanceCalculatorServiceBase(_transactions);
             var startDate = DateOnly.FromDateTime(DateTime.Today);
             var endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(10));
 
@@ -157,7 +157,7 @@ namespace Tests.ChartOfAccounts
         public void CalculateAccountTurnover_WithDateRangeFiltering_ReturnsCorrectTurnover()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase(_transactions);
+            var calculator = new AccountBalanceCalculatorServiceBase(_transactions);
             
             // Only include transactions on day 5
             var startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
@@ -180,7 +180,7 @@ namespace Tests.ChartOfAccounts
         public void HasTransactions_WithTransactions_ReturnsCorrectResult()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase(_transactions);
+            var calculator = new AccountBalanceCalculatorServiceBase(_transactions);
             var nonExistingAccountId = Guid.NewGuid();
 
             // Act
@@ -196,7 +196,7 @@ namespace Tests.ChartOfAccounts
         public void ConstructorWithNullTransactions_ShouldUseEmptyCollection()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorBase(null);
+            var calculator = new AccountBalanceCalculatorServiceBase(null);
             var accountId = Guid.NewGuid();
 
             // Act

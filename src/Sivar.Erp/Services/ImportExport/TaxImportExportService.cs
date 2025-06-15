@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Sivar.Erp.Documents.Tax;
 using Sivar.Erp.Taxes;
 
-namespace Sivar.Erp.ImportExport
+namespace Sivar.Erp.Services.ImportExport
 {
     /// <summary>
     /// Implementation of tax import/export service

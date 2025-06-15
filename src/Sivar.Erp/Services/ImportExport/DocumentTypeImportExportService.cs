@@ -1,52 +1,39 @@
-﻿using Sivar.Erp.ChartOfAccounts;
+using Sivar.Erp.Documents;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Sivar.Erp.ImportExport
+namespace Sivar.Erp.Services.ImportExport
 {
     /// <summary>
-    /// Implementation of account import/export service
+    /// Implementation of document type import/export service
     /// </summary>
-    public class AccountImportExportService : IAccountImportExportService
+    public class DocumentTypeImportExportService : IDocumentTypeImportExportService
     {
-    
-        private readonly AccountValidator _accountValidator;
-
         /// <summary>
-        /// Initializes a new instance of the AccountImportExportService class
+        /// Initializes a new instance of the DocumentTypeImportExportService class
         /// </summary>
-        /// <param name="auditService">Audit service for setting audit information</param>
-        public AccountImportExportService()
+        public DocumentTypeImportExportService()
         {
-            
-            _accountValidator = new AccountValidator();
         }
 
         /// <summary>
-        /// Initializes a new instance of the AccountImportExportService class with a custom validator
-        /// </summary>
-        /// <param name="auditService">Audit service for setting audit information</param>
-        /// <param name="accountValidator">Custom account validator</param>
-        public AccountImportExportService( AccountValidator accountValidator)
-        {
-           
-            _accountValidator = accountValidator ?? new AccountValidator();
-        }
-
-        /// <summary>
-        /// Imports accounts from a CSV file
+        /// Imports document types from a CSV file
         /// </summary>
         /// <param name="csvContent">Content of the CSV file as a string</param>
         /// <param name="userName">User performing the operation</param>
-        /// <returns>Collection of imported accounts and any validation errors</returns>
-        public Task<(IEnumerable<IAccount> ImportedAccounts, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        /// <returns>Collection of imported document types and any validation errors</returns>
+        public Task<(IEnumerable<IDocumentType> ImportedDocumentTypes, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
-            List<AccountDto> importedAccounts = new List<AccountDto>();
+            List<DocumentTypeDto> importedDocumentTypes = new List<DocumentTypeDto>();
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(csvContent))
             {
                 errors.Add("CSV content is empty");
-                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
+                return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
             }
 
             try
@@ -57,7 +44,7 @@ namespace Sivar.Erp.ImportExport
                 if (lines.Length <= 1)
                 {
                     errors.Add("CSV file contains no data rows");
-                    return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
+                    return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
                 }
 
                 // Assume first line is header
@@ -66,7 +53,7 @@ namespace Sivar.Erp.ImportExport
                 // Validate headers
                 if (!ValidateHeaders(headers, errors))
                 {
-                    return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
+                    return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
                 }
 
                 // Process data rows
@@ -81,36 +68,35 @@ namespace Sivar.Erp.ImportExport
                         continue;
                     }
 
-                    var account = CreateAccountFromCsvFields(headers, fields);
+                    var documentType = CreateDocumentTypeFromCsvFields(headers, fields);
 
-                    // Validate account
-                    if (!_accountValidator.ValidateAccount(account))
+                    // Validate document type
+                    if (!ValidateDocumentType(documentType))
                     {
-                        errors.Add($"Line {i + 1}: Account validation failed for account {account.AccountName}");
+                        errors.Add($"Line {i + 1}: Document type validation failed for document type {documentType.Name}");
                         continue;
                     }
 
-                   
-                    importedAccounts.Add(account);
+                    importedDocumentTypes.Add(documentType);
                 }
 
-                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
+                return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
             }
             catch (Exception ex)
             {
                 errors.Add($"Error importing CSV: {ex.Message}");
-                return Task.FromResult<(IEnumerable<IAccount>, IEnumerable<string>)>((importedAccounts, errors));
+                return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
             }
         }
 
         /// <summary>
-        /// Exports accounts to a CSV format
+        /// Exports document types to a CSV format
         /// </summary>
-        /// <param name="accounts">Accounts to export</param>
+        /// <param name="documentTypes">Document types to export</param>
         /// <returns>CSV content as a string</returns>
-        public Task<string> ExportToCsvAsync(IEnumerable<IAccount> accounts)
+        public Task<string> ExportToCsvAsync(IEnumerable<IDocumentType> documentTypes)
         {
-            if (accounts == null || !accounts.Any())
+            if (documentTypes == null || !documentTypes.Any())
             {
                 return Task.FromResult(GetCsvHeader());
             }
@@ -121,9 +107,9 @@ namespace Sivar.Erp.ImportExport
             csvBuilder.AppendLine(GetCsvHeader());
 
             // Add data rows
-            foreach (var account in accounts)
+            foreach (var documentType in documentTypes)
             {
-                csvBuilder.AppendLine(GetCsvRow(account));
+                csvBuilder.AppendLine(GetCsvRow(documentType));
             }
 
             return Task.FromResult(csvBuilder.ToString());
@@ -168,7 +154,7 @@ namespace Sivar.Erp.ImportExport
         private bool ValidateHeaders(string[] headers, List<string> errors)
         {
             // Define required headers
-            string[] requiredHeaders = { "AccountName", "OfficialCode", "AccountType" };
+            string[] requiredHeaders = { "Code", "Name", "DocumentOperation" };
 
             foreach (var requiredHeader in requiredHeaders)
             {
@@ -183,17 +169,33 @@ namespace Sivar.Erp.ImportExport
         }
 
         /// <summary>
-        /// Creates an account from CSV fields
+        /// Validates a document type
+        /// </summary>
+        /// <param name="documentType">Document type to validate</param>
+        /// <returns>True if valid, false otherwise</returns>
+        private bool ValidateDocumentType(DocumentTypeDto documentType)
+        {
+            if (string.IsNullOrWhiteSpace(documentType.Code))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(documentType.Name))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Creates a document type from CSV fields
         /// </summary>
         /// <param name="headers">CSV header fields</param>
         /// <param name="fields">CSV data fields</param>
-        /// <returns>New account with populated properties</returns>
-        private AccountDto CreateAccountFromCsvFields(string[] headers, string[] fields)
+        /// <returns>New document type with populated properties</returns>
+        private DocumentTypeDto CreateDocumentTypeFromCsvFields(string[] headers, string[] fields)
         {
-            var account = new AccountDto
+            var documentType = new DocumentTypeDto
             {
-                Id = Guid.NewGuid(),
-                IsArchived = false
+                Oid = Guid.NewGuid(),
+                IsEnabled = true
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -202,36 +204,33 @@ namespace Sivar.Erp.ImportExport
 
                 switch (headers[i].ToLowerInvariant())
                 {
-                    case "accountname":
-                        account.AccountName = value;
+                    case "code":
+                        documentType.Code = value;
                         break;
-                    case "officialcode":
-                        account.OfficialCode = value;
+                    case "name":
+                        documentType.Name = value;
                         break;
-                    case "accounttype":
-                        if (Enum.TryParse<AccountType>(value, true, out var accountType))
+                    case "isenabled":
+                        if (bool.TryParse(value, out var isEnabled))
                         {
-                            account.AccountType = accountType;
+                            documentType.IsEnabled = isEnabled;
+                        }
+                        break;
+                    case "documentoperation":
+                        if (Enum.TryParse<DocumentOperation>(value, true, out var documentOperation))
+                        {
+                            documentType.DocumentOperation = documentOperation;
                         }
                         else
                         {
-                            // Default to Asset if invalid
-                            account.AccountType = AccountType.Asset;
+                            // Default to PurchaseOrder if invalid
+                            documentType.DocumentOperation = DocumentOperation.PurchaseOrder;
                         }
-                        break;
-                    case "balanceandincomelineid":
-                        if (Guid.TryParse(value, out var lineId))
-                        {
-                            account.BalanceAndIncomeLineId = lineId;
-                        }
-                        break;
-                    case "parentofficialcode":
-                        account.ParentOfficialCode = string.IsNullOrWhiteSpace(value) ? null : value;
                         break;
                 }
             }
 
-            return account;
+            return documentType;
         }
 
         /// <summary>
@@ -240,25 +239,17 @@ namespace Sivar.Erp.ImportExport
         /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
-            return "AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId";
+            return "Code,Name,DocumentOperation,IsEnabled";
         }
 
         /// <summary>
-        /// Gets a CSV row for an account
+        /// Gets a CSV row for a document type
         /// </summary>
-        /// <param name="account">Account to convert to CSV</param>
+        /// <param name="documentType">Document type to convert to CSV</param>
         /// <returns>CSV row as a string</returns>
-        private string GetCsvRow(IAccount account)
+        private string GetCsvRow(IDocumentType documentType)
         {
-            string balanceAndIncomeLineId = account.BalanceAndIncomeLineId.HasValue
-                ? account.BalanceAndIncomeLineId.Value.ToString()
-                : string.Empty;
-
-            string parentOfficialCode = string.IsNullOrWhiteSpace(account.ParentOfficialCode)
-                ? string.Empty
-                : account.ParentOfficialCode;
-
-            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},\"{parentOfficialCode}\",{balanceAndIncomeLineId}";
+            return $"\"{documentType.Code}\",\"{documentType.Name}\",{documentType.DocumentOperation},{documentType.IsEnabled}";
         }
     }
 }

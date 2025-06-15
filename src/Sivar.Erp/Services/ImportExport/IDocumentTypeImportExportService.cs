@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.ImportExport
+namespace Sivar.Erp.Services.ImportExport
 {
     /// <summary>
     /// Interface for document type import/export operations

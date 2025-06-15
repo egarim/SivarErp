@@ -5,35 +5,47 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.ImportExport
+namespace Sivar.Erp.Services.ImportExport
 {
     /// <summary>
-    /// Implementation of document type import/export service
+    /// Implementation of business entity import/export service
     /// </summary>
-    public class DocumentTypeImportExportService : IDocumentTypeImportExportService
+    public class BusinessEntityImportExportService : IBusinessEntityImportExportService
     {
+        private readonly BusinessEntityValidator _businessEntityValidator;
+
         /// <summary>
-        /// Initializes a new instance of the DocumentTypeImportExportService class
+        /// Initializes a new instance of the BusinessEntityImportExportService class
         /// </summary>
-        public DocumentTypeImportExportService()
+        public BusinessEntityImportExportService()
         {
+            _businessEntityValidator = new BusinessEntityValidator();
         }
 
         /// <summary>
-        /// Imports document types from a CSV file
+        /// Initializes a new instance of the BusinessEntityImportExportService class with a custom validator
+        /// </summary>
+        /// <param name="businessEntityValidator">Custom business entity validator</param>
+        public BusinessEntityImportExportService(BusinessEntityValidator businessEntityValidator)
+        {
+            _businessEntityValidator = businessEntityValidator ?? new BusinessEntityValidator();
+        }
+
+        /// <summary>
+        /// Imports business entities from a CSV file
         /// </summary>
         /// <param name="csvContent">Content of the CSV file as a string</param>
         /// <param name="userName">User performing the operation</param>
-        /// <returns>Collection of imported document types and any validation errors</returns>
-        public Task<(IEnumerable<IDocumentType> ImportedDocumentTypes, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        /// <returns>Collection of imported business entities and any validation errors</returns>
+        public Task<(IEnumerable<IBusinessEntity> ImportedBusinessEntities, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
-            List<DocumentTypeDto> importedDocumentTypes = new List<DocumentTypeDto>();
+            List<BusinessEntityDto> importedBusinessEntities = new List<BusinessEntityDto>();
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(csvContent))
             {
                 errors.Add("CSV content is empty");
-                return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
+                return Task.FromResult<(IEnumerable<IBusinessEntity>, IEnumerable<string>)>((importedBusinessEntities, errors));
             }
 
             try
@@ -44,7 +56,7 @@ namespace Sivar.Erp.ImportExport
                 if (lines.Length <= 1)
                 {
                     errors.Add("CSV file contains no data rows");
-                    return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
+                    return Task.FromResult<(IEnumerable<IBusinessEntity>, IEnumerable<string>)>((importedBusinessEntities, errors));
                 }
 
                 // Assume first line is header
@@ -53,7 +65,7 @@ namespace Sivar.Erp.ImportExport
                 // Validate headers
                 if (!ValidateHeaders(headers, errors))
                 {
-                    return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
+                    return Task.FromResult<(IEnumerable<IBusinessEntity>, IEnumerable<string>)>((importedBusinessEntities, errors));
                 }
 
                 // Process data rows
@@ -68,35 +80,35 @@ namespace Sivar.Erp.ImportExport
                         continue;
                     }
 
-                    var documentType = CreateDocumentTypeFromCsvFields(headers, fields);
+                    var businessEntity = CreateBusinessEntityFromCsvFields(headers, fields);
 
-                    // Validate document type
-                    if (!ValidateDocumentType(documentType))
+                    // Validate business entity
+                    if (!_businessEntityValidator.ValidateBusinessEntity(businessEntity))
                     {
-                        errors.Add($"Line {i + 1}: Document type validation failed for document type {documentType.Name}");
+                        errors.Add($"Line {i + 1}: Business entity validation failed for entity {businessEntity.Code}");
                         continue;
                     }
 
-                    importedDocumentTypes.Add(documentType);
+                    importedBusinessEntities.Add(businessEntity);
                 }
 
-                return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
+                return Task.FromResult<(IEnumerable<IBusinessEntity>, IEnumerable<string>)>((importedBusinessEntities, errors));
             }
             catch (Exception ex)
             {
                 errors.Add($"Error importing CSV: {ex.Message}");
-                return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
+                return Task.FromResult<(IEnumerable<IBusinessEntity>, IEnumerable<string>)>((importedBusinessEntities, errors));
             }
         }
 
         /// <summary>
-        /// Exports document types to a CSV format
+        /// Exports business entities to a CSV format
         /// </summary>
-        /// <param name="documentTypes">Document types to export</param>
+        /// <param name="businessEntities">Business entities to export</param>
         /// <returns>CSV content as a string</returns>
-        public Task<string> ExportToCsvAsync(IEnumerable<IDocumentType> documentTypes)
+        public Task<string> ExportToCsvAsync(IEnumerable<IBusinessEntity> businessEntities)
         {
-            if (documentTypes == null || !documentTypes.Any())
+            if (businessEntities == null || !businessEntities.Any())
             {
                 return Task.FromResult(GetCsvHeader());
             }
@@ -107,9 +119,9 @@ namespace Sivar.Erp.ImportExport
             csvBuilder.AppendLine(GetCsvHeader());
 
             // Add data rows
-            foreach (var documentType in documentTypes)
+            foreach (var businessEntity in businessEntities)
             {
-                csvBuilder.AppendLine(GetCsvRow(documentType));
+                csvBuilder.AppendLine(GetCsvRow(businessEntity));
             }
 
             return Task.FromResult(csvBuilder.ToString());
@@ -154,7 +166,7 @@ namespace Sivar.Erp.ImportExport
         private bool ValidateHeaders(string[] headers, List<string> errors)
         {
             // Define required headers
-            string[] requiredHeaders = { "Code", "Name", "DocumentOperation" };
+            string[] requiredHeaders = { "Code", "Name" };
 
             foreach (var requiredHeader in requiredHeaders)
             {
@@ -169,68 +181,56 @@ namespace Sivar.Erp.ImportExport
         }
 
         /// <summary>
-        /// Validates a document type
-        /// </summary>
-        /// <param name="documentType">Document type to validate</param>
-        /// <returns>True if valid, false otherwise</returns>
-        private bool ValidateDocumentType(DocumentTypeDto documentType)
-        {
-            if (string.IsNullOrWhiteSpace(documentType.Code))
-                return false;
-
-            if (string.IsNullOrWhiteSpace(documentType.Name))
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Creates a document type from CSV fields
+        /// Creates a business entity from CSV fields
         /// </summary>
         /// <param name="headers">CSV header fields</param>
         /// <param name="fields">CSV data fields</param>
-        /// <returns>New document type with populated properties</returns>
-        private DocumentTypeDto CreateDocumentTypeFromCsvFields(string[] headers, string[] fields)
+        /// <returns>New business entity with populated properties</returns>
+        private BusinessEntityDto CreateBusinessEntityFromCsvFields(string[] headers, string[] fields)
         {
-            var documentType = new DocumentTypeDto
+            var businessEntity = new BusinessEntityDto
             {
-                Oid = Guid.NewGuid(),
-                IsEnabled = true
+                Oid = Guid.NewGuid()
             };
 
             for (int i = 0; i < headers.Length; i++)
             {
                 string value = fields[i];
+                if (string.IsNullOrWhiteSpace(value)) continue;
 
                 switch (headers[i].ToLowerInvariant())
                 {
                     case "code":
-                        documentType.Code = value;
+                        businessEntity.Code = value;
                         break;
                     case "name":
-                        documentType.Name = value;
+                        businessEntity.Name = value;
                         break;
-                    case "isenabled":
-                        if (bool.TryParse(value, out var isEnabled))
-                        {
-                            documentType.IsEnabled = isEnabled;
-                        }
+                    case "address":
+                        businessEntity.Address = value;
                         break;
-                    case "documentoperation":
-                        if (Enum.TryParse<DocumentOperation>(value, true, out var documentOperation))
-                        {
-                            documentType.DocumentOperation = documentOperation;
-                        }
-                        else
-                        {
-                            // Default to PurchaseOrder if invalid
-                            documentType.DocumentOperation = DocumentOperation.PurchaseOrder;
-                        }
+                    case "city":
+                        businessEntity.City = value;
+                        break;
+                    case "state":
+                        businessEntity.State = value;
+                        break;
+                    case "zipcode":
+                        businessEntity.ZipCode = value;
+                        break;
+                    case "country":
+                        businessEntity.Country = value;
+                        break;
+                    case "phonenumber":
+                        businessEntity.PhoneNumber = value;
+                        break;
+                    case "email":
+                        businessEntity.Email = value;
                         break;
                 }
             }
 
-            return documentType;
+            return businessEntity;
         }
 
         /// <summary>
@@ -239,17 +239,17 @@ namespace Sivar.Erp.ImportExport
         /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
-            return "Code,Name,DocumentOperation,IsEnabled";
+            return "Code,Name,Address,City,State,ZipCode,Country,PhoneNumber,Email";
         }
 
         /// <summary>
-        /// Gets a CSV row for a document type
+        /// Gets a CSV row for a business entity
         /// </summary>
-        /// <param name="documentType">Document type to convert to CSV</param>
+        /// <param name="businessEntity">Business entity to convert to CSV</param>
         /// <returns>CSV row as a string</returns>
-        private string GetCsvRow(IDocumentType documentType)
+        private string GetCsvRow(IBusinessEntity businessEntity)
         {
-            return $"\"{documentType.Code}\",\"{documentType.Name}\",{documentType.DocumentOperation},{documentType.IsEnabled}";
+            return $"\"{businessEntity.Code}\",\"{businessEntity.Name}\",\"{businessEntity.Address ?? string.Empty}\",\"{businessEntity.City ?? string.Empty}\",\"{businessEntity.State ?? string.Empty}\",\"{businessEntity.ZipCode ?? string.Empty}\",\"{businessEntity.Country ?? string.Empty}\",\"{businessEntity.PhoneNumber ?? string.Empty}\",\"{businessEntity.Email ?? string.Empty}\"";
         }
     }
 }

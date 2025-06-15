@@ -1,4 +1,4 @@
-﻿namespace Sivar.Erp.ChartOfAccounts
+﻿namespace Sivar.Erp.Services.ChartsOfAccounts
 {
     public interface IAccountBalanceCalculator
     {

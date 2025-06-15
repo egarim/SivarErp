@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sivar.Erp.Taxes;
+using Sivar.Erp.Services.AccountingProfiles;
 using Sivar.Erp.Taxes.TaxRule;
 
 namespace Sivar.Erp.Documents

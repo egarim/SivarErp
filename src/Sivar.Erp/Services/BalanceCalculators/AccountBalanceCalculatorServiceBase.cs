@@ -1,27 +1,27 @@
 ﻿using Sivar.Erp.Documents;
 
-namespace Sivar.Erp.ChartOfAccounts
+namespace Sivar.Erp.Services.ChartsOfAccounts
 {
     /// <summary>
     /// Utility class for account balance calculations
     /// </summary>
-    public class AccountBalanceCalculatorBase : IAccountBalanceCalculator
+    public class AccountBalanceCalculatorServiceBase : IAccountBalanceCalculator
     {
         IEnumerable<ITransaction> transactions;
 
         /// <summary>
         /// Initializes a new instance with an empty collection of transactions
         /// </summary>
-        public AccountBalanceCalculatorBase()
+        public AccountBalanceCalculatorServiceBase()
         {
-            this.transactions = Array.Empty<ITransaction>();
+            transactions = Array.Empty<ITransaction>();
         }
 
         /// <summary>
         /// Initializes a new instance with the specified collection of transactions
         /// </summary>
         /// <param name="transactions">Collection of transactions to use for calculations</param>
-        public AccountBalanceCalculatorBase(IEnumerable<ITransaction> transactions)
+        public AccountBalanceCalculatorServiceBase(IEnumerable<ITransaction> transactions)
         {
             this.transactions = transactions ?? Array.Empty<ITransaction>();
         }
