@@ -1,10 +1,10 @@
-﻿using Sivar.Erp.ErpSystem.ActivityStream;
+﻿using Sivar.Erp.Documents.DocumentToTransactions;
+using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Services;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Services.Accounting.BalanceCalculators;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
-using Sivar.Erp.Services.Accounting.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +17,10 @@ namespace Sivar.Erp.Services.Accounting
     {
         protected IFiscalPeriodService FiscalPeriodService;
         protected IAccountBalanceCalculator AccountBalanceCalculator;
-        protected ITransactionService transactionService;
+        protected IDocumentToTransactionService transactionService;
 
         public AccountingService(IOptionService optionService, IActivityStreamService activityStreamService, IDateTimeZoneService dateTimeZoneService,
-            IFiscalPeriodService FiscalPeriodService, IAccountBalanceCalculator AccountBalanceCalculator,ITransactionService transactionService) : base(optionService, activityStreamService, dateTimeZoneService)
+            IFiscalPeriodService FiscalPeriodService, IAccountBalanceCalculator AccountBalanceCalculator,IDocumentToTransactionService transactionService) : base(optionService, activityStreamService, dateTimeZoneService)
         {
         }
     }

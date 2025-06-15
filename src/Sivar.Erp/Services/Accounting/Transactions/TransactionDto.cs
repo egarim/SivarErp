@@ -25,5 +25,16 @@
         /// </summary>
         public string Description { get; set; } = string.Empty;
         public IEnumerable<ILedgerEntry> LedgerEntries { get; set; }
+        public bool IsPosted { get; set; }
+
+        public void Post()
+        {
+            this.IsPosted = true;
+        }
+
+        public void UnPost()
+        {
+            this.IsPosted = false;
+        }
     }
 }

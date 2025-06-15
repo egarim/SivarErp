@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
+using Sivar.Erp.Documents;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Services.Taxes
 {
     /// <summary>
     /// Handles tax calculations at the document level

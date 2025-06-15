@@ -1,8 +1,7 @@
-using Sivar.Erp.BusinessEntities;
 using System;
 using System.Text.RegularExpressions;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.BusinessEntities
 {
     /// <summary>
     /// Validator for business entity business rules

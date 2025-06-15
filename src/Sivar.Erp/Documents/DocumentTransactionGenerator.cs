@@ -1,3 +1,4 @@
+using Sivar.Erp.Documents.DocumentToTransactions;
 using Sivar.Erp.Services.Accounting.Transactions;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace Sivar.Erp.Documents
     /// </summary>
     public class DocumentTransactionGenerator
     {
-        private readonly ITransactionService _transactionService;
+        private readonly IDocumentToTransactionService _transactionService;
         private readonly Dictionary<string, TransactionTemplate> _templates;
         private readonly Dictionary<string, Guid> _accountMappings;
 
@@ -22,7 +23,7 @@ namespace Sivar.Erp.Documents
         /// <param name="transactionService">Service for transaction operations</param>
         /// <param name="accountMappings">Dictionary mapping account keys to account IDs</param>
         public DocumentTransactionGenerator(
-            ITransactionService transactionService,
+            IDocumentToTransactionService transactionService,
             Dictionary<string, Guid> accountMappings = null)
         {
             _transactionService = transactionService ?? throw new ArgumentNullException(nameof(transactionService));

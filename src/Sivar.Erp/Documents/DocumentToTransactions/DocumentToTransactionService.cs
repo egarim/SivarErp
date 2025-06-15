@@ -1,28 +1,13 @@
-﻿namespace Sivar.Erp.Services.Accounting.Transactions
+﻿using Sivar.Erp.Services.Accounting.Transactions;
+
+namespace Sivar.Erp.Documents.DocumentToTransactions
 {
     /// <summary>
     /// Implementation of transaction service
     /// </summary>
-    public class TransactionService : ITransactionService
+    public class DocumentToTransactionService : IDocumentToTransactionService
     {
-        /// <summary>
-        /// Creates a new transaction
-        /// </summary>
-        /// <param name="transaction">Transaction to create</param>
-        /// <returns>Created transaction with ID</returns>
-        public Task<ITransaction> CreateTransactionAsync(ITransaction transaction)
-        {
-            // Generate new ID if not provided
-            if (transaction.Id == Guid.Empty)
-            {
-                transaction.Id = Guid.NewGuid();
-            }
-
-            // Here would be the repository call to save the transaction
-            // For this example, we'll just return the transaction
-
-            return Task.FromResult(transaction);
-        }
+       
 
         /// <summary>
         /// Validates a transaction for accounting balance

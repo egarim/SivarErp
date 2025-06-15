@@ -36,7 +36,7 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
         {
             // Get all relevant ledger entries for this account up to the specified date
             var relevantTransactions = transactions
-                .Where(t => t.TransactionDate <= asOfDate)
+                .Where(t => t.TransactionDate <= asOfDate & t.IsPosted)
                 .ToList();
 
             // Find the ledger entries for the specified account
@@ -70,7 +70,7 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
         {
             // Get all relevant ledger entries for this account within the date range
             var relevantTransactions = transactions
-                .Where(t => t.TransactionDate >= startDate && t.TransactionDate <= endDate)
+                .Where(t => t.TransactionDate >= startDate && t.TransactionDate <= endDate && t.IsPosted)
                 .ToList();
 
             // Find the ledger entries for the specified account
@@ -98,8 +98,9 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
         /// <returns>True if account has transactions, false otherwise</returns>
         public bool HasTransactions(Guid accountId)
         {
-            // Check if there are any ledger entries for this account
+            // Check if there are any posted ledger entries for this account
             return transactions
+                .Where(t => t.IsPosted)
                 .SelectMany(t => t.LedgerEntries)
                 .Any(e => e.AccountId == accountId);
         }

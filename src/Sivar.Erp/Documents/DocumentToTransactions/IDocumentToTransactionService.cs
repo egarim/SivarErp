@@ -1,16 +1,13 @@
-﻿namespace Sivar.Erp.Services.Accounting.Transactions
+﻿using Sivar.Erp.Services.Accounting.Transactions;
+
+namespace Sivar.Erp.Documents.DocumentToTransactions
 {
     /// <summary>
     /// Interface for transaction service operations
     /// </summary>
-    public interface ITransactionService
+    public interface IDocumentToTransactionService
     {
-        /// <summary>
-        /// Creates a new transaction
-        /// </summary>
-        /// <param name="transaction">Transaction to create</param>
-        /// <returns>Created transaction with ID</returns>
-        Task<ITransaction> CreateTransactionAsync(ITransaction transaction);
+       
 
         /// <summary>
         /// Validates a transaction for accounting balance

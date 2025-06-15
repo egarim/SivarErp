@@ -24,5 +24,8 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         string Description { get; set; }
 
         IEnumerable<ILedgerEntry> LedgerEntries { get; set; }
+        void Post();
+        void UnPost();
+        bool IsPosted { get; set; }
     }
 }

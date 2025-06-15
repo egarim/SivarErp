@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Documents.DocumentToTransactions
 {
     /// <summary>
     /// Factory for creating common transaction templates
