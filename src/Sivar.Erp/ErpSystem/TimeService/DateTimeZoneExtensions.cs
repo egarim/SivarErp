@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.ErpSystem.DateTimeZone
+namespace Sivar.Erp.ErpSystem.TimeService
 {
     /// <summary>
     /// Extension methods for IDateTimeZoneTrackable

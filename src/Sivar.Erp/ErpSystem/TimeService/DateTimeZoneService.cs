@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sivar.Erp.ErpSystem.DateTimeZone
+namespace Sivar.Erp.ErpSystem.TimeService
 {
     /// <summary>
     /// Implementation of the service for handling date, time, and timezone operations

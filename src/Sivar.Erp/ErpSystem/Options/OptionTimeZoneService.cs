@@ -1,4 +1,4 @@
-using Sivar.Erp.ErpSystem.DateTimeZone;
+using Sivar.Erp.ErpSystem.TimeService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +12,14 @@ namespace Sivar.Erp.ErpSystem.Options
     public class OptionTimeZoneService
     {
         private readonly IOptionService _optionService;
-        private readonly Erp.ErpSystem.DateTimeZone.IDateTimeZoneService _dateTimeZoneService;
+        private readonly IDateTimeZoneService _dateTimeZoneService;
 
         /// <summary>
         /// Initializes a new instance of the OptionTimeZoneService class
         /// </summary>
         /// <param name="optionService">The underlying option service</param>
         /// <param name="dateTimeZoneService">The datetime/timezone service</param>
-        public OptionTimeZoneService(IOptionService optionService, Erp.ErpSystem.DateTimeZone.IDateTimeZoneService dateTimeZoneService)
+        public OptionTimeZoneService(IOptionService optionService, IDateTimeZoneService dateTimeZoneService)
         {
             _optionService = optionService ?? throw new ArgumentNullException(nameof(optionService));
             _dateTimeZoneService = dateTimeZoneService ?? throw new ArgumentNullException(nameof(dateTimeZoneService));

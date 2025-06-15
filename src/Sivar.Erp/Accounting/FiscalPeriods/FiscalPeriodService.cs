@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.ErpSystem.FiscalPeriods
+namespace Sivar.Erp.Accounting.FiscalPeriods
 {
     /// <summary>
     /// Implementation of fiscal period service

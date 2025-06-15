@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.ErpSystem.DateTimeZone
+namespace Sivar.Erp.ErpSystem.TimeService
 {
     /// <summary>
     /// Service for handling date, time, and timezone operations

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.ErpSystem.FiscalPeriods
+namespace Sivar.Erp.Accounting.FiscalPeriods
 {
     /// <summary>
     /// Validator for fiscal period entities

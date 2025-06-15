@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Sivar.Erp.ErpSystem.DateTimeZone;
+using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Services;
 
 namespace Sivar.Erp.ErpSystem.ActivityStream
