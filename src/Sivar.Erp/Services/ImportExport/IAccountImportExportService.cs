@@ -1,4 +1,4 @@
-﻿using Sivar.Erp.Accounting.ChartOfAccounts;
+﻿using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 
 namespace Sivar.Erp.Services.ImportExport
 {

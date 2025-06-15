@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Sivar.Erp.Accounting.FiscalPeriods;
+using Sivar.Erp.Services.Accounting.FiscalPeriods;
 
 namespace Sivar.Erp.Tests.FiscalPeriods
 {

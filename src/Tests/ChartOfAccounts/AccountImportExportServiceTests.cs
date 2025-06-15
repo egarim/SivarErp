@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Sivar.Erp.Accounting.ChartOfAccounts;
+using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 using Sivar.Erp.Services.ImportExport;
 
 namespace Tests.ChartOfAccounts

@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Sivar.Erp.Accounting.ChartOfAccounts;
 using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
-
+using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 using Sivar.Erp.Services.ImportExport;
-using Sivar.Erp.Taxes;
-using Sivar.Erp.Taxes.TaxGroup;
+using Sivar.Erp.Services.Taxes;
+using Sivar.Erp.Services.Taxes.TaxGroup;
+using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Taxes.TaxRule;
 
 namespace Tests.ElSalvador

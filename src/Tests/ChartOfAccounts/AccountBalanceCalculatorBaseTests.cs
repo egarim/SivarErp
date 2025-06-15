@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Sivar.Erp.Accounting.ChartOfAccounts;
 using Sivar.Erp.Accounting.Transactions;
 using Sivar.Erp.ChartOfAccounts;
+using Sivar.Erp.Services.Accounting.Transactions;
 
 namespace Tests.ChartOfAccounts
 {

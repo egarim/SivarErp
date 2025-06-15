@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.TimeService;
 
 namespace Sivar.Erp.ErpSystem.Services
 {
@@ -14,7 +15,10 @@ namespace Sivar.Erp.ErpSystem.Services
         /// Service for managing options
         /// </summary>
         protected readonly IOptionService OptionService;
-        
+
+
+        protected readonly IDateTimeZoneService DateTimeZoneService;
+
         /// <summary>
         /// Service for recording activities
         /// </summary>
@@ -30,10 +34,11 @@ namespace Sivar.Erp.ErpSystem.Services
         /// </summary>
         /// <param name="optionService">The option service</param>
         /// <param name="activityStreamService">The activity stream service</param>
-        protected ServiceBase(IOptionService optionService, IActivityStreamService activityStreamService)
+        protected ServiceBase(IOptionService optionService, IActivityStreamService activityStreamService,IDateTimeZoneService dateTimeZoneService)
         {
             OptionService = optionService ?? throw new ArgumentNullException(nameof(optionService));
             ActivityStreamService = activityStreamService ?? throw new ArgumentNullException(nameof(activityStreamService));
+            DateTimeZoneService= dateTimeZoneService ?? throw new ArgumentNullException(nameof(DateTimeZoneService));
         }
         
         /// <summary>

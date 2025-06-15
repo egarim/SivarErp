@@ -1,10 +1,10 @@
-﻿using Sivar.Erp.Accounting.ChartOfAccounts;
-using Sivar.Erp.BusinessEntities;
+﻿using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Sequencers;
-using Sivar.Erp.Taxes;
-using Sivar.Erp.Taxes.TaxGroup;
+using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Services.Taxes;
+using Sivar.Erp.Services.Taxes.TaxGroup;
 using System;
 using System.Linq;
 

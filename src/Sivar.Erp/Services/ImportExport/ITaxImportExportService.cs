@@ -1,4 +1,4 @@
-using Sivar.Erp.Taxes;
+using Sivar.Erp.Services.Taxes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

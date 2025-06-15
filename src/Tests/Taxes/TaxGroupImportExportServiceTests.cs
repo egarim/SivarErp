@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 
 using Sivar.Erp.Services.ImportExport;
-using Sivar.Erp.Taxes.TaxGroup;
+using Sivar.Erp.Services.Taxes.TaxGroup;
 
 namespace Sivar.Erp.Tests.Taxes
 {
