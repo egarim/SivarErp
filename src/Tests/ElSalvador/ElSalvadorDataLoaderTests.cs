@@ -28,7 +28,12 @@ namespace Tests.ElSalvador
         [SetUp]
         public void Setup()
         {
-            _accountImportService = new AccountImportExportService();
+            // Create an El Salvador-specific account validator using the correct prefix mappings
+            var elSalvadorAccountValidator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
+            
+            // Use the El Salvador-specific validator for account import
+            _accountImportService = new AccountImportExportService(elSalvadorAccountValidator);
+            
             _taxImportService = new TaxImportExportService();
             _taxGroupImportService = new TaxGroupImportExportService();
         }
@@ -274,7 +279,7 @@ namespace Tests.ElSalvador
                 Oid = Guid.NewGuid(),
                 Code = "COMP001",
                 Name = "Empresa Registrada S.A. de C.V.",
-                TaxId = "0614-123456-001-1"
+                //TaxId = "0614-123456-001-1"
             };
 
             var taxableProduct = new ItemDto
