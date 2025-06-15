@@ -10,7 +10,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <summary>
         /// Unique identifier for this option
         /// </summary>
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Oid { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// Unique code for the option

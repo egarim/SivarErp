@@ -38,7 +38,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <inheritdoc />
         public Task<OptionDto?> GetOptionAsync(Guid id)
         {
-            var option = _options.FirstOrDefault(o => o.Id == id);
+            var option = _options.FirstOrDefault(o => o.Oid == id);
             return Task.FromResult(option);
         }
 
@@ -83,9 +83,9 @@ namespace Sivar.Erp.ErpSystem.Options
             }
 
             // Generate a new ID if not provided
-            if (option.Id == Guid.Empty)
+            if (option.Oid == Guid.Empty)
             {
-                option.Id = Guid.NewGuid();
+                option.Oid = Guid.NewGuid();
             }
 
             option.CreatedDate = DateTime.UtcNow;
@@ -107,15 +107,15 @@ namespace Sivar.Erp.ErpSystem.Options
                 throw new ArgumentException("Invalid option", nameof(option));
             }
 
-            var index = _options.FindIndex(o => o.Id == option.Id);
+            var index = _options.FindIndex(o => o.Oid == option.Oid);
             if (index == -1)
             {
-                throw new KeyNotFoundException($"Option with ID {option.Id} not found");
+                throw new KeyNotFoundException($"Option with ID {option.Oid} not found");
             }
 
             // Check if the update would create a duplicate
             var duplicate = _options.FirstOrDefault(o => 
-                o.Id != option.Id && 
+                o.Oid != option.Oid && 
                 o.Code == option.Code && 
                 o.ModuleName == option.ModuleName);
                 
@@ -133,7 +133,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <inheritdoc />
         public Task<bool> DeleteOptionAsync(Guid id)
         {
-            var index = _options.FindIndex(o => o.Id == id);
+            var index = _options.FindIndex(o => o.Oid == id);
             if (index == -1)
             {
                 return Task.FromResult(false);
@@ -162,7 +162,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <inheritdoc />
         public Task<OptionChoiceDto?> GetOptionChoiceAsync(Guid id)
         {
-            var choice = _choices.FirstOrDefault(c => c.Id == id);
+            var choice = _choices.FirstOrDefault(c => c.Oid == id);
             return Task.FromResult(choice);
         }
 
@@ -190,15 +190,15 @@ namespace Sivar.Erp.ErpSystem.Options
             }
 
             // Check if option exists
-            if (_options.All(o => o.Id != choice.OptionId))
+            if (_options.All(o => o.Oid != choice.OptionId))
             {
                 throw new KeyNotFoundException($"Option with ID {choice.OptionId} not found");
             }
 
             // Generate a new ID if not provided
-            if (choice.Id == Guid.Empty)
+            if (choice.Oid == Guid.Empty)
             {
-                choice.Id = Guid.NewGuid();
+                choice.Oid = Guid.NewGuid();
             }
 
             _choices.Add(choice);
@@ -219,14 +219,14 @@ namespace Sivar.Erp.ErpSystem.Options
                 throw new ArgumentException("Invalid option choice", nameof(choice));
             }
 
-            var index = _choices.FindIndex(c => c.Id == choice.Id);
+            var index = _choices.FindIndex(c => c.Oid == choice.Oid);
             if (index == -1)
             {
-                throw new KeyNotFoundException($"Option choice with ID {choice.Id} not found");
+                throw new KeyNotFoundException($"Option choice with ID {choice.Oid} not found");
             }
 
             // Check if option exists
-            if (_options.All(o => o.Id != choice.OptionId))
+            if (_options.All(o => o.Oid != choice.OptionId))
             {
                 throw new KeyNotFoundException($"Option with ID {choice.OptionId} not found");
             }
@@ -239,7 +239,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <inheritdoc />
         public Task<bool> DeleteOptionChoiceAsync(Guid id)
         {
-            var index = _choices.FindIndex(c => c.Id == id);
+            var index = _choices.FindIndex(c => c.Oid == id);
             if (index == -1)
             {
                 return Task.FromResult(false);
@@ -262,7 +262,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <inheritdoc />
         public Task<OptionDetailDto?> GetOptionDetailAsync(Guid id)
         {
-            var detail = _details.FirstOrDefault(d => d.Id == id);
+            var detail = _details.FirstOrDefault(d => d.Oid == id);
             return Task.FromResult(detail);
         }
 
@@ -302,21 +302,21 @@ namespace Sivar.Erp.ErpSystem.Options
             }
 
             // Check if option exists
-            if (_options.All(o => o.Id != detail.OptionId))
+            if (_options.All(o => o.Oid != detail.OptionId))
             {
                 throw new KeyNotFoundException($"Option with ID {detail.OptionId} not found");
             }
 
             // Check if option choice exists
-            if (_choices.All(c => c.Id != detail.OptionChoiceId))
+            if (_choices.All(c => c.Oid != detail.OptionChoiceId))
             {
                 throw new KeyNotFoundException($"Option choice with ID {detail.OptionChoiceId} not found");
             }
 
             // Generate a new ID if not provided
-            if (detail.Id == Guid.Empty)
+            if (detail.Oid == Guid.Empty)
             {
-                detail.Id = Guid.NewGuid();
+                detail.Oid = Guid.NewGuid();
             }
 
             detail.CreatedDate = DateTime.UtcNow;
@@ -338,20 +338,20 @@ namespace Sivar.Erp.ErpSystem.Options
                 throw new ArgumentException("Invalid option detail", nameof(detail));
             }
 
-            var index = _details.FindIndex(d => d.Id == detail.Id);
+            var index = _details.FindIndex(d => d.Oid == detail.Oid);
             if (index == -1)
             {
-                throw new KeyNotFoundException($"Option detail with ID {detail.Id} not found");
+                throw new KeyNotFoundException($"Option detail with ID {detail.Oid} not found");
             }
 
             // Check if option exists
-            if (_options.All(o => o.Id != detail.OptionId))
+            if (_options.All(o => o.Oid != detail.OptionId))
             {
                 throw new KeyNotFoundException($"Option with ID {detail.OptionId} not found");
             }
 
             // Check if option choice exists
-            if (_choices.All(c => c.Id != detail.OptionChoiceId))
+            if (_choices.All(c => c.Oid != detail.OptionChoiceId))
             {
                 throw new KeyNotFoundException($"Option choice with ID {detail.OptionChoiceId} not found");
             }
@@ -364,7 +364,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <inheritdoc />
         public Task<bool> DeleteOptionDetailAsync(Guid id)
         {
-            var index = _details.FindIndex(d => d.Id == id);
+            var index = _details.FindIndex(d => d.Oid == id);
             if (index == -1)
             {
                 return Task.FromResult(false);
@@ -389,7 +389,7 @@ namespace Sivar.Erp.ErpSystem.Options
                 return null;
             }
 
-            var detail = await GetActiveOptionDetailAsync(option.Id, date);
+            var detail = await GetActiveOptionDetailAsync(option.Oid, date);
             return detail?.Value;
         }
 
@@ -403,7 +403,7 @@ namespace Sivar.Erp.ErpSystem.Options
             }
 
             // Get all choices for this option
-            var choices = await GetChoicesForOptionAsync(option.Id);
+            var choices = await GetChoicesForOptionAsync(option.Oid);
             var choice = choices.FirstOrDefault();
             
             if (choice == null)
@@ -411,7 +411,7 @@ namespace Sivar.Erp.ErpSystem.Options
                 // Auto-create a default choice if none exists
                 choice = new OptionChoiceDto
                 {
-                    OptionId = option.Id,
+                    OptionId = option.Oid,
                     Name = "Default",
                     Description = "Auto-generated default choice",
                     IsDefault = true,
@@ -424,8 +424,8 @@ namespace Sivar.Erp.ErpSystem.Options
             // Create new option detail
             var detail = new OptionDetailDto
             {
-                OptionId = option.Id,
-                OptionChoiceId = choice.Id,
+                OptionId = option.Oid,
+                OptionChoiceId = choice.Oid,
                 Value = value,
                 ValidFrom = validFrom,
                 ValidTo = validTo,

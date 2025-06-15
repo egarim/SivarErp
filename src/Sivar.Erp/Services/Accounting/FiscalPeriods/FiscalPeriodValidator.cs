@@ -94,7 +94,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
             if (existingPeriods == null)
                 return true;
 
-            var periodsToCheck = existingPeriods.Where(fp => excludeId == null || fp.Id != excludeId);
+            var periodsToCheck = existingPeriods.Where(fp => excludeId == null || fp.Oid != excludeId);
 
             var hasOverlap = periodsToCheck.Any(fp =>
                 startDate >= fp.StartDate && startDate <= fp.EndDate ||

@@ -51,7 +51,7 @@ namespace Sivar.Erp.ErpSystem.Options
             }
 
             // Get all choices for this option
-            var choices = await _optionService.GetChoicesForOptionAsync(option.Id);
+            var choices = await _optionService.GetChoicesForOptionAsync(option.Oid);
             var choice = choices.FirstOrDefault();
             
             if (choice == null)
@@ -59,7 +59,7 @@ namespace Sivar.Erp.ErpSystem.Options
                 // Auto-create a default choice if none exists
                 choice = new OptionChoiceDto
                 {
-                    OptionId = option.Id,
+                    OptionId = option.Oid,
                     Name = "Default",
                     Description = "Auto-generated default choice",
                     IsDefault = true,
@@ -72,8 +72,8 @@ namespace Sivar.Erp.ErpSystem.Options
             // Create a timezone-aware option detail
             var detail = new OptionDetailWithTimeZoneDto
             {
-                OptionId = option.Id,
-                OptionChoiceId = choice.Id,
+                OptionId = option.Oid,
+                OptionChoiceId = choice.Oid,
                 Value = value,
                 ValidTo = validTo,
                 CreatedBy = userName,
@@ -119,7 +119,7 @@ namespace Sivar.Erp.ErpSystem.Options
             // Now get the actual detail to access its timestamp information
             // In a real implementation, you would extend the OptionService to return the full detail
             // For this example, we'll simulate the retrieval
-            var detail = await SimulateGetActiveOptionDetailWithTimeZoneAsync(option.Id, date);
+            var detail = await SimulateGetActiveOptionDetailWithTimeZoneAsync(option.Oid, date);
             if (detail == null)
             {
                 return (value, date);

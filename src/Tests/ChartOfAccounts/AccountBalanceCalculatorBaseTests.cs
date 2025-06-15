@@ -221,7 +221,7 @@ namespace Tests.ChartOfAccounts
             // Transaction 1 - Initial funding (today)
             var transaction1 = new TransactionDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 DocumentId = _documentId,
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today),
                 Description = "Initial funding",
@@ -229,7 +229,7 @@ namespace Tests.ChartOfAccounts
                 {
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _assetAccountId,
                         EntryType = EntryType.Debit,
@@ -239,7 +239,7 @@ namespace Tests.ChartOfAccounts
                     },
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _liabilityAccountId,
                         EntryType = EntryType.Credit,
@@ -253,7 +253,7 @@ namespace Tests.ChartOfAccounts
             // Transaction 2 - Sale (today + 3 days)
             var transaction2 = new TransactionDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 DocumentId = _documentId,
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today.AddDays(3)),
                 Description = "Sales transaction",
@@ -261,7 +261,7 @@ namespace Tests.ChartOfAccounts
                 {
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _assetAccountId,
                         EntryType = EntryType.Debit,
@@ -271,7 +271,7 @@ namespace Tests.ChartOfAccounts
                     },
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _revenueAccountId,
                         EntryType = EntryType.Credit,
@@ -285,7 +285,7 @@ namespace Tests.ChartOfAccounts
             // Transaction 3 - Expense (today + 5 days)
             var transaction3 = new TransactionDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 DocumentId = _documentId,
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5)),
                 Description = "Office supplies expense",
@@ -293,7 +293,7 @@ namespace Tests.ChartOfAccounts
                 {
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _expenseAccountId,
                         EntryType = EntryType.Debit,
@@ -303,7 +303,7 @@ namespace Tests.ChartOfAccounts
                     },
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _assetAccountId,
                         EntryType = EntryType.Credit,
@@ -317,7 +317,7 @@ namespace Tests.ChartOfAccounts
             // Transaction 4 - Another expense (today + 7 days)
             var transaction4 = new TransactionDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 DocumentId = _documentId,
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today.AddDays(7)),
                 Description = "Utility bill payment",
@@ -325,7 +325,7 @@ namespace Tests.ChartOfAccounts
                 {
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _expenseAccountId,
                         EntryType = EntryType.Debit,
@@ -335,7 +335,7 @@ namespace Tests.ChartOfAccounts
                     },
                     new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = _liabilityAccountId,
                         EntryType = EntryType.Credit,

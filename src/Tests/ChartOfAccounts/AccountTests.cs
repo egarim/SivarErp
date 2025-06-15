@@ -20,7 +20,7 @@ namespace Tests.ChartOfAccounts
             var account = new AccountDto();
 
             // Assert
-            Assert.That(account.Id, Is.EqualTo(Guid.Empty));
+            Assert.That(account.Oid, Is.EqualTo(Guid.Empty));
         }
 
         [Test]
@@ -416,7 +416,7 @@ namespace Tests.ChartOfAccounts
             // Arrange
             var account = new AccountDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 AccountName = "Cash",
                 OfficialCode = "12345",
                 AccountType = AccountType.Asset,

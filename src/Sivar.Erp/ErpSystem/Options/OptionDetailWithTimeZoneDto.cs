@@ -11,7 +11,7 @@ namespace Sivar.Erp.ErpSystem.Options
         /// <summary>
         /// Unique identifier for this option detail
         /// </summary>
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Oid { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// Reference to the parent option

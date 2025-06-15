@@ -8,7 +8,7 @@
         /// <summary>
         /// Unique identifier for the transaction
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid Oid { get; set; }
 
         /// <summary>
         /// Reference to the parent document

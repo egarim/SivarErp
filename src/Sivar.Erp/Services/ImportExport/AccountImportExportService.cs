@@ -192,7 +192,7 @@ namespace Sivar.Erp.Services.ImportExport
         {
             var account = new AccountDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 IsArchived = false
             };
 

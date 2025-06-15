@@ -5,6 +5,7 @@ using Sivar.Erp.ErpSystem.Services;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Services.Accounting.BalanceCalculators;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
+using Sivar.Erp.Services.Accounting.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +21,229 @@ namespace Sivar.Erp.Services.Accounting
         protected IDocumentToTransactionService transactionService;
 
         public AccountingService(IOptionService optionService, IActivityStreamService activityStreamService, IDateTimeZoneService dateTimeZoneService,
-            IFiscalPeriodService FiscalPeriodService, IAccountBalanceCalculator AccountBalanceCalculator,IDocumentToTransactionService transactionService) : base(optionService, activityStreamService, dateTimeZoneService)
+            IFiscalPeriodService fiscalPeriodService, IAccountBalanceCalculator accountBalanceCalculator, IDocumentToTransactionService transactionService) 
+            : base(optionService, activityStreamService, dateTimeZoneService)
         {
+            FiscalPeriodService = fiscalPeriodService;
+            AccountBalanceCalculator = accountBalanceCalculator;
+            this.transactionService = transactionService;
+        }
+
+        /// <summary>
+        /// Posts a transaction after validating fiscal period is open
+        /// </summary>
+        /// <param name="transaction">Transaction to post</param>
+        /// <returns>True if posted successfully, false otherwise</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+        public async Task<bool> PostTransactionAsync(ITransaction transaction)
+        {
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            if (transaction.IsPosted)
+                return true; // Already posted
+
+            // Validate that transaction is in an open fiscal period
+            var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
+            
+            if (fiscalPeriod == null)
+                throw new InvalidOperationException($"No fiscal period found for date {transaction.TransactionDate}");
+                
+            if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
+                throw new InvalidOperationException($"Cannot post transaction: Fiscal period '{fiscalPeriod.Name}' is closed");
+
+            // Validate transaction balance (debits = credits)
+            bool isValid = await transactionService.ValidateTransactionAsync(
+                transaction.Oid, 
+                transaction.LedgerEntries);
+                
+            if (!isValid)
+                throw new InvalidOperationException("Transaction has unbalanced debits and credits");
+
+            // Post the transaction
+            transaction.Post();
+            
+            // Log the activity
+            var systemActor = CreateSystemStreamObject();
+            var transactionTarget = CreateStreamObject(
+                "Transaction", 
+                transaction.Oid.ToString(), 
+                $"Transaction on {transaction.TransactionDate}");
+                
+            await RecordActivityAsync(
+                systemActor,
+                "Posted",
+                transactionTarget);
+                
+            return true;
+        }
+
+        /// <summary>
+        /// Unposts a transaction if possible
+        /// </summary>
+        /// <param name="transaction">Transaction to unpost</param>
+        /// <returns>True if unposted successfully, false otherwise</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+        public async Task<bool> UnPostTransactionAsync(ITransaction transaction)
+        {
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            if (!transaction.IsPosted)
+                return true; // Already unposted
+
+            // Validate that transaction is in an open fiscal period
+            var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
+            
+            if (fiscalPeriod == null)
+                throw new InvalidOperationException($"No fiscal period found for date {transaction.TransactionDate}");
+                
+            if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
+                throw new InvalidOperationException($"Cannot unpost transaction: Fiscal period '{fiscalPeriod.Name}' is closed");
+
+            // Unpost the transaction
+            transaction.UnPost();
+            
+            // Log the activity
+            var systemActor = CreateSystemStreamObject();
+            var transactionTarget = CreateStreamObject(
+                "Transaction", 
+                transaction.Oid.ToString(), 
+                $"Transaction on {transaction.TransactionDate}");
+                
+            await RecordActivityAsync(
+                systemActor,
+                "Unposted",
+                transactionTarget);
+                
+            return true;
+        }
+
+        /// <summary>
+        /// Posts a transaction batch and all its transactions
+        /// </summary>
+        /// <param name="batch">Transaction batch to post</param>
+        /// <returns>True if posted successfully, false otherwise</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+        public async Task<bool> PostTransactionBatchAsync(ITransactionBatch batch)
+        {
+            if (batch == null)
+                throw new ArgumentNullException(nameof(batch));
+
+            if (batch.IsPosted)
+                return true; // Already posted
+
+            // Validate that batch is in an open fiscal period
+            var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(batch.BatchDate);
+            
+            if (fiscalPeriod == null)
+                throw new InvalidOperationException($"No fiscal period found for date {batch.BatchDate}");
+                
+            if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
+                throw new InvalidOperationException($"Cannot post batch: Fiscal period '{fiscalPeriod.Name}' is closed");
+
+            // Get all transactions in this batch
+            // Assuming we can access transactions through a cast to TransactionBatchDto
+            // In a real implementation, we would use a repository or other data access method
+            var batchDto = batch as TransactionBatchDto;
+            
+            if (batchDto?.Transactions != null)
+            {
+                // Post each transaction in the batch
+                foreach (var transaction in batchDto.Transactions)
+                {
+                    await PostTransactionAsync(transaction);
+                }
+            }
+
+            // Post the batch itself
+            batch.Post();
+            
+            // Update batch status
+            batch.Status = BatchStatus.Processed;
+            
+            // Log the activity
+            var systemActor = CreateSystemStreamObject();
+            var batchTarget = CreateStreamObject(
+                "TransactionBatch", 
+                batch.Oid.ToString(), 
+                $"Transaction batch '{batch.ReferenceCode}'");
+                
+            await RecordActivityAsync(
+                systemActor,
+                "Posted",
+                batchTarget);
+                
+            return true;
+        }
+
+        /// <summary>
+        /// Unposts a transaction batch and all its transactions
+        /// </summary>
+        /// <param name="batch">Transaction batch to unpost</param>
+        /// <returns>True if unposted successfully, false otherwise</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+        public async Task<bool> UnPostTransactionBatchAsync(ITransactionBatch batch)
+        {
+            if (batch == null)
+                throw new ArgumentNullException(nameof(batch));
+
+            if (!batch.IsPosted)
+                return true; // Already unposted
+
+            // Validate that batch is in an open fiscal period
+            var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(batch.BatchDate);
+            
+            if (fiscalPeriod == null)
+                throw new InvalidOperationException($"No fiscal period found for date {batch.BatchDate}");
+                
+            if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
+                throw new InvalidOperationException($"Cannot unpost batch: Fiscal period '{fiscalPeriod.Name}' is closed");
+
+            // Get all transactions in this batch
+            // Assuming we can access transactions through a cast to TransactionBatchDto
+            // In a real implementation, we would use a repository or other data access method
+            var batchDto = batch as TransactionBatchDto;
+            
+            if (batchDto?.Transactions != null)
+            {
+                // Unpost each transaction in the batch
+                foreach (var transaction in batchDto.Transactions)
+                {
+                    await UnPostTransactionAsync(transaction);
+                }
+            }
+
+            // Unpost the batch itself
+            batch.UnPost();
+            
+            // Update batch status
+            batch.Status = BatchStatus.Approved;
+            
+            // Log the activity
+            var systemActor = CreateSystemStreamObject();
+            var batchTarget = CreateStreamObject(
+                "TransactionBatch", 
+                batch.Oid.ToString(), 
+                $"Transaction batch '{batch.ReferenceCode}'");
+                
+            await RecordActivityAsync(
+                systemActor,
+                "Unposted",
+                batchTarget);
+                
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if a date falls within an open fiscal period
+        /// </summary>
+        /// <param name="date">Date to check</param>
+        /// <returns>True if date is within an open fiscal period, false otherwise</returns>
+        public async Task<bool> IsDateInOpenFiscalPeriodAsync(DateOnly date)
+        {
+            var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(date);
+            return fiscalPeriod != null && fiscalPeriod.Status == FiscalPeriodStatus.Open;
         }
     }
 }

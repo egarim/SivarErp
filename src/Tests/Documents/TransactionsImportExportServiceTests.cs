@@ -28,28 +28,28 @@ namespace Sivar.Erp.Tests.Documents
             {
                 new AccountDto
                 {
-                    Id = Guid.Parse("a0000000-0000-0000-0000-000000000001"),
+                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000001"),
                     OfficialCode = "1000",
                     AccountName = "Cash",
                     AccountType = AccountType.Asset
                 },
                 new AccountDto
                 {
-                    Id = Guid.Parse("a0000000-0000-0000-0000-000000000002"),
+                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000002"),
                     OfficialCode = "2000",
                     AccountName = "Accounts Payable",
                     AccountType = AccountType.Liability
                 },
                 new AccountDto
                 {
-                    Id = Guid.Parse("a0000000-0000-0000-0000-000000000003"),
+                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000003"),
                     OfficialCode = "4000",
                     AccountName = "Sales Revenue",
                     AccountType = AccountType.Revenue
                 },
                 new AccountDto
                 {
-                    Id = Guid.Parse("a0000000-0000-0000-0000-000000000004"),
+                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000004"),
                     OfficialCode = "5000",
                     AccountName = "Office Expenses",
                     AccountType = AccountType.Expense
@@ -65,7 +65,7 @@ namespace Sivar.Erp.Tests.Documents
 
             var transaction1 = new TransactionDto
             {
-                Id = transaction1Id,
+                Oid = transaction1Id,
                 DocumentId = documentId,
                 TransactionDate = new DateOnly(2025, 6, 11),
                 Description = "Office Supplies Purchase"
@@ -75,9 +75,9 @@ namespace Sivar.Erp.Tests.Documents
             {
                 new LedgerEntryDto
                 {
-                    Id = Guid.Parse("d0000000-0000-0000-0000-000000000001"),
+                    Oid = Guid.Parse("d0000000-0000-0000-0000-000000000001"),
                     TransactionId = transaction1Id,
-                    AccountId = _accounts[3].Id,  // Office Expenses
+                    AccountId = _accounts[3].Oid,  // Office Expenses
                     EntryType = EntryType.Debit,
                     Amount = 150.00m,
                     AccountName = _accounts[3].AccountName,
@@ -85,9 +85,9 @@ namespace Sivar.Erp.Tests.Documents
                 },
                 new LedgerEntryDto
                 {
-                    Id = Guid.Parse("d0000000-0000-0000-0000-000000000002"),
+                    Oid = Guid.Parse("d0000000-0000-0000-0000-000000000002"),
                     TransactionId = transaction1Id,
-                    AccountId = _accounts[0].Id,  // Cash
+                    AccountId = _accounts[0].Oid,  // Cash
                     EntryType = EntryType.Credit,
                     Amount = 150.00m,
                     AccountName = _accounts[0].AccountName,
@@ -97,7 +97,7 @@ namespace Sivar.Erp.Tests.Documents
 
             var transaction2 = new TransactionDto
             {
-                Id = transaction2Id,
+                Oid = transaction2Id,
                 DocumentId = documentId,
                 TransactionDate = new DateOnly(2025, 6, 11),
                 Description = "Client Invoice"
@@ -107,9 +107,9 @@ namespace Sivar.Erp.Tests.Documents
             {
                 new LedgerEntryDto
                 {
-                    Id = Guid.Parse("d0000000-0000-0000-0000-000000000003"),
+                    Oid = Guid.Parse("d0000000-0000-0000-0000-000000000003"),
                     TransactionId = transaction2Id,
-                    AccountId = _accounts[0].Id,  // Cash
+                    AccountId = _accounts[0].Oid,  // Cash
                     EntryType = EntryType.Debit,
                     Amount = 500.00m,
                     AccountName = _accounts[0].AccountName,
@@ -117,9 +117,9 @@ namespace Sivar.Erp.Tests.Documents
                 },
                 new LedgerEntryDto
                 {
-                    Id = Guid.Parse("d0000000-0000-0000-0000-000000000004"),
+                    Oid = Guid.Parse("d0000000-0000-0000-0000-000000000004"),
                     TransactionId = transaction2Id,
-                    AccountId = _accounts[2].Id,  // Sales Revenue
+                    AccountId = _accounts[2].Oid,  // Sales Revenue
                     EntryType = EntryType.Credit,
                     Amount = 500.00m,
                     AccountName = _accounts[2].AccountName,
@@ -183,7 +183,7 @@ namespace Sivar.Erp.Tests.Documents
             Assert.That(importedTransactions.Count, Is.EqualTo(_testTransactions.Count));
 
             // Check first transaction
-            var firstTransaction = importedTransactions.FirstOrDefault(t => t.Transaction.Id == _testTransactions[0].Transaction.Id);
+            var firstTransaction = importedTransactions.FirstOrDefault(t => t.Transaction.Oid == _testTransactions[0].Transaction.Oid);
             Assert.That(firstTransaction.Transaction, Is.Not.Null);
             Assert.That(firstTransaction.Transaction.Description, Is.EqualTo("Office Supplies Purchase"));
             Assert.That(firstTransaction.Transaction.TransactionDate, Is.EqualTo(new DateOnly(2025, 6, 11)));
@@ -203,7 +203,7 @@ namespace Sivar.Erp.Tests.Documents
             Assert.That(cashEntry.AccountName, Is.EqualTo("Cash"));
 
             // Check second transaction
-            var secondTransaction = importedTransactions.FirstOrDefault(t => t.Transaction.Id == _testTransactions[1].Transaction.Id);
+            var secondTransaction = importedTransactions.FirstOrDefault(t => t.Transaction.Oid == _testTransactions[1].Transaction.Oid);
             Assert.That(secondTransaction.Transaction, Is.Not.Null);
             Assert.That(secondTransaction.Transaction.Description, Is.EqualTo("Client Invoice"));
             Assert.That(secondTransaction.Entries.Count, Is.EqualTo(2));
@@ -223,29 +223,29 @@ namespace Sivar.Erp.Tests.Documents
             Assert.That(reexportedCsv, Is.EqualTo(exportedCsv));
 
             // Verify all transaction IDs are preserved
-            var originalIds = _testTransactions.Select(t => t.Transaction.Id).ToList();
-            var reimportedIds = reimportedTransactions.Select(t => t.Transaction.Id).ToList();
+            var originalIds = _testTransactions.Select(t => t.Transaction.Oid).ToList();
+            var reimportedIds = reimportedTransactions.Select(t => t.Transaction.Oid).ToList();
 
             Assert.That(reimportedIds, Is.EquivalentTo(originalIds));
 
             // Verify all entry IDs are preserved
-            var originalEntryIds = _testTransactions.SelectMany(t => t.Entries.Select(e => e.Id)).ToList();
-            var reimportedEntryIds = reimportedTransactions.SelectMany(t => t.Entries.Select(e => e.Id)).ToList();
+            var originalEntryIds = _testTransactions.SelectMany(t => t.Entries.Select(e => e.Oid)).ToList();
+            var reimportedEntryIds = reimportedTransactions.SelectMany(t => t.Entries.Select(e => e.Oid)).ToList();
 
             Assert.That(reimportedEntryIds, Is.EquivalentTo(originalEntryIds));
 
             // Verify amounts are correctly preserved
             foreach (var txn in _testTransactions)
             {
-                var reimportedTxn = reimportedTransactions.FirstOrDefault(t => t.Transaction.Id == txn.Transaction.Id);
-                Assert.That(reimportedTxn.Transaction, Is.Not.Null, $"Transaction {txn.Transaction.Id} was not reimported");
+                var reimportedTxn = reimportedTransactions.FirstOrDefault(t => t.Transaction.Oid == txn.Transaction.Oid);
+                Assert.That(reimportedTxn.Transaction, Is.Not.Null, $"Transaction {txn.Transaction.Oid} was not reimported");
 
                 foreach (var entry in txn.Entries)
                 {
-                    var reimportedEntry = reimportedTxn.Entries.FirstOrDefault(e => e.Id == entry.Id);
-                    Assert.That(reimportedEntry, Is.Not.Null, $"Entry {entry.Id} was not reimported");
-                    Assert.That(reimportedEntry.Amount, Is.EqualTo(entry.Amount), $"Amount mismatch for entry {entry.Id}");
-                    Assert.That(reimportedEntry.EntryType, Is.EqualTo(entry.EntryType), $"EntryType mismatch for entry {entry.Id}");
+                    var reimportedEntry = reimportedTxn.Entries.FirstOrDefault(e => e.Oid == entry.Oid);
+                    Assert.That(reimportedEntry, Is.Not.Null, $"Entry {entry.Oid} was not reimported");
+                    Assert.That(reimportedEntry.Amount, Is.EqualTo(entry.Amount), $"Amount mismatch for entry {entry.Oid}");
+                    Assert.That(reimportedEntry.EntryType, Is.EqualTo(entry.EntryType), $"EntryType mismatch for entry {entry.Oid}");
                 }
             }
         }

@@ -7,7 +7,12 @@ namespace Sivar.Erp.Documents.DocumentToTransactions
     /// </summary>
     public interface IDocumentToTransactionService
     {
-       
+        /// <summary>
+        /// Creates a new transaction
+        /// </summary>
+        /// <param name="transaction">Transaction to create</param>
+        /// <returns>Created transaction</returns>
+        Task<TransactionDto> CreateTransactionAsync(TransactionDto transaction);
 
         /// <summary>
         /// Validates a transaction for accounting balance

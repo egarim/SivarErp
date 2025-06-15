@@ -9,7 +9,7 @@
         /// <summary>
         /// Unique identifier for the entity
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid Oid { get; set; }
 
         /// <summary>
         /// UTC timestamp when the entity was created

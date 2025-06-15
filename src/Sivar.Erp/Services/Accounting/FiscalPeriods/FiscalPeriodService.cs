@@ -40,8 +40,8 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
                 throw new InvalidOperationException("Invalid fiscal period or fiscal period overlaps with existing period");
 
             // Generate ID if not set
-            if (fiscalPeriod.Id == Guid.Empty)
-                fiscalPeriod.Id = Guid.NewGuid();
+            if (fiscalPeriod.Oid == Guid.Empty)
+                fiscalPeriod.Oid = Guid.NewGuid();
 
           
 
@@ -66,12 +66,12 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
                 throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
 
             // Find existing fiscal period
-            var existingPeriod = _fiscalPeriods.FirstOrDefault(fp => fp.Id == fiscalPeriod.Id);
+            var existingPeriod = _fiscalPeriods.FirstOrDefault(fp => fp.Oid == fiscalPeriod.Oid);
             if (existingPeriod == null)
                 throw new InvalidOperationException("Fiscal period not found");
 
             // Validate the fiscal period including overlap check (excluding current period)
-            var isValid = await ValidateFiscalPeriodWithOverlapAsync(fiscalPeriod, fiscalPeriod.Id);
+            var isValid = await ValidateFiscalPeriodWithOverlapAsync(fiscalPeriod, fiscalPeriod.Oid);
             if (!isValid)
                 throw new InvalidOperationException("Invalid fiscal period or fiscal period overlaps with existing period");
 
@@ -94,7 +94,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <returns>Fiscal period if found, null otherwise</returns>
         public Task<IFiscalPeriod?> GetFiscalPeriodByIdAsync(Guid id)
         {
-            var fiscalPeriod = _fiscalPeriods.FirstOrDefault(fp => fp.Id == id);
+            var fiscalPeriod = _fiscalPeriods.FirstOrDefault(fp => fp.Oid == id);
             return Task.FromResult(fiscalPeriod);
         }
 
@@ -204,7 +204,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <returns>True if there is an overlap, false otherwise</returns>
         public Task<bool> HasOverlappingPeriodsAsync(DateOnly startDate, DateOnly endDate, Guid? excludeId = null)
         {
-            var periodsToCheck = _fiscalPeriods.Where(fp => excludeId == null || fp.Id != excludeId);
+            var periodsToCheck = _fiscalPeriods.Where(fp => excludeId == null || fp.Oid != excludeId);
 
             var hasOverlap = periodsToCheck.Any(fp =>
                 startDate >= fp.StartDate && startDate <= fp.EndDate ||

@@ -40,7 +40,7 @@ namespace Sivar.Erp.Tests.FiscalPeriods
             };
 
             // Assert
-            Assert.That(fiscalPeriod.Id, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(fiscalPeriod.Oid, Is.Not.EqualTo(Guid.Empty));
         }
 
         [Test]
@@ -478,7 +478,7 @@ namespace Sivar.Erp.Tests.FiscalPeriods
 
             // Assert
             Assert.That(createdPeriod, Is.Not.Null);
-            Assert.That(createdPeriod.Id, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(createdPeriod.Oid, Is.Not.EqualTo(Guid.Empty));
             Assert.That(createdPeriod.Name, Is.EqualTo("Q1 2025"));
             Assert.That(createdPeriod.Status, Is.EqualTo(FiscalPeriodStatus.Open));
         }
@@ -520,7 +520,7 @@ namespace Sivar.Erp.Tests.FiscalPeriods
             var createdPeriod = await _fiscalPeriodService.CreateFiscalPeriodAsync(fiscalPeriod, "TestUser");
 
             // Act
-            var closedPeriod = await _fiscalPeriodService.CloseFiscalPeriodAsync(createdPeriod.Id, "TestUser");
+            var closedPeriod = await _fiscalPeriodService.CloseFiscalPeriodAsync(createdPeriod.Oid, "TestUser");
 
             // Assert
             Assert.That(closedPeriod.Status, Is.EqualTo(FiscalPeriodStatus.Closed));
@@ -551,7 +551,7 @@ namespace Sivar.Erp.Tests.FiscalPeriods
 
             await _fiscalPeriodService.CreateFiscalPeriodAsync(openPeriod, "TestUser");
             var created = await _fiscalPeriodService.CreateFiscalPeriodAsync(closedPeriod, "TestUser");
-            await _fiscalPeriodService.CloseFiscalPeriodAsync(created.Id, "TestUser");
+            await _fiscalPeriodService.CloseFiscalPeriodAsync(created.Oid, "TestUser");
 
             // Act
             var openPeriods = await _fiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Open);
@@ -656,7 +656,7 @@ namespace Sivar.Erp.Tests.FiscalPeriods
             createdPeriod.EndDate = new DateOnly(2025, 3, 30);
 
             // Act
-            var isValid = await _fiscalPeriodService.ValidateFiscalPeriodWithOverlapAsync(createdPeriod, createdPeriod.Id);
+            var isValid = await _fiscalPeriodService.ValidateFiscalPeriodWithOverlapAsync(createdPeriod, createdPeriod.Oid);
 
             // Assert
             Assert.That(isValid, Is.True);

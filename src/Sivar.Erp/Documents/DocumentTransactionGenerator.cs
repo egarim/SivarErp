@@ -97,7 +97,7 @@ namespace Sivar.Erp.Documents
             // Create transaction
             var transaction = new TransactionDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 DocumentId = document.Oid,
                 TransactionDate = document.Date,
                 Description = template.DescriptionGenerator(document)
@@ -135,8 +135,8 @@ namespace Sivar.Erp.Documents
                 // Create ledger entry
                 var ledgerEntry = new LedgerEntryDto
                 {
-                    Id = Guid.NewGuid(),
-                    TransactionId = createdTransaction.Id,
+                    Oid = Guid.NewGuid(),
+                    TransactionId = createdTransaction.Oid,
                     AccountId = accountId,
                     EntryType = entry.EntryType,
                     Amount = amount,
@@ -148,7 +148,7 @@ namespace Sivar.Erp.Documents
             
             // Validate transaction balance
             bool isValid = await _transactionService.ValidateTransactionAsync(
-                createdTransaction.Id, ledgerEntries);
+                createdTransaction.Oid, ledgerEntries);
 
             if (!isValid)
             {
@@ -174,7 +174,7 @@ namespace Sivar.Erp.Documents
 
             // Here you would save the ledger entries using whatever service you have
             // This is a placeholder for the actual implementation
-            // await _ledgerEntryService.CreateLedgerEntriesAsync(transaction.Id, ledgerEntries);
+            // await _ledgerEntryService.CreateLedgerEntriesAsync(transaction.Oid, ledgerEntries);
 
             return transaction;
         }

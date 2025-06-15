@@ -42,7 +42,7 @@ namespace Sivar.Erp.Documents
             // Create the transaction
             var transaction = new TransactionDto
             {
-                Id = Guid.NewGuid(),
+                Oid = Guid.NewGuid(),
                 DocumentId = document.Oid,
                 TransactionDate = document.Date,
                 Description = GenerateTransactionDescription(document)
@@ -64,8 +64,8 @@ namespace Sivar.Erp.Documents
                     {
                         var entry = new LedgerEntryDto
                         {
-                            Id = Guid.NewGuid(),
-                            TransactionId = transaction.Id,
+                            Oid = Guid.NewGuid(),
+                            TransactionId = transaction.Oid,
                             AccountId = accountId,
                             EntryType = EntryType.Debit,
                             Amount = totalDto.Total,
@@ -83,8 +83,8 @@ namespace Sivar.Erp.Documents
                     {
                         var entry = new LedgerEntryDto
                         {
-                            Id = Guid.NewGuid(),
-                            TransactionId = transaction.Id,
+                            Oid = Guid.NewGuid(),
+                            TransactionId = transaction.Oid,
                             AccountId = accountId,
                             EntryType = EntryType.Credit,
                             Amount = totalDto.Total,

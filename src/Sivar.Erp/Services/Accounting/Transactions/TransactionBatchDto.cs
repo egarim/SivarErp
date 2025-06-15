@@ -11,7 +11,7 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// <summary>
         /// Unique identifier for the transaction batch
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid Oid { get; set; }
 
         /// <summary>
         /// Batch reference code

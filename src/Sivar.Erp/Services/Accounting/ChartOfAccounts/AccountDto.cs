@@ -8,7 +8,7 @@
         /// <summary>
         /// Unique identifier for the account
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid Oid { get; set; }
 
         /// <summary>
         /// Optional reference to balance sheet or income statement line

@@ -8,6 +8,6 @@
         /// <summary>
         /// Unique identifier for the entity
         /// </summary>
-        Guid Id { get; set; }
+        Guid Oid { get; set; }
     }
 }

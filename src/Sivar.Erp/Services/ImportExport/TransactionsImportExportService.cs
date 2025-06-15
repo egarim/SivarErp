@@ -19,7 +19,7 @@ namespace Sivar.Erp.Services.ImportExport
         public TransactionsImportExportService(List<AccountDto> accounts)
         {
             _accounts = accounts;
-            _accountCodeToId = accounts.ToDictionary(a => a.OfficialCode, a => a.Id);
+            _accountCodeToId = accounts.ToDictionary(a => a.OfficialCode, a => a.Oid);
         }
 
         [Obsolete("Use ImportFromCsv instead. This method will be removed in future versions.", true)]
@@ -51,7 +51,7 @@ namespace Sivar.Erp.Services.ImportExport
                     currentTransactionId = Guid.NewGuid();
                     currentTransaction = new TransactionDto
                     {
-                        Id = currentTransactionId,
+                        Oid = currentTransactionId,
                         DocumentId = Guid.Empty, // Set as needed
                         TransactionDate = DateOnly.Parse(cols[2], CultureInfo.InvariantCulture),
                         Description = cols[3].Trim()
@@ -99,11 +99,11 @@ namespace Sivar.Erp.Services.ImportExport
                     }
                     // Allow entries where both debit and credit are 0
                     // Find the account to get its name and official code
-                    var account = _accounts.FirstOrDefault(a => a.Id == accountId);
+                    var account = _accounts.FirstOrDefault(a => a.Oid == accountId);
 
                     var entry = new LedgerEntryDto
                     {
-                        Id = Guid.NewGuid(),
+                        Oid = Guid.NewGuid(),
                         TransactionId = currentTransactionId,
                         AccountId = accountId,
                         // If both are zero, default to Debit with zero amount                        // When both are zero, default to Debit with zero amount
@@ -169,7 +169,7 @@ namespace Sivar.Erp.Services.ImportExport
                 // Write transaction data
                 foreach (var (transaction, _) in transactionsWithEntries)
                 {
-                    string line = $"{transaction.Id}," +
+                    string line = $"{transaction.Oid}," +
                                   $"{transaction.TransactionDate:yyyy-MM-dd}," +
                                   $"\"{EscapeCsvField(transaction.Description)}\"," +
                                   $"{transaction.DocumentId}";
@@ -187,8 +187,8 @@ namespace Sivar.Erp.Services.ImportExport
                 {
                     foreach (var entry in entries)
                     {
-                        string line = $"{entry.Id}," +
-                                      $"{transaction.Id}," +
+                        string line = $"{entry.Oid}," +
+                                      $"{transaction.Oid}," +
                                       $"{entry.AccountId}," +
                                       $"\"{EscapeCsvField(entry.OfficialCode)}\"," +
                                       $"\"{EscapeCsvField(entry.AccountName)}\"," +
@@ -218,7 +218,7 @@ namespace Sivar.Erp.Services.ImportExport
             // Write transaction data
             foreach (var transaction in transactions)
             {
-                string line = $"{transaction.Id}," +
+                string line = $"{transaction.Oid}," +
                               $"{transaction.TransactionDate:yyyy-MM-dd}," +
                               $"\"{EscapeCsvField(transaction.Description)}\"," +
                               $"{transaction.DocumentId}";
@@ -241,8 +241,8 @@ namespace Sivar.Erp.Services.ImportExport
             {
                 foreach (var entry in entries)
                 {
-                    string line = $"{entry.Id}," +
-                                  $"{transaction.Id}," +
+                    string line = $"{entry.Oid}," +
+                                  $"{transaction.Oid}," +
                                   $"{entry.AccountId}," +
                                   $"\"{EscapeCsvField(entry.OfficialCode)}\"," +
                                   $"\"{EscapeCsvField(entry.AccountName)}\"," +
@@ -313,8 +313,8 @@ namespace Sivar.Erp.Services.ImportExport
                     var transaction = ParseTransactionLine(line);
                     if (transaction != null)
                     {
-                        transactions[transaction.Id] = transaction;
-                        entriesByTransactionId[transaction.Id] = new List<LedgerEntryDto>();
+                        transactions[transaction.Oid] = transaction;
+                        entriesByTransactionId[transaction.Oid] = new List<LedgerEntryDto>();
                     }
                 }
                 else if (inLedgerEntrySection)
@@ -347,7 +347,7 @@ namespace Sivar.Erp.Services.ImportExport
 
                 return new TransactionDto
                 {
-                    Id = Guid.Parse(parts[0]),
+                    Oid = Guid.Parse(parts[0]),
                     TransactionDate = DateOnly.Parse(parts[1]),
                     Description = parts[2],
                     DocumentId = Guid.Parse(parts[3])
@@ -380,7 +380,7 @@ namespace Sivar.Erp.Services.ImportExport
 
                 var entry = new LedgerEntryDto
                 {
-                    Id = Guid.Parse(parts[0]),
+                    Oid = Guid.Parse(parts[0]),
                     TransactionId = transactionId,
                     AccountId = accountId, // Use the looked up accountId
                     OfficialCode = officialCode,
