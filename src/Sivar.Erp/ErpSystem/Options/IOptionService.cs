@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.System.Options
+namespace Sivar.Erp.ErpSystem.Options
 {
     /// <summary>
     /// Interface for option service

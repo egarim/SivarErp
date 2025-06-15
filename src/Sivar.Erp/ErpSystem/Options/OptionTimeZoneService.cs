@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.System.Options
+namespace Sivar.Erp.ErpSystem.Options
 {
     /// <summary>
     /// Service that extends the option service with timezone-aware capabilities

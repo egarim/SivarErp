@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Sivar.Erp.Services
 {
-    public class ObjectDb
+    public class ObjectDb : IObjectDb
     {
         public IList<IAccount> Accounts { get; set; } = new List<IAccount>();
         public IList<IBusinessEntity> BusinessEntities { get; set; } = new List<IBusinessEntity>();

@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.System.FiscalPeriods
+namespace Sivar.Erp.ErpSystem.FiscalPeriods
 {
     /// <summary>
     /// Implementation of a fiscal period

@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.System.Options
+namespace Sivar.Erp.ErpSystem.Options
 {
     /// <summary>
     /// Data transfer object for options

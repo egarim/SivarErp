@@ -1,7 +1,7 @@
 using System;
 
 
-namespace Sivar.Erp.System.Options
+namespace Sivar.Erp.ErpSystem.Options
 {
     /// <summary>
     /// Data transfer object for option details that store time-bound values with timezone information

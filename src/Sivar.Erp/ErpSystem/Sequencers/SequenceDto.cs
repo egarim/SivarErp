@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.System.Sequencers
+namespace Sivar.Erp.ErpSystem.Sequencers
 {
     public class SequenceDto
     {
