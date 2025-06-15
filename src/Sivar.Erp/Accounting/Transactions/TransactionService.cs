@@ -1,6 +1,6 @@
-﻿using Sivar.Erp.Accounting.Transactions;
+﻿using Sivar.Erp.Documents;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Accounting.Transactions
 {
     /// <summary>
     /// Implementation of transaction service

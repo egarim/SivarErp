@@ -1,3 +1,4 @@
+using Sivar.Erp.Accounting.Transactions;
 using Sivar.Erp.BusinessEntities;
 using System;
 using System.Collections.Generic;
