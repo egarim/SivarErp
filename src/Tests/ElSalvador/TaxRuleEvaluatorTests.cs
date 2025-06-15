@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
-using Sivar.Erp.Taxes.TaxRule;
+
 
 namespace Tests.ElSalvador
 {

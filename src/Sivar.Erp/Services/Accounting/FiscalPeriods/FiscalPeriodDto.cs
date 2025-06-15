@@ -15,12 +15,12 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <summary>
         /// Start date of the fiscal period
         /// </summary>
-        public required DateOnly StartDate { get; set; }
+        public  DateOnly StartDate { get; set; }
 
         /// <summary>
         /// End date of the fiscal period
         /// </summary>
-        public required DateOnly EndDate { get; set; }
+        public  DateOnly EndDate { get; set; }
 
         /// <summary>
         /// Status of the fiscal period (Open or Closed)
@@ -30,7 +30,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <summary>
         /// Name of the fiscal period
         /// </summary>
-        public required string Name { get; set; }
+        public  string Name { get; set; }
 
         /// <summary>
         /// Description of the fiscal period
@@ -45,7 +45,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <summary>
         /// User who created the fiscal period
         /// </summary>
-        public required string InsertedBy { get; set; }
+        public  string InsertedBy { get; set; }
 
         /// <summary>
         /// UTC timestamp when the fiscal period was last updated
@@ -55,7 +55,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <summary>
         /// User who last updated the fiscal period
         /// </summary>
-        public required string UpdatedBy { get; set; }
+        public  string UpdatedBy { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the FiscalPeriodDto class

@@ -3,6 +3,7 @@ using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using System;
@@ -12,6 +13,7 @@ namespace Sivar.Erp.Services
 {
     public interface IObjectDb
     {
+        IList<IFiscalPeriod> fiscalPeriods { get; set; }
         IList<IAccount> Accounts { get; set; }
         IList<IBusinessEntity> BusinessEntities { get; set; }
         IList<IDocumentType> DocumentTypes { get; set; }

@@ -5,6 +5,7 @@ using System.Linq;
 using NUnit.Framework;
 using Sivar.Erp;
 using Sivar.Erp.Documents;
+using Sivar.Erp.BusinessEntities;
 
 namespace Tests.ElSalvador
 {

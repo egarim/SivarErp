@@ -49,9 +49,9 @@ namespace Sivar.Erp.ErpSystem.TimeService
             }
             
             // Set the properties
-            entity.Date = DateOnly.FromDateTime(utcDateTime);
-            entity.Time = TimeOnly.FromDateTime(utcDateTime);
-            entity.TimeZoneId = "UTC"; // Store that we're using UTC
+            //entity.Date = DateOnly.FromDateTime(utcDateTime);
+            //entity.Time = TimeOnly.FromDateTime(utcDateTime);
+            //entity.TimeZoneId = "UTC"; // Store that we're using UTC
         }
 
         /// <summary>

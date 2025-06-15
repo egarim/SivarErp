@@ -11,7 +11,7 @@ using Sivar.Erp.Services.ImportExport;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
-using Sivar.Erp.Taxes.TaxRule;
+
 
 namespace Tests.ElSalvador
 {

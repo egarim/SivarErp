@@ -24,9 +24,9 @@ namespace Sivar.Erp.ErpSystem.TimeService
                 ? DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc)
                 : utcDateTime.ToUniversalTime();
 
-            entity.Date = DateOnly.FromDateTime(normalizedUtc);
-            entity.Time = TimeOnly.FromDateTime(normalizedUtc);
-            entity.TimeZoneId = "UTC";
+            //entity.Date = DateOnly.FromDateTime(normalizedUtc);
+            //entity.Time = TimeOnly.FromDateTime(normalizedUtc);
+            //entity.TimeZoneId = "UTC";
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace Sivar.Erp.ErpSystem.TimeService
                 ? DateTime.SpecifyKind(localDateTime, DateTimeKind.Local).ToUniversalTime()
                 : localDateTime.ToUniversalTime();
 
-            entity.Date = DateOnly.FromDateTime(utcDateTime);
-            entity.Time = TimeOnly.FromDateTime(utcDateTime);
-            entity.TimeZoneId = "UTC";
+            //entity.Date = DateOnly.FromDateTime(utcDateTime);
+            //entity.Time = TimeOnly.FromDateTime(utcDateTime);
+            //entity.TimeZoneId = "UTC";
         }
 
         /// <summary>
