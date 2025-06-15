@@ -1,9 +1,8 @@
-using Sivar.Erp.ErpSystem.Sequencers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.Sequencers
+namespace Sivar.Erp.ErpSystem.Sequencers
 {
     public interface ISequencerService
     {

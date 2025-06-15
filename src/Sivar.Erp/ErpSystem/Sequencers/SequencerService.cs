@@ -1,18 +1,18 @@
-using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.Sequencers
+namespace Sivar.Erp.ErpSystem.Sequencers
 {
     public class SequencerService : ISequencerService
     {
-        private readonly ISequenceRepository _repository;
-
-        public SequencerService(ISequenceRepository repository)
+        private readonly IObjectDb objectDb;
+        
+        public SequencerService(IObjectDb objectDb)
         {
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            this.objectDb = objectDb;
         }
 
         public async Task<string> GetNextNumberAsync(string sequenceCode)
@@ -20,17 +20,20 @@ namespace Sivar.Erp.Services.Sequencers
             if (string.IsNullOrEmpty(sequenceCode))
                 throw new ArgumentException("Sequence code cannot be empty", nameof(sequenceCode));
 
-            var sequence = await _repository.GetByCodeAsync(sequenceCode);
+            var sequence = objectDb.Sequences.FirstOrDefault(s => s.Code == sequenceCode);
             if (sequence == null)
                 throw new InvalidOperationException($"Sequence with code {sequenceCode} not found");
 
             if (!sequence.IsActive)
                 throw new InvalidOperationException($"Sequence {sequenceCode} is not active");
 
-            int nextNumber = await _repository.IncrementNumberAsync(sequenceCode);
+            sequence.CurrentNumber++;
+            sequence.LastUsedDate = DateTime.UtcNow;
+            int nextNumber = sequence.CurrentNumber;
+            
             string numberPart = nextNumber.ToString().PadLeft(sequence.PaddingLength, sequence.PaddingChar);
             
-            return $"{sequence.Prefix}{numberPart}{sequence.Suffix}";
+            return await Task.FromResult($"{sequence.Prefix}{numberPart}{sequence.Suffix}");
         }
 
         public async Task<SequenceDto> CreateSequenceAsync(SequenceDto sequence)
@@ -41,7 +44,7 @@ namespace Sivar.Erp.Services.Sequencers
             if (string.IsNullOrEmpty(sequence.Code))
                 throw new ArgumentException("Sequence code cannot be empty", nameof(sequence));
 
-            var existing = await _repository.GetByCodeAsync(sequence.Code);
+            var existing = objectDb.Sequences.FirstOrDefault(s => s.Code == sequence.Code);
             if (existing != null)
                 throw new InvalidOperationException($"Sequence with code {sequence.Code} already exists");
 
@@ -50,7 +53,8 @@ namespace Sivar.Erp.Services.Sequencers
             sequence.IsActive = true;
             sequence.LastUsedDate = DateTime.UtcNow;
 
-            return await _repository.SaveAsync(sequence);
+            objectDb.Sequences.Add(sequence);
+            return await Task.FromResult(sequence);
         }
 
         public async Task<SequenceDto> UpdateSequenceAsync(SequenceDto sequence)
@@ -58,11 +62,21 @@ namespace Sivar.Erp.Services.Sequencers
             if (sequence == null)
                 throw new ArgumentNullException(nameof(sequence));
 
-            var existing = await _repository.GetByCodeAsync(sequence.Code);
+            var existing = objectDb.Sequences.FirstOrDefault(s => s.Code == sequence.Code);
             if (existing == null)
                 throw new InvalidOperationException($"Sequence with code {sequence.Code} not found");
 
-            return await _repository.SaveAsync(sequence);
+            // Remove the existing sequence
+            var existingIndex = objectDb.Sequences.IndexOf(existing);
+            if (existingIndex >= 0)
+            {
+                objectDb.Sequences.RemoveAt(existingIndex);
+            }
+            
+            // Add the updated sequence
+            objectDb.Sequences.Add(sequence);
+            
+            return await Task.FromResult(sequence);
         }
 
         public async Task<SequenceDto?> GetSequenceByCodeAsync(string code)
@@ -70,13 +84,13 @@ namespace Sivar.Erp.Services.Sequencers
             if (string.IsNullOrEmpty(code))
                 throw new ArgumentException("Sequence code cannot be empty", nameof(code));
 
-            return await _repository.GetByCodeAsync(code);
+            var sequence = objectDb.Sequences.FirstOrDefault(s => s.Code == code);
+            return await Task.FromResult(sequence);
         }
 
         public async Task<IEnumerable<SequenceDto>> GetActiveSequencesAsync()
         {
-            var sequences = await _repository.GetAllAsync();
-            return sequences.Where(s => s.IsActive);
+            return await Task.FromResult(objectDb.Sequences.Where(s => s.IsActive));
         }
     }
 }

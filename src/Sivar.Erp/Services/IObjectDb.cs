@@ -2,6 +2,7 @@
 using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Taxes;
 using Sivar.Erp.Taxes.TaxGroup;
 using System;
@@ -18,5 +19,6 @@ namespace Sivar.Erp.Services
         IList<ITax> Taxes { get; set; }
         IList<ITaxGroup> TaxGroups { get; set; }
         IList<ActivityRecord> ActivityRecords { get; set; }
+        IList<SequenceDto> Sequences { get; set; }
     }
 }

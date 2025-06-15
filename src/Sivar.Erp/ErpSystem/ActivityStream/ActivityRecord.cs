@@ -74,16 +74,6 @@ namespace Sivar.Erp.ErpSystem.ActivityStream
         /// </summary>
         public string ContextUrl { get; set; }
         
-        /// <summary>
-        /// Gets the full date and time of the activity in the specified timezone
-        /// </summary>
-        [JsonIgnore]
-        public DateTime LocalDateTime => this.ToDateTime();
-        
-        /// <summary>
-        /// Gets the full date and time of the activity in UTC
-        /// </summary>
-        [JsonIgnore]
-        public DateTime UtcDateTime => this.ToUtcDateTime();
+      
     }
 }
