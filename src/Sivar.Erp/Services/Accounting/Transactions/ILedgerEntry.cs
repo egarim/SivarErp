@@ -28,13 +28,7 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// </summary>
         decimal Amount { get; set; }
 
-        /// <summary>
-        /// Optional reference to a person for analysis
-        /// </summary>
-        Guid? PersonId { get; set; }        /// <summary>
-                                            /// Optional reference to a cost center for analysis
-                                            /// </summary>
-        Guid? CostCentreId { get; set; }
+      
 
         /// <summary>
         /// Name of the account
