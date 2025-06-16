@@ -44,7 +44,7 @@ namespace Tests.ElSalvador
             var activityStreamService = new ActivityStreamService(dateTimeZoneService,_objectDb);
             var fiscalPeriodService = new FiscalPeriodService(_objectDb);
             var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase();
-            var documentToTransactionService = new DocumentToTransactionService();
+         
             var sequencerService = new SequencerService(_objectDb);
 
             _accountingService = new AccountingModule(
@@ -53,7 +53,7 @@ namespace Tests.ElSalvador
                 dateTimeZoneService,
                 fiscalPeriodService,
                 accountBalanceCalculator,
-                documentToTransactionService,
+                
                 sequencerService
             );
         }
@@ -117,7 +117,7 @@ namespace Tests.ElSalvador
             _accountingService.RegisterSequence(null);
 
 
-            TaxModule 
+            
             // Act
             bool posted = await _accountingService.PostTransactionAsync(transaction);
 
