@@ -13,7 +13,7 @@ namespace Sivar.Erp.Documents
     /// </summary>
     public class DocumentTransactionGenerator
     {
-        private readonly IDocumentToTransactionService _transactionService;
+   
         private readonly Dictionary<string, TransactionTemplate> _templates;
         private readonly Dictionary<string, Guid> _accountMappings;
 
@@ -23,10 +23,10 @@ namespace Sivar.Erp.Documents
         /// <param name="transactionService">Service for transaction operations</param>
         /// <param name="accountMappings">Dictionary mapping account keys to account IDs</param>
         public DocumentTransactionGenerator(
-            IDocumentToTransactionService transactionService,
+        
             Dictionary<string, Guid> accountMappings = null)
         {
-            _transactionService = transactionService ?? throw new ArgumentNullException(nameof(transactionService));
+           
             _templates = new Dictionary<string, TransactionTemplate>(StringComparer.OrdinalIgnoreCase);
             _accountMappings = accountMappings ?? new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
         }
@@ -147,7 +147,7 @@ namespace Sivar.Erp.Documents
             }
             
             // Validate transaction balance
-            bool isValid = await _transactionService.ValidateTransactionAsync(
+            bool isValid = await ValidateTransactionAsync(
                 createdTransaction.Oid, ledgerEntries);
 
             if (!isValid)
@@ -162,7 +162,32 @@ namespace Sivar.Erp.Documents
 
             return (transaction, ledgerEntries);
         }
+        /// <summary>
+        /// Validates a transaction for accounting balance
+        /// </summary>
+        /// <param name="transactionId">Transaction ID</param>
+        /// <param name="entries">Ledger entries for the transaction</param>
+        /// <returns>True if valid, false otherwise</returns>
+        public Task<bool> ValidateTransactionAsync(Guid transactionId, IEnumerable<ILedgerEntry> entries)
+        {
+            // Validate transaction has entries
+            if (entries == null || !entries.Any())
+            {
+                return Task.FromResult(false);
+            }
 
+            // Calculate total debits and credits
+            decimal totalDebits = entries
+                .Where(e => e.EntryType == EntryType.Debit)
+                .Sum(e => e.Amount);
+
+            decimal totalCredits = entries
+                .Where(e => e.EntryType == EntryType.Credit)
+                .Sum(e => e.Amount);
+
+            // Transaction is valid if debits equal credits
+            return Task.FromResult(Math.Abs(totalDebits - totalCredits) < 0.01m);
+        }
         /// <summary>
         /// Generates and persists ledger entries for a transaction
         /// </summary>

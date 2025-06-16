@@ -12,7 +12,7 @@ namespace Sivar.Erp.Documents
     /// </summary>
     public class TransactionGeneratorService
     {
-        private readonly IDocumentToTransactionService _transactionService;
+    
         private readonly Dictionary<string, Guid> _accountMappings;
 
         /// <summary>
@@ -21,10 +21,10 @@ namespace Sivar.Erp.Documents
         /// <param name="transactionService">Service for transaction operations</param>
         /// <param name="accountMappings">Dictionary mapping account codes to account IDs</param>
         public TransactionGeneratorService(
-            IDocumentToTransactionService transactionService,
+          
             Dictionary<string, Guid> accountMappings = null)
         {
-            _transactionService = transactionService ?? throw new ArgumentNullException(nameof(transactionService));
+           
             _accountMappings = accountMappings ?? new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -139,5 +139,6 @@ namespace Sivar.Erp.Documents
                 _accountMappings[mapping.Key] = mapping.Value;
             }
         }
+       
     }
 }

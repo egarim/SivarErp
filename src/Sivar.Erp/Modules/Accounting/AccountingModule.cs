@@ -1,3 +1,4 @@
+using Sivar.Erp.Documents;
 using Sivar.Erp.Documents.DocumentToTransactions;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
@@ -19,7 +20,7 @@ namespace Sivar.Erp.Services.Accounting
     {
         protected IFiscalPeriodService FiscalPeriodService;
         protected IAccountBalanceCalculator AccountBalanceCalculator;
-        protected IDocumentToTransactionService transactionService;
+     
    
 
         // Constants for transaction number sequence codes
@@ -32,13 +33,13 @@ namespace Sivar.Erp.Services.Accounting
             IDateTimeZoneService dateTimeZoneService,
             IFiscalPeriodService fiscalPeriodService, 
             IAccountBalanceCalculator accountBalanceCalculator, 
-            IDocumentToTransactionService transactionService,
+          
             ISequencerService sequencerService) 
             : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
         {
             FiscalPeriodService = fiscalPeriodService;
             AccountBalanceCalculator = accountBalanceCalculator;
-            this.transactionService = transactionService;
+           
            
         }
 
@@ -66,10 +67,8 @@ namespace Sivar.Erp.Services.Accounting
                 throw new InvalidOperationException($"Cannot post transaction: Fiscal period '{fiscalPeriod.Name}' is closed");
 
             // Validate transaction balance (debits = credits)
-            bool isValid = await transactionService.ValidateTransactionAsync(
-                transaction.Oid, 
-                transaction.LedgerEntries);
-                
+            bool isValid =await transaction.ValidateTransactionAsync();
+
             if (!isValid)
                 throw new InvalidOperationException("Transaction has unbalanced debits and credits");
 
