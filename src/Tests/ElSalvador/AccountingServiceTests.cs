@@ -24,7 +24,7 @@ namespace Tests.ElSalvador
     {
         private readonly string _testDataPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "Tests", "ElSalvador", "Data", "New");
         private IAccountImportExportService _accountImportService;
-        private AccountingService _accountingService;
+        private AccountingModule _accountingService;
         private ObjectDb _objectDb;
 
         [SetUp]
@@ -47,7 +47,7 @@ namespace Tests.ElSalvador
             var documentToTransactionService = new DocumentToTransactionService();
             var sequencerService = new SequencerService(_objectDb);
 
-            _accountingService = new AccountingService(
+            _accountingService = new AccountingModule(
                 optionService,
                 activityStreamService,
                 dateTimeZoneService,
@@ -115,6 +115,9 @@ namespace Tests.ElSalvador
                 }
             };
             _accountingService.RegisterSequence(null);
+
+
+            TaxModule 
             // Act
             bool posted = await _accountingService.PostTransactionAsync(transaction);
 

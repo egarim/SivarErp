@@ -10,7 +10,7 @@ namespace Sivar.Erp.ErpSystem.Services
     /// <summary>
     /// Base class for services that provides common functionality related to options and activity recording
     /// </summary>
-    public abstract class ServiceBase
+    public abstract class ErpModuleBase
     {
         /// <summary>
         /// Service for managing options
@@ -36,7 +36,7 @@ namespace Sivar.Erp.ErpSystem.Services
         /// </summary>
         /// <param name="optionService">The option service</param>
         /// <param name="activityStreamService">The activity stream service</param>
-        protected ServiceBase(IOptionService optionService, IActivityStreamService activityStreamService,IDateTimeZoneService dateTimeZoneService, ISequencerService sequencerService)
+        protected ErpModuleBase(IOptionService optionService, IActivityStreamService activityStreamService,IDateTimeZoneService dateTimeZoneService, ISequencerService sequencerService)
         {
             OptionService = optionService ?? throw new ArgumentNullException(nameof(optionService));
             ActivityStreamService = activityStreamService ?? throw new ArgumentNullException(nameof(activityStreamService));

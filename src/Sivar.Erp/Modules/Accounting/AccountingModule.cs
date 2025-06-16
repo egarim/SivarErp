@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Sivar.Erp.Services.Accounting
 {
-    public class AccountingService : ServiceBase
+    public class AccountingModule : ErpModuleBase
     {
         protected IFiscalPeriodService FiscalPeriodService;
         protected IAccountBalanceCalculator AccountBalanceCalculator;
@@ -26,7 +26,7 @@ namespace Sivar.Erp.Services.Accounting
         private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
         private const string BATCH_SEQUENCE_CODE = "BATCH";
 
-        public AccountingService(
+        public AccountingModule(
             IOptionService optionService, 
             IActivityStreamService activityStreamService, 
             IDateTimeZoneService dateTimeZoneService,
