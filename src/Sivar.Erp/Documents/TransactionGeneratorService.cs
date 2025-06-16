@@ -10,7 +10,7 @@ namespace Sivar.Erp.Documents
     /// <summary>
     /// Generates transactions directly from document totals with accounting information
     /// </summary>
-    public class SimpleTransactionGenerator
+    public class TransactionGeneratorService
     {
         private readonly IDocumentToTransactionService _transactionService;
         private readonly Dictionary<string, Guid> _accountMappings;
@@ -20,7 +20,7 @@ namespace Sivar.Erp.Documents
         /// </summary>
         /// <param name="transactionService">Service for transaction operations</param>
         /// <param name="accountMappings">Dictionary mapping account codes to account IDs</param>
-        public SimpleTransactionGenerator(
+        public TransactionGeneratorService(
             IDocumentToTransactionService transactionService,
             Dictionary<string, Guid> accountMappings = null)
         {
@@ -96,8 +96,7 @@ namespace Sivar.Erp.Documents
                 }
             }
             
-            // Save the transaction
-            await _transactionService.CreateTransactionAsync(transaction);
+           
             
             return (transaction, entries);
         }

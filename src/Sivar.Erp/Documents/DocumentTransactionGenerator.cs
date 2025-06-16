@@ -104,7 +104,7 @@ namespace Sivar.Erp.Documents
             };
 
             // Create and save the transaction
-            var createdTransaction = await _transactionService.CreateTransactionAsync(transaction);
+            var createdTransaction = transaction;
 
             // Generate ledger entries based on the template
             var ledgerEntries = new List<LedgerEntryDto>();

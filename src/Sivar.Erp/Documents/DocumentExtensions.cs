@@ -20,7 +20,7 @@ namespace Sivar.Erp.Documents
         /// <param name="generator">The transaction generator</param>
         /// <returns>A tuple containing the transaction and ledger entries</returns>
         public static async Task<(TransactionDto Transaction, List<LedgerEntryDto> LedgerEntries)> 
-            GenerateSimpleTransactionAsync(this IDocument document, SimpleTransactionGenerator generator)
+            GenerateSimpleTransactionAsync(this IDocument document, TransactionGeneratorService generator)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));

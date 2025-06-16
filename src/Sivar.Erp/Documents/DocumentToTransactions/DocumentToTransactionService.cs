@@ -7,25 +7,7 @@ namespace Sivar.Erp.Documents.DocumentToTransactions
     /// </summary>
     public class DocumentToTransactionService : IDocumentToTransactionService
     {
-        /// <summary>
-        /// Creates a new transaction
-        /// </summary>
-        /// <param name="transaction">Transaction to create</param>
-        /// <returns>Created transaction</returns>
-        public Task<TransactionDto> CreateTransactionAsync(TransactionDto transaction)
-        {
-            if (transaction == null)
-                throw new ArgumentNullException(nameof(transaction));
-
-            // Ensure the transaction has a valid ID
-            if (transaction.Oid == Guid.Empty)
-                transaction.Oid = Guid.NewGuid();
-
-            // In a real implementation, this would save to a database
-            // For now, we'll just return the transaction with the ID set
-            
-            return Task.FromResult(transaction);
-        }
+       
 
         /// <summary>
         /// Validates a transaction for accounting balance
