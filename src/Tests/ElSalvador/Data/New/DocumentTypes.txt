@@ -1,0 +1,15 @@
+Code,Name,DocumentOperation,IsEnabled
+CCF,Comprobante de Crédito Fiscal,SalesInvoice,true
+FCF,Factura de Consumidor Final,SalesInvoice,true
+NR,Nota de Remisión,DeliveryNote,true
+NE,Nota de Exportación,SalesInvoice,true
+NC,Nota de Crédito,CreditNote,true
+ND,Nota de Débito,DebitNote,true
+REC,Comprobante de Recibo,Receipt,true
+CO,Cotización,Quotation,true
+PED,Pedido,SalesOrder,true
+OC,Orden de Compra,PurchaseOrder,true
+SC,Solicitud de Cotización,RequestForQuotation,true
+SR,Solicitud de Requisición,PurchaseRequisition,true
+GR,Recepción de Mercadería,GoodsReceiptNote,true
+FC,Factura de Compra,PurchaseInvoice,true
