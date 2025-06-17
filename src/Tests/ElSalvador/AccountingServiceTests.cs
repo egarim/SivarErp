@@ -378,7 +378,6 @@ namespace Tests.ElSalvador
                     Oid = Guid.NewGuid(),
                     TaxId = ivaTax.Oid,
                     DocumentOperation = DocumentOperation.SalesInvoice,
-                    DocumentTypeCode = ccfDocType.Code,
                     IsEnabled = true,
                     Priority = 1
                 }
