@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
@@ -27,6 +28,9 @@ namespace Tests.ElSalvador
         private IAccountImportExportService _accountImportService;
         private ITaxImportExportService _taxImportService;
         private ITaxGroupImportExportService _taxGroupImportService;
+        private IBusinessEntityImportExportService _businessEntityImportService;
+        private IItemImportExportService _itemImportService;
+        private IDocumentTypeImportExportService _documentTypeImportService;
         private AccountingModule _accountingService;
         private ObjectDb _objectDb;
 
@@ -38,18 +42,19 @@ namespace Tests.ElSalvador
             _accountImportService = new AccountImportExportService(elSalvadorAccountValidator);
             _taxImportService = new TaxImportExportService();
             _taxGroupImportService = new TaxGroupImportExportService();
+            _businessEntityImportService = new BusinessEntityImportExportService();
+            _itemImportService = new ItemImportExportService();
+            _documentTypeImportService = new DocumentTypeImportExportService();
 
             // Create object database
             _objectDb = new ObjectDb();
 
             // Create required services
             var optionService = new OptionService();
-       
             var dateTimeZoneService = new DateTimeZoneService();
-            var activityStreamService = new ActivityStreamService(dateTimeZoneService,_objectDb);
+            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb);
             var fiscalPeriodService = new FiscalPeriodService(_objectDb);
             var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase();
-         
             var sequencerService = new SequencerService(_objectDb);
 
             _accountingService = new AccountingModule(
@@ -87,6 +92,7 @@ namespace Tests.ElSalvador
             };
 
             _objectDb.fiscalPeriods.Add(fiscalPeriod);
+
             // Create a test transaction
             var cashAccount = importedAccounts.First(a => a.OfficialCode == "11010101"); // CAJA GENERAL
             var expenseAccount = importedAccounts.First(a => a.OfficialCode == "430119"); // PAPELERIA Y UTILES DE OFICINA
@@ -105,22 +111,20 @@ namespace Tests.ElSalvador
                         TransactionId = Guid.NewGuid(),
                         AccountId = expenseAccount.Oid,
                         Amount = 100.00m,
-                         EntryType = EntryType.Debit
+                        EntryType = EntryType.Debit
                     },
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
                         AccountId = cashAccount.Oid,
-                   
-                         EntryType = EntryType.Credit,
+                        EntryType = EntryType.Credit,
                         Amount = 100.00m
                     }
                 }
             };
+
             _accountingService.RegisterSequence(null);
-
-
             
             // Act
             bool posted = await _accountingService.PostTransactionAsync(transaction);
@@ -131,8 +135,6 @@ namespace Tests.ElSalvador
             // Verify transaction is in the activity stream
             var activityRecord = _objectDb.ActivityRecords.FirstOrDefault(a => 
                 a.Id == transaction.Oid);
-
-            //Assert.That(activityRecord, Is.Not.Null, "Activity record should be created for posted transaction");
         }
 
         [Test]
@@ -232,6 +234,58 @@ namespace Tests.ElSalvador
                 a.Id == transaction.Oid);
 
             Assert.That(activityRecord, Is.Not.Null, "Activity record should be created for posted transaction");
+        }
+
+        [Test]
+        public async Task LoadMasterData_Success()
+        {
+            // Arrange - Load Business Entities
+            string businessEntitiesPath = Path.Combine(_testDataPath, "BusinesEntities.txt");
+            string businessEntitiesCsvContent = await File.ReadAllTextAsync(businessEntitiesPath);
+
+            var (businessEntities, businessEntityErrors) = await _businessEntityImportService.ImportFromCsvAsync(businessEntitiesCsvContent, "AccountingServiceTest");
+            Assert.That(businessEntityErrors, Is.Empty, "Business entity import should not have errors");
+
+            // Add business entities to object database
+            _objectDb.BusinessEntities = businessEntities.ToList();
+
+            // Load Items
+            string itemsPath = Path.Combine(_testDataPath, "Items.txt");
+            string itemsCsvContent = await File.ReadAllTextAsync(itemsPath);
+
+            var (items, itemErrors) = await _itemImportService.ImportFromCsvAsync(itemsCsvContent, "AccountingServiceTest");
+            Assert.That(itemErrors, Is.Empty, "Item import should not have errors");
+
+            // Add items to object database
+            _objectDb.Items = items.ToList();
+
+            // Load Document Types
+            string documentTypesPath = Path.Combine(_testDataPath, "DocumentTypes.txt");
+            string documentTypesCsvContent = await File.ReadAllTextAsync(documentTypesPath);
+
+            var (documentTypes, documentTypeErrors) = await _documentTypeImportService.ImportFromCsvAsync(documentTypesCsvContent, "AccountingServiceTest");
+            Assert.That(documentTypeErrors, Is.Empty, "Document type import should not have errors");
+
+            // Add document types to object database
+            _objectDb.DocumentTypes = documentTypes.ToList();
+
+            // Verify the imported data
+            Assert.That(_objectDb.BusinessEntities, Is.Not.Empty, "Business entities should be imported");
+            Assert.That(_objectDb.Items, Is.Not.Empty, "Items should be imported");
+            Assert.That(_objectDb.DocumentTypes, Is.Not.Empty, "Document types should be imported");
+
+            // Verify some specific data
+            var nationalClient = _objectDb.BusinessEntities.FirstOrDefault(be => be.Code == "CL001");
+            Assert.That(nationalClient, Is.Not.Null, "National client CL001 should exist");
+            Assert.That(nationalClient.Name, Is.EqualTo("CLIENTE NACIONAL 1"));
+
+            var product1 = _objectDb.Items.FirstOrDefault(i => i.Code == "PR001");
+            Assert.That(product1, Is.Not.Null, "Product PR001 should exist");
+            Assert.That(product1.Description, Is.EqualTo("PRODUCTO 1"));
+
+            var ccfDocType = _objectDb.DocumentTypes.FirstOrDefault(dt => dt.Code == "CCF");
+            Assert.That(ccfDocType, Is.Not.Null, "CCF document type should exist");
+            Assert.That(ccfDocType.DocumentOperation, Is.EqualTo(DocumentOperation.SalesInvoice));
         }
     }
 }
