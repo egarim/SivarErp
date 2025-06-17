@@ -40,8 +40,4 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ElSalvador\Services\" />
-  </ItemGroup>
-
 </Project>
