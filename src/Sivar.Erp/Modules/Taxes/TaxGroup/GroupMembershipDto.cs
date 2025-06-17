@@ -10,8 +10,8 @@ namespace Sivar.Erp.Services.Taxes.TaxGroup
     public class GroupMembershipDto : INotifyPropertyChanged
     {
         private Guid _oid;
-        private Guid _groupId;
-        private Guid _entityId;
+        private string _groupId;
+        private string _entityId;
         private GroupType _groupType;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Sivar.Erp.Services.Taxes.TaxGroup
         /// <summary>
         /// The tax group ID that this membership belongs to
         /// </summary>
-        public Guid GroupId
+        public string GroupId
         {
             get => _groupId;
             set
@@ -49,7 +49,7 @@ namespace Sivar.Erp.Services.Taxes.TaxGroup
         /// <summary>
         /// The entity ID that is a member of the group (either business entity or item depending on GroupType)
         /// </summary>
-        public Guid EntityId
+        public string EntityId
         {
             get => _entityId;
             set

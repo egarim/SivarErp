@@ -9,7 +9,7 @@ namespace Sivar.Erp.BusinessEntities
 {
     public interface IBusinessEntity
     {
-        Guid Oid { get; set; }
+  
         string Code { get; set; }
         string Name { get; set; }
         string Address { get; set; }

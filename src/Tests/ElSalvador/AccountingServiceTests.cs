@@ -320,6 +320,54 @@ namespace Tests.ElSalvador
                 "Accounting equation should balance: Assets = -(Liabilities + Expenses)");
         }
 
+
+        [Test]
+        public async Task FullFlow()
+        {
+            // Arrange - Load Chart of Accounts
+            string chartOfAccountsPath = Path.Combine(_testDataPath, "ComercialChartOfAccounts.txt");
+            string chartCsvContent = await File.ReadAllTextAsync(chartOfAccountsPath);
+
+            // Import the chart of accounts
+            var (importedAccounts, accountErrors) = await _accountImportService.ImportFromCsvAsync(chartCsvContent, "AccountingServiceTest");
+            Assert.That(accountErrors, Is.Empty, "Chart of accounts import should not have errors");
+
+            // Add accounts to object database
+            _objectDb.Accounts = importedAccounts.ToList();
+
+            // Load Taxes
+            string taxesPath = Path.Combine(_testDataPath, "ElSalvadorTaxes.txt");
+            string taxesCsvContent = await File.ReadAllTextAsync(taxesPath);
+            var (taxes, taxErrors) = await _taxImportService.ImportFromCsvAsync(taxesCsvContent, "AccountingServiceTest");
+            Assert.That(taxErrors, Is.Empty, "Tax import should not have errors");
+
+            // Add taxes to object database
+            _objectDb.Taxes = taxes.Cast<ITax>().ToList();
+
+            // Load Tax Groups
+            string taxGroupsPath = Path.Combine(_testDataPath, "ElSalvadorTaxGroups.txt");
+            string taxGroupsCsvContent = await File.ReadAllTextAsync(taxGroupsPath);
+            var (taxGroups, taxGroupErrors) = await _taxGroupImportService.ImportFromCsvAsync(taxGroupsCsvContent, "AccountingServiceTest");
+            Assert.That(taxGroupErrors, Is.Empty, "Tax group import should not have errors");
+
+            // Add tax groups to object database
+            _objectDb.TaxGroups = taxGroups.Cast<ITaxGroup>().ToList();
+
+            // Create fiscal period for January 2020
+            var fiscalPeriod = new FiscalPeriodDto
+            {
+                Name = "January 2020",
+                StartDate = new DateOnly(2000, 1, 1),
+                EndDate = new DateOnly(2050, 1, 31),
+                Status = FiscalPeriodStatus.Open
+            };
+
+            _objectDb.fiscalPeriods.Add(fiscalPeriod);
+
+   
+        }
+
+
         [Test]
         public async Task TransactionGeneratorWithTaxRules_EvaluatesDocumentTaxes_GeneratesTransaction()
         {
@@ -398,8 +446,8 @@ namespace Tests.ElSalvador
             };
 
             // 7. Create tax groups
-            var registeredCompanyGroupId = Guid.NewGuid();
-            var exemptItemGroupId = Guid.NewGuid();
+            var registeredCompanyGroupId = "Register companies";
+            var exemptItemGroupId = "Exempt";
 
             // 8. Create taxes
             var ivaTax = new TaxDto
@@ -420,7 +468,7 @@ namespace Tests.ElSalvador
                 new TaxRuleDto
                 {
                     Oid = Guid.NewGuid(),
-                    TaxId = ivaTax.Oid,
+                    TaxId = ivaTax.Code,
                     DocumentOperation = DocumentOperation.SalesInvoice,
                     BusinessEntityGroupId = registeredCompanyGroupId,
                     IsEnabled = true,
@@ -431,7 +479,7 @@ namespace Tests.ElSalvador
                 new TaxRuleDto
                 {
                     Oid = Guid.NewGuid(),
-                    TaxId = ivaTax.Oid,
+                    TaxId = ivaTax.Code,
                     DocumentOperation = DocumentOperation.SalesInvoice,
                     BusinessEntityGroupId = registeredCompanyGroupId,
                     ItemGroupId = exemptItemGroupId,
@@ -448,7 +496,7 @@ namespace Tests.ElSalvador
                 {
                     Oid = Guid.NewGuid(),
                     GroupId = registeredCompanyGroupId,
-                    EntityId = registeredCompany.Oid,
+                    EntityId = registeredCompany.Code,
                     GroupType = GroupType.BusinessEntity
                 },
                 
@@ -457,7 +505,7 @@ namespace Tests.ElSalvador
                 {
                     Oid = Guid.NewGuid(),
                     GroupId = exemptItemGroupId,
-                    EntityId = exemptProduct.Oid,
+                    EntityId = exemptProduct.Code,
                     GroupType = GroupType.Item
                 }
             };

@@ -8,14 +8,14 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
     /// <summary>
     /// Defines rules for when a tax should be applied based on document type and entity/item groups
     /// </summary>
-    public class TaxRuleDto : INotifyPropertyChanged
+    public class TaxRuleDto : ITaxRule, INotifyPropertyChanged
     {
         private Guid _oid;
-        private Guid _taxId;
+        private string _taxId;
         private string _documentTypeCode;
         private DocumentOperation? _documentOperation;
-        private Guid? _businessEntityGroupId;
-        private Guid? _itemGroupId;
+        private string _businessEntityGroupId;
+        private string _itemGroupId;
         private bool _isEnabled = true;
         private int _priority = 1;
 
@@ -38,7 +38,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// <summary>
         /// Reference to the tax that should be applied
         /// </summary>
-        public Guid TaxId
+        public string TaxId
         {
             get => _taxId;
             set
@@ -87,7 +87,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// <summary>
         /// Business entity group ID this rule applies to (null means any entity)
         /// </summary>
-        public Guid? BusinessEntityGroupId
+        public string BusinessEntityGroupId
         {
             get => _businessEntityGroupId;
             set
@@ -103,7 +103,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// <summary>
         /// Item group ID this rule applies to (null means any item)
         /// </summary>
-        public Guid? ItemGroupId
+        public string ItemGroupId
         {
             get => _itemGroupId;
             set

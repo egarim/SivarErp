@@ -35,16 +35,16 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
                 throw new ArgumentNullException(nameof(document));
 
             // Get the business entity ID
-            var businessEntityId = document.BusinessEntity?.Oid;
+            var businessEntityId = document.BusinessEntity?.Code;
 
-            if (!businessEntityId.HasValue)
+            if (!string.IsNullOrEmpty(businessEntityId))
                 return new List<TaxDto>();
 
             // Get all business entity groups that this entity belongs to
-            var entityGroupIds = GetGroupsForEntity(businessEntityId.Value, GroupType.BusinessEntity);
+            var entityGroupIds = GetGroupsForEntity(businessEntityId, GroupType.BusinessEntity);
 
             // Find applicable document-level taxes
-            return GetApplicableTaxes(document.DocumentType.DocumentOperation, entityGroupIds, new List<Guid>())
+            return GetApplicableTaxes(document.DocumentType.DocumentOperation, entityGroupIds, new List<string>())
                 .Where(tax => tax.ApplicationLevel == TaxApplicationLevel.Document)
                 .ToList();
         }
@@ -60,15 +60,15 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
                 throw new ArgumentNullException(nameof(line));
 
             // Get the business entity and item IDs
-            var businessEntityId = document.BusinessEntity?.Oid;
-            var itemId = line.Item?.Oid;
+            var businessEntityId = document.BusinessEntity.Code;
+            var itemId = line.Item?.Code;
 
-            if (!businessEntityId.HasValue || !itemId.HasValue)
+            if (!string.IsNullOrEmpty(document.BusinessEntity.Code) || !string.IsNullOrEmpty(itemId))
                 return new List<TaxDto>();
 
             // Get the groups these entities belong to
-            var entityGroupIds = GetGroupsForEntity(businessEntityId.Value, GroupType.BusinessEntity);
-            var itemGroupIds = GetGroupsForEntity(itemId.Value, GroupType.Item);
+            var entityGroupIds = GetGroupsForEntity(businessEntityId, GroupType.BusinessEntity);
+            var itemGroupIds = GetGroupsForEntity(itemId, GroupType.Item);
 
             // Find applicable line-level taxes
             return GetApplicableTaxes(document.DocumentType.DocumentOperation, entityGroupIds, itemGroupIds)
@@ -79,7 +79,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// <summary>
         /// Gets all groups that an entity belongs to
         /// </summary>
-        private IList<Guid> GetGroupsForEntity(Guid entityId, GroupType groupType)
+        private IList<string> GetGroupsForEntity(string entityId, GroupType groupType)
         {
             return _groupMemberships
                 .Where(m => m.EntityId == entityId && m.GroupType == groupType)
@@ -92,21 +92,21 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// </summary>
         private IEnumerable<TaxDto> GetApplicableTaxes(
             DocumentOperation documentOperation,
-            IList<Guid> entityGroupIds,
-            IList<Guid> itemGroupIds)
+            IList<string> entityGroupIds,
+            IList<string> itemGroupIds)
         {
             // Dictionary to track final decision for each tax (whether it should be applied)
-            var taxDecisions = new Dictionary<Guid, bool>();
+            var taxDecisions = new Dictionary<string, bool>();
 
             // Get rules that match our criteria, ordered by priority (lower number = higher priority)
             var matchingRules = _taxRules
                 .Where(rule => rule.DocumentOperation == documentOperation)
                 .Where(rule =>
-                    !rule.BusinessEntityGroupId.HasValue ||
-                    entityGroupIds.Contains(rule.BusinessEntityGroupId.Value))
+                    string.IsNullOrEmpty(rule.BusinessEntityGroupId) ||
+                    entityGroupIds.Contains(rule.BusinessEntityGroupId))
                 .Where(rule =>
-                    !rule.ItemGroupId.HasValue ||
-                    itemGroupIds.Contains(rule.ItemGroupId.Value))
+                    string.IsNullOrEmpty(rule.ItemGroupId) ||
+                    itemGroupIds.Contains(rule.ItemGroupId))
                 .OrderBy(rule => rule.Priority)
                 .ToList();
 
@@ -114,7 +114,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
             foreach (var rule in matchingRules)
             {
                 // The most specific rule (with matching ItemGroupId) for each tax wins
-                if (!taxDecisions.ContainsKey(rule.TaxId) || rule.ItemGroupId.HasValue)
+                if (!taxDecisions.ContainsKey(rule.TaxId) || !string.IsNullOrEmpty(rule.ItemGroupId))
                 {
                     // If the rule is disabled, it means we should NOT apply the tax
                     taxDecisions[rule.TaxId] = rule.IsEnabled;
@@ -124,8 +124,8 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
             // Return only enabled taxes that have a positive decision
             return _availableTaxes
                 .Where(tax => tax.IsEnabled &&
-                           taxDecisions.ContainsKey(tax.Oid) &&
-                           taxDecisions[tax.Oid])
+                           taxDecisions.ContainsKey(tax.Code) &&
+                           taxDecisions[tax.Code])
                 .ToList();
         }
     }

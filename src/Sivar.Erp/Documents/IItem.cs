@@ -5,7 +5,7 @@ namespace Sivar.Erp.Documents
 {
     public interface IItem
     {
-        Guid Oid { get; set; }
+   
         string Code { get; set; }
         string Type { get; set; }
         string Description { get; set; }

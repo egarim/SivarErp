@@ -1,0 +1,15 @@
+TaxCode,DocumentOperation,BusinessEntityGroupCode,ItemGroupCode,IsEnabled,Priority
+IVA,SalesInvoice,REGISTERED_TAXPAYERS,,true,1
+IVA,SalesInvoice,,TAXABLE_ITEMS,true,1
+IVA,SalesInvoice,,EXEMPT_ITEMS,false,0
+IVAR,PurchaseInvoice,REGISTERED_TAXPAYERS,,true,1
+IVAR,PurchaseInvoice,,EXEMPT_ITEMS,false,0
+IVP,SalesInvoice,SMALL_TAXPAYERS,,true,1
+FOVIAL,SalesInvoice,,FUEL_ITEMS,true,1
+COTRANS,SalesInvoice,,FUEL_ITEMS,true,1
+CESC5,SalesInvoice,,TELECOM_ITEMS,true,1
+TURISMO5,SalesInvoice,,TOURISM_ITEMS,true,1
+IVA,PurchaseInvoice,EXEMPT_ENTITIES,,false,0
+IVA,SalesInvoice,EXEMPT_ENTITIES,,false,0
+ISRSE,SalesInvoice,,EXEMPT_ITEMS,false,0
+ISRPP,SalesInvoice,GOVERNMENT,,true,1
