@@ -69,7 +69,7 @@ namespace Sivar.Erp.Documents
                             EntryType = EntryType.Debit,
                             Amount = totalDto.Total,
                             AccountName = totalDto.Concept,
-                            OfficialCode = totalDto.DebitAccountCode
+                            OfficialCode = accountId
 
                         };
                         
@@ -89,7 +89,7 @@ namespace Sivar.Erp.Documents
                             EntryType = EntryType.Credit,
                             Amount = totalDto.Total,
                             AccountName = totalDto.Concept,
-                            OfficialCode = totalDto.CreditAccountCode
+                            OfficialCode = accountId
                         };
                         
                         entries.Add(entry);
