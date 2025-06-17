@@ -26,6 +26,7 @@ namespace Sivar.Erp.Services.Accounting
         // Constants for transaction number sequence codes
         private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
         private const string BATCH_SEQUENCE_CODE = "BATCH";
+        private const string FISCAL_SEQUENCE_CODE = "FISCAL";
 
         public AccountingModule(
             IOptionService optionService, 
@@ -85,7 +86,7 @@ namespace Sivar.Erp.Services.Accounting
             var systemActor = CreateSystemStreamObject();
             var transactionTarget = CreateStreamObject(
                 "Transaction", 
-                transaction.Oid.ToString(), 
+                transaction.TransactionNumber, 
                 $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
                 
             await RecordActivityAsync(
@@ -126,7 +127,7 @@ namespace Sivar.Erp.Services.Accounting
             var systemActor = CreateSystemStreamObject();
             var transactionTarget = CreateStreamObject(
                 "Transaction", 
-                transaction.Oid.ToString(), 
+                transaction.TransactionNumber, 
                 $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
                 
             await RecordActivityAsync(
@@ -190,7 +191,7 @@ namespace Sivar.Erp.Services.Accounting
             var systemActor = CreateSystemStreamObject();
             var batchTarget = CreateStreamObject(
                 "TransactionBatch", 
-                batch.Oid.ToString(), 
+                batch.TransactionNumber, 
                 $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
                 
             await RecordActivityAsync(
@@ -248,7 +249,7 @@ namespace Sivar.Erp.Services.Accounting
             var systemActor = CreateSystemStreamObject();
             var batchTarget = CreateStreamObject(
                 "TransactionBatch", 
-                batch.Oid.ToString(), 
+                batch.TransactionNumber, 
                 $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
                 
             await RecordActivityAsync(
@@ -286,9 +287,15 @@ namespace Sivar.Erp.Services.Accounting
             BatchSequence.Name = "Batch";
             BatchSequence.Prefix = "B";
             BatchSequence.Suffix = "S";
-            
-          
 
+            SequenceDto FiscalPeriod = new SequenceDto();
+            FiscalPeriod.Code = FISCAL_SEQUENCE_CODE;
+            FiscalPeriod.CurrentNumber = 1;
+            FiscalPeriod.Name = "Fiscal Period";
+            FiscalPeriod.Prefix = "FP";
+            FiscalPeriod.Suffix = "S";
+
+            this.sequencerService.CreateSequenceAsync(FiscalPeriod);
             this.sequencerService.CreateSequenceAsync(sequence);
             this.sequencerService.CreateSequenceAsync(BatchSequence);
         }

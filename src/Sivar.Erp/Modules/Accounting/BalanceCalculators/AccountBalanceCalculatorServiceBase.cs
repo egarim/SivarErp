@@ -29,10 +29,10 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
         /// <summary>
         /// Calculates the balance of an account as of a specific date
         /// </summary>
-        /// <param name="accountId">Account ID</param>
+        /// <param name="AccountOfficialCode">Account ID</param>
         /// <param name="asOfDate">Date to calculate balance for</param>
         /// <returns>Account balance (positive for debit balance, negative for credit balance)</returns>
-        public decimal CalculateAccountBalance(Guid accountId, DateOnly asOfDate)
+        public decimal CalculateAccountBalance(string AccountOfficialCode, DateOnly asOfDate)
         {
             // Get all relevant ledger entries for this account up to the specified date
             var relevantTransactions = transactions
@@ -42,7 +42,7 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
             // Find the ledger entries for the specified account
             var ledgerEntries = relevantTransactions
                 .SelectMany(t => t.LedgerEntries)
-                .Where(e => e.AccountId == accountId)
+                .Where(e => e.OfficialCode == AccountOfficialCode)
                 .ToList();
 
             // Calculate balance (debit sum - credit sum)
@@ -66,7 +66,7 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
         /// <param name="endDate">End date (inclusive)</param>
         /// <returns>Tuple containing debit turnover and credit turnover</returns>
         public (decimal DebitTurnover, decimal CreditTurnover) CalculateAccountTurnover(
-            Guid accountId, DateOnly startDate, DateOnly endDate)
+            string AccountOfficialCode, DateOnly startDate, DateOnly endDate)
         {
             // Get all relevant ledger entries for this account within the date range
             var relevantTransactions = transactions
@@ -76,7 +76,7 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
             // Find the ledger entries for the specified account
             var ledgerEntries = relevantTransactions
                 .SelectMany(t => t.LedgerEntries)
-                .Where(e => e.AccountId == accountId)
+                .Where(e => e.OfficialCode == AccountOfficialCode)
                 .ToList();
 
             // Calculate debit and credit turnovers
@@ -94,15 +94,15 @@ namespace Sivar.Erp.Services.Accounting.BalanceCalculators
         /// <summary>
         /// Determines if an account has any transactions
         /// </summary>
-        /// <param name="accountId">Account ID</param>
+        /// <param name="AccountOfficialCode">Account ID</param>
         /// <returns>True if account has transactions, false otherwise</returns>
-        public bool HasTransactions(Guid accountId)
+        public bool HasTransactions(string AccountOfficialCode)
         {
             // Check if there are any posted ledger entries for this account
             return transactions
                 .Where(t => t.IsPosted)
                 .SelectMany(t => t.LedgerEntries)
-                .Any(e => e.AccountId == accountId);
+                .Any(e => e.OfficialCode == AccountOfficialCode);
         }
     }
 }

@@ -203,7 +203,7 @@ namespace Tests.ChartOfAccounts
             {
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                  
                     AccountName = "Cash",
                     OfficialCode = "11000",
                     AccountType = AccountType.Asset,
@@ -217,7 +217,7 @@ namespace Tests.ChartOfAccounts
                 },
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                
                     AccountName = "Accounts Receivable",
                     OfficialCode = "12000",
                     AccountType = AccountType.Asset,
@@ -250,7 +250,7 @@ namespace Tests.ChartOfAccounts
             {
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                   
                     AccountName = "Cash, on hand",
                     OfficialCode = "11000",
                     AccountType = AccountType.Asset,
@@ -275,7 +275,7 @@ namespace Tests.ChartOfAccounts
             {
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                   
                     AccountName = "Current Assets",
                     OfficialCode = "11000",
                     AccountType = AccountType.Asset,
@@ -289,7 +289,7 @@ namespace Tests.ChartOfAccounts
                 },
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+
                     AccountName = "Cash",
                     OfficialCode = "11100",
                     AccountType = AccountType.Asset,
@@ -303,7 +303,7 @@ namespace Tests.ChartOfAccounts
                 },
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                   
                     AccountName = "Bank Account",
                     OfficialCode = "11110",
                     AccountType = AccountType.Asset,
@@ -342,7 +342,7 @@ namespace Tests.ChartOfAccounts
             {
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                  
                     AccountName = "Cash",
                     OfficialCode = "11000",
                     AccountType = AccountType.Asset,
@@ -356,7 +356,7 @@ namespace Tests.ChartOfAccounts
                 },
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                  
                     AccountName = "Petty Cash",
                     OfficialCode = "11010",
                     AccountType = AccountType.Asset,
@@ -402,7 +402,7 @@ namespace Tests.ChartOfAccounts
             {
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                   
                     AccountName = "Assets",
                     OfficialCode = "10000",
                     AccountType = AccountType.Asset,
@@ -416,7 +416,7 @@ namespace Tests.ChartOfAccounts
                 },
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                  
                     AccountName = "Current Assets",
                     OfficialCode = "11000",
                     AccountType = AccountType.Asset,
@@ -430,7 +430,7 @@ namespace Tests.ChartOfAccounts
                 },
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                 
                     AccountName = "Cash",
                     OfficialCode = "11100",
                     AccountType = AccountType.Asset,
@@ -444,7 +444,7 @@ namespace Tests.ChartOfAccounts
                 },
                 new AccountDto
                 {
-                    Oid = Guid.NewGuid(),
+                   
                     AccountName = "Bank Account",
                     OfficialCode = "11110",
                     AccountType = AccountType.Asset,

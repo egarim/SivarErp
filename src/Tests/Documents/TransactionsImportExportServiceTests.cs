@@ -28,28 +28,28 @@ namespace Sivar.Erp.Tests.Documents
             {
                 new AccountDto
                 {
-                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000001"),
+                   
                     OfficialCode = "1000",
                     AccountName = "Cash",
                     AccountType = AccountType.Asset
                 },
                 new AccountDto
                 {
-                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000002"),
+                   
                     OfficialCode = "2000",
                     AccountName = "Accounts Payable",
                     AccountType = AccountType.Liability
                 },
                 new AccountDto
                 {
-                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000003"),
+                   
                     OfficialCode = "4000",
                     AccountName = "Sales Revenue",
                     AccountType = AccountType.Revenue
                 },
                 new AccountDto
                 {
-                    Oid = Guid.Parse("a0000000-0000-0000-0000-000000000004"),
+                   
                     OfficialCode = "5000",
                     AccountName = "Office Expenses",
                     AccountType = AccountType.Expense
@@ -77,7 +77,7 @@ namespace Sivar.Erp.Tests.Documents
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000001"),
                     TransactionId = transaction1Id,
-                    AccountId = _accounts[3].Oid,  // Office Expenses
+                 
                     EntryType = EntryType.Debit,
                     Amount = 150.00m,
                     AccountName = _accounts[3].AccountName,
@@ -87,7 +87,7 @@ namespace Sivar.Erp.Tests.Documents
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000002"),
                     TransactionId = transaction1Id,
-                    AccountId = _accounts[0].Oid,  // Cash
+                  
                     EntryType = EntryType.Credit,
                     Amount = 150.00m,
                     AccountName = _accounts[0].AccountName,
@@ -109,7 +109,7 @@ namespace Sivar.Erp.Tests.Documents
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000003"),
                     TransactionId = transaction2Id,
-                    AccountId = _accounts[0].Oid,  // Cash
+
                     EntryType = EntryType.Debit,
                     Amount = 500.00m,
                     AccountName = _accounts[0].AccountName,
@@ -119,7 +119,7 @@ namespace Sivar.Erp.Tests.Documents
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000004"),
                     TransactionId = transaction2Id,
-                    AccountId = _accounts[2].Oid,  // Sales Revenue
+
                     EntryType = EntryType.Credit,
                     Amount = 500.00m,
                     AccountName = _accounts[2].AccountName,

@@ -7,6 +7,8 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
     /// </summary>
     public interface IFiscalPeriod : IEntity
     {
+        [BusinessKey]
+        string Code { get; set; }
         /// <summary>
         /// UTC timestamp when the entity was created
         /// </summary>

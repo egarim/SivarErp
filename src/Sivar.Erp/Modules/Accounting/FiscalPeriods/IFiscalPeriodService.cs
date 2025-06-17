@@ -19,12 +19,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
 
        
 
-        /// <summary>
-        /// Gets a fiscal period by ID
-        /// </summary>
-        /// <param name="id">Fiscal period ID</param>
-        /// <returns>Fiscal period if found, null otherwise</returns>
-        Task<IFiscalPeriod?> GetFiscalPeriodByIdAsync(Guid id);
+       
 
 
         /// <summary>
@@ -41,25 +36,12 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <returns>Fiscal period containing the date, null if none found</returns>
         Task<IFiscalPeriod?> GetFiscalPeriodForDateAsync(DateOnly date);
 
-        /// <summary>
-        /// Closes a fiscal period
-        /// </summary>
-        /// <param name="fiscalPeriodId">ID of the fiscal period to close</param>
-        /// <param name="userId">User closing the fiscal period</param>
-        /// <returns>Updated fiscal period</returns>
-        Task<IFiscalPeriod> CloseFiscalPeriodAsync(Guid fiscalPeriodId, string userId);
-
-        /// <summary>
-        /// Opens a fiscal period
-        /// </summary>
-        /// <param name="fiscalPeriodId">ID of the fiscal period to open</param>
-        /// <param name="userId">User opening the fiscal period</param>
-        /// <returns>Updated fiscal period</returns>
-        Task<IFiscalPeriod> OpenFiscalPeriodAsync(Guid fiscalPeriodId, string userId);        /// <summary>
-                                                                                              /// Validates a fiscal period for creation or update
-                                                                                              /// </summary>
-                                                                                              /// <param name="fiscalPeriod">Fiscal period to validate</param>
-                                                                                              /// <returns>True if valid, false otherwise</returns>
+          
+        /// <summary>                                                                                 
+        /// Validates a fiscal period for creation or update                                                                              
+        /// </summary>                                                                                
+        /// <param name="fiscalPeriod">Fiscal period to validate</param>                                                                                
+        // <returns>True if valid, false otherwise</returns>
         Task<bool> ValidateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod);
 
         /// <summary>
@@ -68,7 +50,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <param name="fiscalPeriod">Fiscal period to validate</param>
         /// <param name="excludeId">Optional ID to exclude from overlap check (for updates)</param>
         /// <returns>True if valid, false otherwise</returns>
-        Task<bool> ValidateFiscalPeriodWithOverlapAsync(IFiscalPeriod fiscalPeriod, Guid? excludeId = null);
+        Task<bool> ValidateFiscalPeriodWithOverlapAsync(IFiscalPeriod fiscalPeriod, string? excludeId = null);
 
         /// <summary>
         /// Checks if fiscal periods overlap
@@ -77,7 +59,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <param name="endDate">End date of period to check</param>
         /// <param name="excludeId">Optional ID to exclude from overlap check (for updates)</param>
         /// <returns>True if there is an overlap, false otherwise</returns>
-        Task<bool> HasOverlappingPeriodsAsync(DateOnly startDate, DateOnly endDate, Guid? excludeId = null);
+        Task<bool> HasOverlappingPeriodsAsync(DateOnly startDate, DateOnly endDate, string? excludeId = null);
 
         /// <summary>
         /// Clears all fiscal periods (for testing purposes)

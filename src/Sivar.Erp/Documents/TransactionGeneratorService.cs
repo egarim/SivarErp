@@ -13,7 +13,7 @@ namespace Sivar.Erp.Documents
     public class TransactionGeneratorService
     {
     
-        private readonly Dictionary<string, Guid> _accountMappings;
+        private readonly Dictionary<string, string> _accountMappings;
 
         /// <summary>
         /// Creates a new simple transaction generator
@@ -22,10 +22,10 @@ namespace Sivar.Erp.Documents
         /// <param name="accountMappings">Dictionary mapping account codes to account IDs</param>
         public TransactionGeneratorService(
           
-            Dictionary<string, Guid> accountMappings = null)
+            Dictionary<string, string> accountMappings = null)
         {
            
-            _accountMappings = accountMappings ?? new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            _accountMappings = accountMappings ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -66,10 +66,11 @@ namespace Sivar.Erp.Documents
                         {
                             Oid = Guid.NewGuid(),
                             TransactionId = transaction.Oid,
-                            AccountId = accountId,
                             EntryType = EntryType.Debit,
                             Amount = totalDto.Total,
-                            AccountName = totalDto.Concept
+                            AccountName = totalDto.Concept,
+                            OfficialCode = totalDto.DebitAccountCode
+
                         };
                         
                         entries.Add(entry);
@@ -85,10 +86,10 @@ namespace Sivar.Erp.Documents
                         {
                             Oid = Guid.NewGuid(),
                             TransactionId = transaction.Oid,
-                            AccountId = accountId,
                             EntryType = EntryType.Credit,
                             Amount = totalDto.Total,
-                            AccountName = totalDto.Concept
+                            AccountName = totalDto.Concept,
+                            OfficialCode = totalDto.CreditAccountCode
                         };
                         
                         entries.Add(entry);
@@ -116,20 +117,20 @@ namespace Sivar.Erp.Documents
         /// Add an account mapping
         /// </summary>
         /// <param name="accountCode">The account code</param>
-        /// <param name="accountId">The account ID</param>
-        public void AddAccountMapping(string accountCode, Guid accountId)
+        /// <param name="accountOfficialCode">The account ID</param>
+        public void AddAccountMapping(string accountCode, string accountOfficialCode)
         {
             if (string.IsNullOrEmpty(accountCode))
                 throw new ArgumentNullException(nameof(accountCode));
                 
-            _accountMappings[accountCode] = accountId;
+            _accountMappings[accountCode] = accountOfficialCode;
         }
         
         /// <summary>
         /// Add account mappings
         /// </summary>
         /// <param name="mappings">Dictionary mapping account codes to account IDs</param>
-        public void AddAccountMappings(Dictionary<string, Guid> mappings)
+        public void AddAccountMappings(Dictionary<string, string> mappings)
         {
             if (mappings == null)
                 throw new ArgumentNullException(nameof(mappings));

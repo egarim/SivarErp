@@ -89,12 +89,12 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <param name="existingPeriods">Collection of existing fiscal periods</param>
         /// <param name="excludeId">Optional ID to exclude from overlap check (for updates)</param>
         /// <returns>True if no overlap, false if overlaps with existing periods</returns>
-        public bool ValidateNoOverlap(DateOnly startDate, DateOnly endDate, IEnumerable<IFiscalPeriod> existingPeriods, Guid? excludeId = null)
+        public bool ValidateNoOverlap(DateOnly startDate, DateOnly endDate, IEnumerable<IFiscalPeriod> existingPeriods, string? excludeId = null)
         {
             if (existingPeriods == null)
                 return true;
 
-            var periodsToCheck = existingPeriods.Where(fp => excludeId == null || fp.Oid != excludeId);
+            var periodsToCheck = existingPeriods.Where(fp => excludeId == null || fp.Code != excludeId);
 
             var hasOverlap = periodsToCheck.Any(fp =>
                 startDate >= fp.StartDate && startDate <= fp.EndDate ||
@@ -111,7 +111,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <param name="existingPeriods">Collection of existing fiscal periods for overlap check</param>
         /// <param name="excludeId">Optional ID to exclude from overlap check (for updates)</param>
         /// <returns>True if all validations pass, false otherwise</returns>
-        public bool ValidateFiscalPeriodWithOverlapCheck(IFiscalPeriod fiscalPeriod, IEnumerable<IFiscalPeriod> existingPeriods, Guid? excludeId = null)
+        public bool ValidateFiscalPeriodWithOverlapCheck(IFiscalPeriod fiscalPeriod, IEnumerable<IFiscalPeriod> existingPeriods, string? excludeId = null)
         {
             if (fiscalPeriod == null)
                 return false;

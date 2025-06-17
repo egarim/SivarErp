@@ -13,10 +13,7 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// </summary>
         Guid TransactionId { get; set; }
 
-        /// <summary>
-        /// Reference to the account
-        /// </summary>
-        Guid AccountId { get; set; }
+       
 
         /// <summary>
         /// Type of entry (debit or credit)

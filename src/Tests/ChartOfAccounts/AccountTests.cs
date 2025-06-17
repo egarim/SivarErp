@@ -12,15 +12,7 @@ namespace Tests.ChartOfAccounts
     {
         #region AccountDto Tests
 
-        [Test]
-        public void AccountDto_NewAccount_HasEmptyGuid()
-        {
-            // Arrange & Act
-            var account = new AccountDto();
-
-            // Assert
-            Assert.That(account.Oid, Is.EqualTo(Guid.Empty));
-        }
+    
 
         [Test]
         public void AccountDto_Validate_RequiresAccountName()
@@ -361,7 +353,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase();
-            var accountId = Guid.NewGuid();
+            var accountId = string.Empty;
             var asOfDate = DateOnly.FromDateTime(DateTime.Today);
 
             // Act
@@ -376,7 +368,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase();
-            var accountId = Guid.NewGuid();
+            var accountId = string.Empty;
             var startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-30));
             var endDate = DateOnly.FromDateTime(DateTime.Today);
 
@@ -393,7 +385,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase();
-            var accountId = Guid.NewGuid();
+            var accountId = string.Empty;
 
             // Act
             bool hasTransactions = calculator.HasTransactions(accountId);
@@ -415,7 +407,7 @@ namespace Tests.ChartOfAccounts
             // Arrange
             var account = new AccountDto
             {
-                Oid = Guid.NewGuid(),
+             
                 AccountName = "Cash",
                 OfficialCode = "12345",
                 AccountType = AccountType.Asset,

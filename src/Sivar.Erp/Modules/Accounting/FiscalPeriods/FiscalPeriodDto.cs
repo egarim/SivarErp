@@ -10,7 +10,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// <summary>
         /// Unique identifier for the fiscal period
         /// </summary>
-        public Guid Oid { get; set; }
+        public string Code { get; set; }
 
         /// <summary>
         /// Start date of the fiscal period
@@ -62,7 +62,7 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
         /// </summary>
         public FiscalPeriodDto()
         {
-            Oid = Guid.NewGuid();
+           
         }
 
         /// <summary>

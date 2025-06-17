@@ -5,10 +5,10 @@
     /// </summary>
     public class AccountDto : IAccount
     {
-        /// <summary>
-        /// Unique identifier for the account
-        /// </summary>
-        public Guid Oid { get; set; }
+        ///// <summary>
+        ///// Unique identifier for the account
+        ///// </summary>
+        //public Guid Oid { get; set; }
 
         /// <summary>
         /// Optional reference to balance sheet or income statement line

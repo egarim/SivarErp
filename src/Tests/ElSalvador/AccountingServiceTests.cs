@@ -86,7 +86,7 @@ namespace Tests.ElSalvador
             // Create fiscal period for January 2020
             var fiscalPeriod = new FiscalPeriodDto
             {
-                Oid = Guid.NewGuid(),
+               
                 Name = "January 2020",
                 StartDate = new DateOnly(2020, 1, 1),
                 EndDate = new DateOnly(2020, 1, 31),
@@ -111,7 +111,8 @@ namespace Tests.ElSalvador
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = expenseAccount.Oid,
+                        OfficialCode = expenseAccount.OfficialCode,
+                        AccountName= expenseAccount.AccountName,
                         Amount = 100.00m,
                         EntryType = EntryType.Debit
                     },
@@ -119,7 +120,9 @@ namespace Tests.ElSalvador
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = cashAccount.Oid,
+                      
+                         OfficialCode = cashAccount.OfficialCode,
+                        AccountName= cashAccount.AccountName,
                         EntryType = EntryType.Credit,
                         Amount = 100.00m
                     }
@@ -174,7 +177,7 @@ namespace Tests.ElSalvador
             // Create fiscal period for January 2020
             var fiscalPeriod = new FiscalPeriodDto
             {
-                Oid = Guid.NewGuid(),
+               
                 Name = "January 2020",
                 StartDate = new DateOnly(2020, 1, 1),
                 EndDate = new DateOnly(2020, 1, 31),
@@ -200,7 +203,8 @@ namespace Tests.ElSalvador
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = expenseAccount.Oid,
+                        OfficialCode = expenseAccount.OfficialCode, 
+                        AccountName = expenseAccount.AccountName,
                         Amount = 100.00m,
                         EntryType = EntryType.Debit
                     },
@@ -208,7 +212,8 @@ namespace Tests.ElSalvador
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = ivaTaxAccount.Oid,
+                        OfficialCode = ivaTaxAccount.OfficialCode,
+                        AccountName = ivaTaxAccount.AccountName,
                         Amount = 13.00m,  // 13% IVA
                         EntryType = EntryType.Debit
                     },
@@ -216,7 +221,8 @@ namespace Tests.ElSalvador
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = cashAccount.Oid,
+                        OfficialCode = cashAccount.OfficialCode,
+                        AccountName = cashAccount.AccountName,
                         EntryType = EntryType.Credit,
                         Amount = 113.00m  // Total with IVA
                     }
@@ -328,7 +334,7 @@ namespace Tests.ElSalvador
             // 4. Create fiscal period
             var fiscalPeriod = new FiscalPeriodDto
             {
-                Oid = Guid.NewGuid(),
+               
                 Name = "January 2023",
                 StartDate = new DateOnly(2023, 1, 1),
                 EndDate = new DateOnly(2023, 1, 31),
@@ -337,15 +343,15 @@ namespace Tests.ElSalvador
             _objectDb.fiscalPeriods.Add(fiscalPeriod);
 
             // 5. Set up account mappings for the transaction generator
-            var accountMappings = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            var accountMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             
             var cashAccount = importedAccounts.First(a => a.OfficialCode == "11010101"); // CAJA GENERAL
             var salesAccount = importedAccounts.First(a => a.OfficialCode == "51010101"); // VENTAS GRAVADAS
             var ivaTaxAccount = importedAccounts.First(a => a.OfficialCode == "21060101"); // IVA por Pagar
             
-            accountMappings.Add("CASH", cashAccount.Oid);
-            accountMappings.Add("SALES", salesAccount.Oid);
-            accountMappings.Add("IVA_TAX", ivaTaxAccount.Oid);
+            accountMappings.Add("CASH", cashAccount.OfficialCode);
+            accountMappings.Add("SALES", salesAccount.OfficialCode);
+            accountMappings.Add("IVA_TAX", ivaTaxAccount.OfficialCode);
 
             // 6. Get specific entities needed for the test
             var client = _objectDb.BusinessEntities.First(be => be.Code == "CL001");
@@ -510,7 +516,7 @@ namespace Tests.ElSalvador
             
             // 5. Verify IVA tax entry was created
             var ivaTaxEntry = result.LedgerEntries.FirstOrDefault(e => 
-                e.AccountId == ivaTaxAccount.Oid && 
+                e.OfficialCode == ivaTaxAccount.OfficialCode && 
                 e.EntryType == EntryType.Credit);
             
             Assert.That(ivaTaxEntry, Is.Not.Null, "Should have a credit entry for IVA tax account");
@@ -518,7 +524,7 @@ namespace Tests.ElSalvador
             
             // 6. Verify sales account entry
             var salesEntry = result.LedgerEntries.FirstOrDefault(e => 
-                e.AccountId == salesAccount.Oid && 
+                e.OfficialCode == salesAccount.OfficialCode && 
                 e.EntryType == EntryType.Credit);
                 
             Assert.That(salesEntry, Is.Not.Null, "Should have a credit entry for sales account");
@@ -526,7 +532,7 @@ namespace Tests.ElSalvador
             
             // 7. Verify cash entry (represents payment)
             var cashEntry = result.LedgerEntries.FirstOrDefault(e => 
-                e.AccountId == cashAccount.Oid && 
+                e.OfficialCode == cashAccount.OfficialCode && 
                 e.EntryType == EntryType.Debit);
                 
             Assert.That(cashEntry, Is.Not.Null, "Should have a debit entry for cash account");

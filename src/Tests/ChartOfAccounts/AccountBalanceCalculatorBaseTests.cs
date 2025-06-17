@@ -10,22 +10,22 @@ namespace Tests.ChartOfAccounts
     [TestFixture]
     public class AccountBalanceCalculatorBaseTests
     {
-        private Guid _assetAccountId;
-        private Guid _liabilityAccountId;
-        private Guid _revenueAccountId;
-        private Guid _expenseAccountId;
-        private Guid _documentId;
+        private string _assetAccountId;
+        private string _liabilityAccountId;
+        private string _revenueAccountId;
+        private string _expenseAccountId;
+        private string _documentId;
         private List<ITransaction> _transactions;
 
         [SetUp]
         public void Setup()
         {
             // Generate GUIDs for accounts
-            _assetAccountId = Guid.NewGuid();
-            _liabilityAccountId = Guid.NewGuid();
-            _revenueAccountId = Guid.NewGuid();
-            _expenseAccountId = Guid.NewGuid();
-            _documentId = Guid.NewGuid();
+            _assetAccountId = Guid.NewGuid().ToString();
+            _liabilityAccountId = Guid.NewGuid().ToString();
+            _revenueAccountId = Guid.NewGuid().ToString();
+            _expenseAccountId = Guid.NewGuid().ToString();
+            _documentId = Guid.NewGuid().ToString();
             
             // Create test transactions with ledger entries
             _transactions = CreateTestTransactions();
@@ -38,7 +38,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase();
-            var accountId = Guid.NewGuid();
+            var accountId = string.Empty;
             var asOfDate = DateOnly.FromDateTime(DateTime.Today);
 
             // Act
@@ -53,7 +53,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase();
-            var accountId = Guid.NewGuid();
+            var accountId = string.Empty;
             var startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-30));
             var endDate = DateOnly.FromDateTime(DateTime.Today);
 
@@ -70,7 +70,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase();
-            var accountId = Guid.NewGuid();
+            var accountId = string.Empty;
 
             // Act
             bool hasTransactions = calculator.HasTransactions(accountId);
@@ -181,7 +181,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase(_transactions);
-            var nonExistingAccountId = Guid.NewGuid();
+            var nonExistingAccountId = string.Empty;
 
             // Act
             bool assetHasTransactions = calculator.HasTransactions(_assetAccountId);
@@ -197,7 +197,7 @@ namespace Tests.ChartOfAccounts
         {
             // Arrange
             var calculator = new AccountBalanceCalculatorServiceBase(null);
-            var accountId = Guid.NewGuid();
+            var accountId = string.Empty;
 
             // Act
             bool hasTransactions = calculator.HasTransactions(accountId);
@@ -220,7 +220,7 @@ namespace Tests.ChartOfAccounts
             var transaction1 = new TransactionDto
             {
                 Oid = Guid.NewGuid(),
-                DocumentId = _documentId,
+            
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today),
                 Description = "Initial funding",
                 LedgerEntries = new List<ILedgerEntry>
@@ -229,7 +229,7 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _assetAccountId,
+                       
                         EntryType = EntryType.Debit,
                         Amount = 500m,
                         AccountName = "Cash",
@@ -239,7 +239,7 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _liabilityAccountId,
+                       
                         EntryType = EntryType.Credit,
                         Amount = 500m,
                         AccountName = "Accounts Payable",
@@ -252,7 +252,7 @@ namespace Tests.ChartOfAccounts
             var transaction2 = new TransactionDto
             {
                 Oid = Guid.NewGuid(),
-                DocumentId = _documentId,
+             
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today.AddDays(3)),
                 Description = "Sales transaction",
                 LedgerEntries = new List<ILedgerEntry>
@@ -261,7 +261,7 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _assetAccountId,
+                        
                         EntryType = EntryType.Debit,
                         Amount = 1500m,
                         AccountName = "Cash",
@@ -271,7 +271,7 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _revenueAccountId,
+                      
                         EntryType = EntryType.Credit,
                         Amount = 1500m,
                         AccountName = "Sales Revenue",
@@ -284,7 +284,7 @@ namespace Tests.ChartOfAccounts
             var transaction3 = new TransactionDto
             {
                 Oid = Guid.NewGuid(),
-                DocumentId = _documentId,
+          
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5)),
                 Description = "Office supplies expense",
                 LedgerEntries = new List<ILedgerEntry>
@@ -293,7 +293,7 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _expenseAccountId,
+                       
                         EntryType = EntryType.Debit,
                         Amount = 600m,
                         AccountName = "Office Supplies Expense",
@@ -303,7 +303,7 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _assetAccountId,
+                       
                         EntryType = EntryType.Credit,
                         Amount = 600m,
                         AccountName = "Cash",
@@ -316,7 +316,7 @@ namespace Tests.ChartOfAccounts
             var transaction4 = new TransactionDto
             {
                 Oid = Guid.NewGuid(),
-                DocumentId = _documentId,
+              
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today.AddDays(7)),
                 Description = "Utility bill payment",
                 LedgerEntries = new List<ILedgerEntry>
@@ -325,7 +325,7 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _expenseAccountId,
+                    
                         EntryType = EntryType.Debit,
                         Amount = 500m,
                         AccountName = "Utilities Expense",
@@ -335,7 +335,6 @@ namespace Tests.ChartOfAccounts
                     {
                         Oid = Guid.NewGuid(),
                         TransactionId = Guid.NewGuid(),
-                        AccountId = _liabilityAccountId,
                         EntryType = EntryType.Credit,
                         Amount = 500m,
                         AccountName = "Accounts Payable",

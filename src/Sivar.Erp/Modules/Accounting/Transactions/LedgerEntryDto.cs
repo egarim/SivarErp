@@ -15,10 +15,7 @@
         /// </summary>
         public Guid TransactionId { get; set; }
 
-        /// <summary>
-        /// Reference to the account
-        /// </summary>
-        public Guid AccountId { get; set; }
+        
 
         /// <summary>
         /// Type of entry (debit or credit)
