@@ -22,6 +22,7 @@ namespace Sivar.Erp.Services
         public IList<ITaxGroup> TaxGroups { get; set; } = new List<ITaxGroup>();
         public IList<ITax> Taxes { get; set; } = new List<ITax>();
         public IList<IItem> Items { get; set; } = new List<IItem>();
+        public IList<GroupMembershipDto> GroupMemberships { get; set; } = new List<GroupMembershipDto>();
         public IList<ActivityRecord> ActivityRecords { get; set; } = new List<ActivityRecord>();
         public IList<SequenceDto> Sequences { get; set; } = new List<SequenceDto>();
         public IList<IFiscalPeriod> fiscalPeriods { get; set; } = new List<IFiscalPeriod>();

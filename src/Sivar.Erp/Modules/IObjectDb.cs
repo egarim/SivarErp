@@ -20,6 +20,8 @@ namespace Sivar.Erp.Services
         IList<IItem> Items { get; set; }
         IList<ITax> Taxes { get; set; }
         IList<ITaxGroup> TaxGroups { get; set; }
+
+        IList<GroupMembershipDto> GroupMemberships { get; set; }
         IList<ActivityRecord> ActivityRecords { get; set; }
         IList<SequenceDto> Sequences { get; set; }
     }
