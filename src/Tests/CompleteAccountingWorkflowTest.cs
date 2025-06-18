@@ -573,7 +573,7 @@ namespace Sivar.Erp.Tests
             await File.WriteAllTextAsync(tempFile, csvContent);
 
             results.Add($"✓ Transaction data exported to: {tempFile}");
-            results.Add($"✓ Export contains {_objectDb.Transactions} transactions");
+            results.Add($"✓ Export contains {_objectDb.Transactions.Count} transactions");
 
         }
     }
