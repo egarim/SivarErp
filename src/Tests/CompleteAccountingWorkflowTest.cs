@@ -82,6 +82,15 @@ namespace Sivar.Erp.Tests
                 }
                 results.Add("");
 
+                results.Add("=== STEP 3.5: INVENTORY TRANSACTION ===");
+
+                var InventoryTransaction= AddInitialInventory();
+                // Post the transaction
+                var postedInventoryTransaction = await _accountingModule.PostTransactionAsync(InventoryTransaction);
+                results.Add($"✓ Transaction posted successfully: {postedInventoryTransaction}");
+                results.Add($"✓ Transaction is posted: {InventoryTransaction.IsPosted}");
+                results.Add("");
+
                 // Step 4: Transaction Generation
                 results.Add("=== STEP 4: TRANSACTION GENERATION ===");
                 var (transaction, ledgerEntries) = await _transactionGenerator.GenerateTransactionAsync(document);
@@ -116,12 +125,12 @@ namespace Sivar.Erp.Tests
 
                 // Step 6: Balance Verification
                 results.Add("=== STEP 6: BALANCE VERIFICATION ===");
-                await VerifyAccountBalances(ledgerEntries, results);
+                await VerifyAccountBalances(_accountingModule, _objectDb.LedgerEntries, results);
                 results.Add("");
 
                 // Step 7: Export Results
                 results.Add("=== STEP 7: EXPORT RESULTS ===");
-                await ExportTransactionData(transaction, ledgerEntries, results);
+                await ExportTransactionData(results);
 
                 results.Add("🎉 Complete accounting workflow test executed successfully!");
 
@@ -134,7 +143,38 @@ namespace Sivar.Erp.Tests
 
             var ouput=string.Join(Environment.NewLine, results);
         }
-
+        // Add this before creating the sales document
+        private ITransaction AddInitialInventory()
+        {
+            // Create a beginning balance transaction
+            var beginningBalanceTransaction = new TransactionDto
+            {
+                Oid = Guid.NewGuid(),
+                TransactionDate = DateOnly.FromDateTime(DateTime.Now),
+                Description = "Beginning Inventory Balance",
+                IsPosted = false,
+                LedgerEntries = new List<LedgerEntryDto>
+        {
+            new LedgerEntryDto
+            {
+                Oid = Guid.NewGuid(),
+                OfficialCode = "1105010201", // INVENTARIO PRODUCTO 1
+                EntryType = EntryType.Debit,
+                Amount = 500.00m // Add enough inventory to cover the sale
+            },
+            new LedgerEntryDto
+            {
+                Oid = Guid.NewGuid(),
+                OfficialCode = "31010101", // CAPITAL SOCIAL PAGADO (or another equity account)
+                EntryType = EntryType.Credit,
+                Amount = 500.00m
+            }
+        }
+            };
+           
+            return beginningBalanceTransaction;
+            // Post this transaction before running the sales test
+        }
         /// <summary>
         /// Sets up all required data and services for the test
         /// </summary>
@@ -447,10 +487,9 @@ namespace Sivar.Erp.Tests
         /// <summary>
         /// Verifies account balances after transaction posting
         /// </summary>
-        private async Task VerifyAccountBalances(List<LedgerEntryDto> ledgerEntries, List<string> results)
+        private async Task VerifyAccountBalances(AccountingModule Module,IEnumerable<ILedgerEntry> ledgerEntries, List<string> results)
         {
-            var balanceCalculator = new AccountBalanceCalculatorServiceBase(
-                new List<ITransaction> { CreateTransactionFromEntries(ledgerEntries) });
+            
 
             var asOfDate = DateOnly.FromDateTime(DateTime.Now);
 
@@ -460,7 +499,7 @@ namespace Sivar.Erp.Tests
             foreach (var accountGroup in accountGroups)
             {
                 var accountCode = accountGroup.Key;
-                var balance = balanceCalculator.CalculateAccountBalance(accountCode, asOfDate);
+                var balance = Module.AccountBalanceCalculator.CalculateAccountBalance(accountCode, asOfDate);
 
                 // Get account name for display
                 var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == accountCode);
@@ -525,15 +564,16 @@ namespace Sivar.Erp.Tests
         /// <summary>
         /// Exports transaction data for review
         /// </summary>
-        private async Task ExportTransactionData(TransactionDto transaction, List<LedgerEntryDto> ledgerEntries, List<string> results)
+        private async Task ExportTransactionData(List<string> results)
         {
             var exportService = new TransactionsImportExportService(_objectDb.Accounts.Cast<AccountDto>().ToList());
 
-            var transactionsWithEntries = new List<(TransactionDto, List<LedgerEntryDto>)>
+            List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> transactionsWithEntries = new();
+            foreach (ITransaction transaction in _objectDb.Transactions)
             {
-                (transaction, ledgerEntries)
-            };
-
+                transactionsWithEntries.Add(new (transaction, transaction.LedgerEntries));
+            }
+           
             var csvContent = exportService.ExportTransactionsToCsv(transactionsWithEntries);
 
             // Save to temp file
@@ -541,7 +581,8 @@ namespace Sivar.Erp.Tests
             await File.WriteAllTextAsync(tempFile, csvContent);
 
             results.Add($"✓ Transaction data exported to: {tempFile}");
-            results.Add($"✓ Export contains {ledgerEntries.Count} ledger entries");
+            results.Add($"✓ Export contains {_objectDb.LedgerEntries.Count} ledger entries");
+
         }
     }
 

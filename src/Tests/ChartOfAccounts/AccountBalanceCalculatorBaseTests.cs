@@ -228,7 +228,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                        
                         EntryType = EntryType.Debit,
                         Amount = 500m,
@@ -238,7 +238,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                        
                         EntryType = EntryType.Credit,
                         Amount = 500m,
@@ -260,7 +260,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                         
                         EntryType = EntryType.Debit,
                         Amount = 1500m,
@@ -270,7 +270,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                       
                         EntryType = EntryType.Credit,
                         Amount = 1500m,
@@ -292,7 +292,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                        
                         EntryType = EntryType.Debit,
                         Amount = 600m,
@@ -302,7 +302,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                        
                         EntryType = EntryType.Credit,
                         Amount = 600m,
@@ -324,7 +324,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                     
                         EntryType = EntryType.Debit,
                         Amount = 500m,
@@ -334,7 +334,7 @@ namespace Tests.ChartOfAccounts
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                         EntryType = EntryType.Credit,
                         Amount = 500m,
                         AccountName = "Accounts Payable",

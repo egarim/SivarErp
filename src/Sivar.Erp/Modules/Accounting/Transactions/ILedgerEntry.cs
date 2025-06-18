@@ -11,22 +11,18 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// <summary>
         /// Reference to the parent transaction
         /// </summary>
-        Guid TransactionId { get; set; }
-
-       
+        string TransactionNumber { get; set; }
+        [BusinessKey]
+        string LedgerEntryNumber { get; set; }
 
         /// <summary>
         /// Type of entry (debit or credit)
         /// </summary>
         EntryType EntryType { get; set; }
-
         /// <summary>
         /// Amount of the entry
         /// </summary>
         decimal Amount { get; set; }
-
-      
-
         /// <summary>
         /// Name of the account
         /// </summary>

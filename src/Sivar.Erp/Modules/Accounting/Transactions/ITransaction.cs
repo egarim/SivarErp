@@ -11,7 +11,7 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// <summary>
         /// Reference to the parent document
         /// </summary>
-        Guid DocumentId { get; set; }
+        string DocumentNumber { get; set; }
 
         [BusinessKey()]
         string TransactionNumber { get; set; }

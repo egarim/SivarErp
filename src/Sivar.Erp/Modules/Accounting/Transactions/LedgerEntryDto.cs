@@ -5,15 +5,14 @@
     /// </summary>
     public class LedgerEntryDto : ILedgerEntry
     {
-        /// <summary>
-        /// Unique identifier for the ledger entry
-        /// </summary>
-        public Guid Oid { get; set; }
+
+       
+       
 
         /// <summary>
         /// Reference to the parent transaction
         /// </summary>
-        public Guid TransactionId { get; set; }
+        public string TransactionNumber { get; set; }
 
         
 
@@ -38,5 +37,6 @@
         /// Official code/identifier for the account
         /// </summary>
         public string OfficialCode { get; set; } = string.Empty;
+        public string LedgerEntryNumber { get; set; }
     }
 }

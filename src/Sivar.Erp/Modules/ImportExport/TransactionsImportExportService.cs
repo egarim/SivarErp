@@ -50,7 +50,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// <param name="transactionsWithEntries">List of transactions with their associated ledger entries</param>
         /// <returns>CSV content as string with both transactions and ledger entries</returns>
         public string ExportTransactionsToCsv(
-            List<(TransactionDto Transaction, List<LedgerEntryDto> Entries)> transactionsWithEntries)
+            List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> transactionsWithEntries)
         {
             try
             {
@@ -63,10 +63,10 @@ namespace Sivar.Erp.Services.ImportExport
                 // Write transaction data
                 foreach (var (transaction, _) in transactionsWithEntries)
                 {
-                    string line = $"{transaction.Oid}," +
+                    string line = $"{transaction.TransactionNumber}," +
                                   $"{transaction.TransactionDate:yyyy-MM-dd}," +
                                   $"\"{EscapeCsvField(transaction.Description)}\"," +
-                                  $"{transaction.DocumentId}";
+                                  $"{transaction.DocumentNumber}";
 
                     sb.AppendLine(line);
                 }
@@ -81,8 +81,8 @@ namespace Sivar.Erp.Services.ImportExport
                 {
                     foreach (var entry in entries)
                     {
-                        string line = $"{entry.Oid}," +
-                                      $"{transaction.Oid}," +
+                        string line = $"{entry.LedgerEntryNumber}," +
+                                      $"{transaction.TransactionNumber}," +
                                       $"\"{EscapeCsvField(entry.OfficialCode)}\"," +
                                       $"\"{EscapeCsvField(entry.AccountName)}\"," +
                                       $"{entry.EntryType}," +
@@ -111,10 +111,10 @@ namespace Sivar.Erp.Services.ImportExport
             // Write transaction data
             foreach (var transaction in transactions)
             {
-                string line = $"{transaction.Oid}," +
+                string line = $"{transaction.TransactionNumber}," +
                               $"{transaction.TransactionDate:yyyy-MM-dd}," +
                               $"\"{EscapeCsvField(transaction.Description)}\"," +
-                              $"{transaction.DocumentId}";
+                              $"{transaction.DocumentNumber}";
 
                 sb.AppendLine(line);
             }
@@ -127,15 +127,15 @@ namespace Sivar.Erp.Services.ImportExport
             var sb = new StringBuilder();
 
             // Write header
-            sb.AppendLine("EntryId,TransactionId,AccountId,OfficialCode,AccountName,EntryType,Amount");
+            sb.AppendLine("LedgerEntryNumber,TransactionNumber,AccountId,OfficialCode,AccountName,EntryType,Amount");
 
             // Write ledger entry data
             foreach (var (transaction, entries) in transactionsWithEntries)
             {
                 foreach (var entry in entries)
                 {
-                    string line = $"{entry.Oid}," +
-                                  $"{transaction.Oid}," +
+                    string line = $"{entry.LedgerEntryNumber}," +
+                                  $"{transaction.TransactionNumber}," +
                                   $"\"{EscapeCsvField(entry.OfficialCode)}\"," +
                                   $"\"{EscapeCsvField(entry.AccountName)}\"," +
                                   $"{entry.EntryType}," +
@@ -163,11 +163,11 @@ namespace Sivar.Erp.Services.ImportExport
         /// </summary>
         /// <param name="csvText">CSV text containing transactions and ledger entries</param>
         /// <returns>List of transactions with their associated ledger entries</returns>
-        public List<(TransactionDto Transaction, List<LedgerEntryDto> Entries)> ImportFromCsv(string csvText)
+        public List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> ImportFromCsv(string csvText)
         {
-            var result = new List<(TransactionDto Transaction, List<LedgerEntryDto> Entries)>();
-            var transactions = new Dictionary<Guid, TransactionDto>();
-            var entriesByTransactionId = new Dictionary<Guid, List<LedgerEntryDto>>();
+            var result = new List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)>();
+            var transactions = new Dictionary<string, ITransaction>();
+            var entriesByTransactionId = new Dictionary<string, List<ILedgerEntry>>();
 
             var lines = csvText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -205,8 +205,8 @@ namespace Sivar.Erp.Services.ImportExport
                     var transaction = ParseTransactionLine(line);
                     if (transaction != null)
                     {
-                        transactions[transaction.Oid] = transaction;
-                        entriesByTransactionId[transaction.Oid] = new List<LedgerEntryDto>();
+                        transactions[transaction.TransactionNumber] = transaction;
+                        entriesByTransactionId[transaction.TransactionNumber] = new List<ILedgerEntry>();
                     }
                 }
                 else if (inLedgerEntrySection)
@@ -222,7 +222,9 @@ namespace Sivar.Erp.Services.ImportExport
             // Combine transactions and entries
             foreach (var transactionId in transactions.Keys)
             {
-                result.Add((transactions[transactionId], entriesByTransactionId[transactionId]));
+                ITransaction transaction = transactions[transactionId];
+                IEnumerable<ILedgerEntry> ledgerEntryDtos = entriesByTransactionId[transactionId];
+                result.Add((transaction, ledgerEntryDtos));
             }
 
             Console.WriteLine($"Imported {transactions.Count} transactions with {entriesByTransactionId.Values.Sum(e => e.Count)} total ledger entries");
@@ -239,10 +241,10 @@ namespace Sivar.Erp.Services.ImportExport
 
                 return new TransactionDto
                 {
-                    Oid = Guid.Parse(parts[0]),
+                    TransactionNumber = parts[0],
                     TransactionDate = DateOnly.Parse(parts[1]),
                     Description = parts[2],
-                    DocumentId = Guid.Parse(parts[3])
+                    DocumentNumber = parts[3]
                 };
             }
             catch (Exception ex)
@@ -252,31 +254,26 @@ namespace Sivar.Erp.Services.ImportExport
             }
         }
 
-        private (LedgerEntryDto? Entry, Guid TransactionId) ParseLedgerEntryLine(string line)
+        private (ILedgerEntry? Entry, string TransactionId) ParseLedgerEntryLine(string line)
         {
             try
             {
                 var parts = ParseCsvLine(line);
                 if (parts.Length < 7)
-                    return (null, Guid.Empty);
+                    return (null, string.Empty);
 
-                var transactionId = Guid.Parse(parts[1]);
+                var transactionId = parts[1];
                 var officialCode = parts[3];
 
-                // Look up AccountId using OfficialCode
-                //if (!_accountCodeToId.TryGetValue(officialCode, out var accountId))
-                //{
-                //    Console.WriteLine($"Account code '{officialCode}' not found in provided accounts.");
-                //    accountId = Guid.Parse(parts[2]); // Fallback to the AccountId from CSV
-                //}
+               
 
                 var accountId= _accounts.FirstOrDefault(a => a.OfficialCode == officialCode)?.OfficialCode ?? string.Empty;
                 Console.WriteLine($"Account code '{officialCode}' not found in provided accounts.");
 
                 var entry = new LedgerEntryDto
                 {
-                    Oid = Guid.Parse(parts[0]),
-                    TransactionId = transactionId,
+                   
+                    TransactionNumber = transactionId,
                     OfficialCode = officialCode,
                     AccountName = parts[4],
                     EntryType = Enum.Parse<EntryType>(parts[5]),
@@ -288,7 +285,7 @@ namespace Sivar.Erp.Services.ImportExport
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to parse ledger entry: {ex.Message}");
-                return (null, Guid.Empty);
+                return (null, string.Empty);
             }
         }
 

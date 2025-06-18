@@ -5,15 +5,12 @@
     /// </summary>
     public class TransactionDto : ITransaction
     {
-        /// <summary>
-        /// Unique identifier for the transaction
-        /// </summary>
-        public Guid Oid { get; set; }
+       
 
         /// <summary>
         /// Reference to the parent document
         /// </summary>
-        public Guid DocumentId { get; set; }
+        public string DocumentNumber { get; set; }
 
         /// <summary>
         /// Date of the transaction (may differ from document date)

@@ -19,14 +19,16 @@ namespace Sivar.Erp.Services.Accounting
     public class AccountingModule : ErpModuleBase
     {
         protected IFiscalPeriodService FiscalPeriodService;
-        protected IAccountBalanceCalculator AccountBalanceCalculator;
-     
-   
+        private IAccountBalanceCalculator accountBalanceCalculator;
+
+
 
         // Constants for transaction number sequence codes
         private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
         private const string BATCH_SEQUENCE_CODE = "BATCH";
         private const string FISCAL_SEQUENCE_CODE = "FISCAL";
+
+        public IAccountBalanceCalculator AccountBalanceCalculator { get => accountBalanceCalculator; set => accountBalanceCalculator = value; }
 
         public AccountingModule(
             IOptionService optionService, 

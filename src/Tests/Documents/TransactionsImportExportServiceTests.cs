@@ -18,7 +18,7 @@ namespace Sivar.Erp.Tests.Documents
     {
         private TransactionsImportExportService _importHelper;
         private List<AccountDto> _accounts;
-        private List<(TransactionDto Transaction, List<LedgerEntryDto> Entries)> _testTransactions;
+        private List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> _testTransactions;
 
         [SetUp]
         public void Setup()
@@ -66,7 +66,7 @@ namespace Sivar.Erp.Tests.Documents
             var transaction1 = new TransactionDto
             {
                 Oid = transaction1Id,
-                DocumentId = documentId,
+                DocumentNumber = documentId,
                 TransactionDate = new DateOnly(2025, 6, 11),
                 Description = "Office Supplies Purchase"
             };
@@ -76,7 +76,7 @@ namespace Sivar.Erp.Tests.Documents
                 new LedgerEntryDto
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000001"),
-                    TransactionId = transaction1Id,
+                    TransactionNumber = transaction1Id,
                  
                     EntryType = EntryType.Debit,
                     Amount = 150.00m,
@@ -86,7 +86,7 @@ namespace Sivar.Erp.Tests.Documents
                 new LedgerEntryDto
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000002"),
-                    TransactionId = transaction1Id,
+                    TransactionNumber = transaction1Id,
                   
                     EntryType = EntryType.Credit,
                     Amount = 150.00m,
@@ -98,7 +98,7 @@ namespace Sivar.Erp.Tests.Documents
             var transaction2 = new TransactionDto
             {
                 Oid = transaction2Id,
-                DocumentId = documentId,
+                DocumentNumber = documentId,
                 TransactionDate = new DateOnly(2025, 6, 11),
                 Description = "Client Invoice"
             };
@@ -108,7 +108,7 @@ namespace Sivar.Erp.Tests.Documents
                 new LedgerEntryDto
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000003"),
-                    TransactionId = transaction2Id,
+                    TransactionNumber = transaction2Id,
 
                     EntryType = EntryType.Debit,
                     Amount = 500.00m,
@@ -118,7 +118,7 @@ namespace Sivar.Erp.Tests.Documents
                 new LedgerEntryDto
                 {
                     Oid = Guid.Parse("d0000000-0000-0000-0000-000000000004"),
-                    TransactionId = transaction2Id,
+                    TransactionNumber = transaction2Id,
 
                     EntryType = EntryType.Credit,
                     Amount = 500.00m,
@@ -127,7 +127,7 @@ namespace Sivar.Erp.Tests.Documents
                 }
             };
 
-            _testTransactions = new List<(TransactionDto, List<LedgerEntryDto>)>
+            _testTransactions = new List<(ITransaction, IEnumerable<ILedgerEntry>)>
             {
                 (transaction1, transaction1Entries),
                 (transaction2, transaction2Entries)
@@ -223,8 +223,8 @@ namespace Sivar.Erp.Tests.Documents
             Assert.That(reexportedCsv, Is.EqualTo(exportedCsv));
 
             // Verify all transaction IDs are preserved
-            var originalIds = _testTransactions.Select(t => t.Transaction.Oid).ToList();
-            var reimportedIds = reimportedTransactions.Select(t => t.Transaction.Oid).ToList();
+            var originalIds = _testTransactions.Select(t => t.Transaction.TransactionNumber).ToList();
+            var reimportedIds = reimportedTransactions.Select(t => t.Transaction.TransactionNumber).ToList();
 
             Assert.That(reimportedIds, Is.EquivalentTo(originalIds));
 

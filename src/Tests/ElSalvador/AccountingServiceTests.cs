@@ -110,7 +110,7 @@ namespace Tests.ElSalvador
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                         OfficialCode = expenseAccount.OfficialCode,
                         AccountName = expenseAccount.AccountName,
                         Amount = 100.00m,
@@ -119,7 +119,7 @@ namespace Tests.ElSalvador
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                         OfficialCode = cashAccount.OfficialCode,
                         AccountName = cashAccount.AccountName,
                         EntryType = EntryType.Credit,
@@ -237,7 +237,7 @@ namespace Tests.ElSalvador
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                         OfficialCode = expenseAccount.OfficialCode,
                         AccountName = expenseAccount.AccountName,
                         Amount = 100.00m,
@@ -246,7 +246,7 @@ namespace Tests.ElSalvador
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                         OfficialCode = ivaTaxAccount.OfficialCode,
                         AccountName = ivaTaxAccount.AccountName,
                         Amount = 13.00m,  // 13% IVA
@@ -255,7 +255,7 @@ namespace Tests.ElSalvador
                     new LedgerEntryDto
                     {
                         Oid = Guid.NewGuid(),
-                        TransactionId = Guid.NewGuid(),
+                        TransactionNumber = Guid.NewGuid(),
                         OfficialCode = cashAccount.OfficialCode,
                         AccountName = cashAccount.AccountName,
                         EntryType = EntryType.Credit,
