@@ -196,7 +196,7 @@ namespace Tests.ChartOfAccounts
         public void ConstructorWithNullTransactions_ShouldUseEmptyCollection()
         {
             // Arrange
-            var calculator = new AccountBalanceCalculatorServiceBase(null);
+            var calculator = new AccountBalanceCalculatorServiceBase();
             var accountId = string.Empty;
 
             // Act

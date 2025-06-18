@@ -4,6 +4,7 @@ using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
+using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using System;
@@ -27,8 +28,25 @@ namespace Sivar.Erp.Services
         public IList<SequenceDto> Sequences { get; set; } = new List<SequenceDto>();
         public IList<IFiscalPeriod> fiscalPeriods { get; set; } = new List<IFiscalPeriod>();
 
+        /// <summary>
+        /// Collection of all transactions in the system
+        /// </summary>
+        public IList<ITransaction> Transactions { get; set; } = new List<ITransaction>();
+
+        /// <summary>
+        /// Collection of all ledger entries in the system
+        /// </summary>
+        public IList<ILedgerEntry> LedgerEntries { get; set; } = new List<ILedgerEntry>();
+
+        /// <summary>
+        /// Collection of all transaction batches in the system
+        /// </summary>
+        public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>();
+
         public ObjectDb()
         {
         }
+
+       
     }
 }

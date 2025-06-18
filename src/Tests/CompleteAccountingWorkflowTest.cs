@@ -132,7 +132,7 @@ namespace Sivar.Erp.Tests
                 results.Add($"Stack trace: {ex.StackTrace}");
             }
 
-            //return string.Join(Environment.NewLine, results);
+            var ouput=string.Join(Environment.NewLine, results);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace Sivar.Erp.Tests
             var optionService = new OptionService();
             var sequencerService = new SequencerService(_objectDb);
             var fiscalPeriodService = new FiscalPeriodService(_objectDb);
-            var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase();
+            var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);
 
             // Create accounting module
             _accountingModule = new AccountingModule(
