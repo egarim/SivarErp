@@ -97,6 +97,9 @@ namespace Sivar.Erp.Tests
                 // Step 4: Transaction Generation
                 results.Add("=== STEP 4: TRANSACTION GENERATION ===");
                 var (transaction, ledgerEntries) = await _transactionGenerator.GenerateTransactionAsync(document);
+
+
+
                 results.Add($"✓ Generated transaction {transaction.TransactionNumber}");
                 results.Add($"✓ Transaction has {ledgerEntries.Count} ledger entries:");
 
@@ -180,6 +183,9 @@ namespace Sivar.Erp.Tests
             return beginningBalanceTransaction;
             // Post this transaction before running the sales test
         }
+
+    
+
         /// <summary>
         /// Sets up all required data and services for the test
         /// </summary>

@@ -37,7 +37,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
             // Get the business entity ID
             var businessEntityId = document.BusinessEntity?.Code;
 
-            if (!string.IsNullOrEmpty(businessEntityId))
+            if (string.IsNullOrEmpty(businessEntityId))
                 return new List<TaxDto>();
 
             // Get all business entity groups that this entity belongs to
