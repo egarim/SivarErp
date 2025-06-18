@@ -13,9 +13,9 @@ namespace Sivar.Erp.Services.ImportExport
     /// </summary>
     public class TransactionsImportExportService
     {
-        private readonly List<AccountDto> _accounts;
+        private readonly IEnumerable<IAccount> _accounts;
 
-        public TransactionsImportExportService(List<AccountDto> accounts)
+        public TransactionsImportExportService(IEnumerable<IAccount> accounts)
         {
             _accounts = accounts;
 

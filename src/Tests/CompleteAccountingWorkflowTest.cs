@@ -87,6 +87,9 @@ namespace Sivar.Erp.Tests
                 var InventoryTransaction= AddInitialInventory();
                 // Post the transaction
                 var postedInventoryTransaction = await _accountingModule.PostTransactionAsync(InventoryTransaction);
+
+                _objectDb.Transactions.Add(InventoryTransaction);
+
                 results.Add($"✓ Transaction posted successfully: {postedInventoryTransaction}");
                 results.Add($"✓ Transaction is posted: {InventoryTransaction.IsPosted}");
                 results.Add("");
@@ -94,7 +97,7 @@ namespace Sivar.Erp.Tests
                 // Step 4: Transaction Generation
                 results.Add("=== STEP 4: TRANSACTION GENERATION ===");
                 var (transaction, ledgerEntries) = await _transactionGenerator.GenerateTransactionAsync(document);
-                results.Add($"✓ Generated transaction {transaction.Oid}");
+                results.Add($"✓ Generated transaction {transaction.TransactionNumber}");
                 results.Add($"✓ Transaction has {ledgerEntries.Count} ledger entries:");
 
                 decimal totalDebits = 0, totalCredits = 0;
@@ -119,13 +122,15 @@ namespace Sivar.Erp.Tests
 
                 // Post the transaction
                 var posted = await _accountingModule.PostTransactionAsync(transaction);
+                _objectDb.Transactions.Add(transaction);
+               
                 results.Add($"✓ Transaction posted successfully: {posted}");
                 results.Add($"✓ Transaction is posted: {transaction.IsPosted}");
                 results.Add("");
 
                 // Step 6: Balance Verification
                 results.Add("=== STEP 6: BALANCE VERIFICATION ===");
-                await VerifyAccountBalances(_accountingModule, _objectDb.LedgerEntries, results);
+                await VerifyAccountBalances(_accountingModule, _objectDb.Transactions, results);
                 results.Add("");
 
                 // Step 7: Export Results
@@ -149,7 +154,7 @@ namespace Sivar.Erp.Tests
             // Create a beginning balance transaction
             var beginningBalanceTransaction = new TransactionDto
             {
-                Oid = Guid.NewGuid(),
+               
                 TransactionDate = DateOnly.FromDateTime(DateTime.Now),
                 Description = "Beginning Inventory Balance",
                 IsPosted = false,
@@ -157,14 +162,14 @@ namespace Sivar.Erp.Tests
         {
             new LedgerEntryDto
             {
-                Oid = Guid.NewGuid(),
+              
                 OfficialCode = "1105010201", // INVENTARIO PRODUCTO 1
                 EntryType = EntryType.Debit,
                 Amount = 500.00m // Add enough inventory to cover the sale
             },
             new LedgerEntryDto
             {
-                Oid = Guid.NewGuid(),
+                
                 OfficialCode = "31010101", // CAPITAL SOCIAL PAGADO (or another equity account)
                 EntryType = EntryType.Credit,
                 Amount = 500.00m
@@ -487,10 +492,10 @@ namespace Sivar.Erp.Tests
         /// <summary>
         /// Verifies account balances after transaction posting
         /// </summary>
-        private async Task VerifyAccountBalances(AccountingModule Module,IEnumerable<ILedgerEntry> ledgerEntries, List<string> results)
+        private async Task VerifyAccountBalances(AccountingModule Module,IEnumerable<ITransaction> transactions, List<string> results)
         {
             
-
+            ILedgerEntry[] ledgerEntries = transactions.SelectMany(t => t.LedgerEntries).ToArray();
             var asOfDate = DateOnly.FromDateTime(DateTime.Now);
 
             // Group entries by account
@@ -512,20 +517,7 @@ namespace Sivar.Erp.Tests
             }
         }
 
-        /// <summary>
-        /// Creates a transaction object from ledger entries for balance calculation
-        /// </summary>
-        private ITransaction CreateTransactionFromEntries(List<LedgerEntryDto> ledgerEntries)
-        {
-            return new TransactionDto
-            {
-                Oid = Guid.NewGuid(),
-                TransactionDate = DateOnly.FromDateTime(DateTime.Now),
-                Description = "Test Transaction",
-                LedgerEntries = ledgerEntries,
-                IsPosted = true
-            };
-        }
+        
 
         /// <summary>
         /// Verifies specific account balance expectations
@@ -566,7 +558,7 @@ namespace Sivar.Erp.Tests
         /// </summary>
         private async Task ExportTransactionData(List<string> results)
         {
-            var exportService = new TransactionsImportExportService(_objectDb.Accounts.Cast<AccountDto>().ToList());
+            var exportService = new TransactionsImportExportService(_objectDb.Accounts);
 
             List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> transactionsWithEntries = new();
             foreach (ITransaction transaction in _objectDb.Transactions)
