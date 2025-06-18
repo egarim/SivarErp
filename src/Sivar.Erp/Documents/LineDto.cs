@@ -153,6 +153,36 @@ namespace Sivar.Erp.Documents
             }
         }
 
+        double lineNumber;
+        public double LineNumber 
+        { 
+            get => lineNumber; set
+            {
+                if (lineNumber == value)
+                {
+                    return;
+                }
+
+                lineNumber = value;
+                OnPropertyChanged();
+            }
+        }
+        string description;
+        public string Description
+        {
+            get => description;
+            set
+            {
+                if (description == value)
+                {
+                    return;
+                }
+
+                description = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
