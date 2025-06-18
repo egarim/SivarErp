@@ -7,6 +7,7 @@ using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
+using Sivar.Erp.Services.Taxes.TaxRule;
 using System;
 using System.Linq;
 
@@ -21,6 +22,8 @@ namespace Sivar.Erp.Services
         IList<IItem> Items { get; set; }
         IList<ITax> Taxes { get; set; }
         IList<ITaxGroup> TaxGroups { get; set; }
+
+        IList<ITaxRule> TaxRules { get; set; }
         IList<GroupMembershipDto> GroupMemberships { get; set; }
         IList<ActivityRecord> ActivityRecords { get; set; }
         IList<SequenceDto> Sequences { get; set; }

@@ -34,7 +34,8 @@ namespace Sivar.Erp.Modules
             IDocumentTypeImportExportService documentTypeImportService,
             IBusinessEntityImportExportService businessEntityImportService,
             IItemImportExportService itemImportService,
-            IGroupMembershipImportExportService groupMembershipImportService)
+            IGroupMembershipImportExportService groupMembershipImportService,
+            ITaxRuleImportExportService taxRuleImportService)
         {
             if (string.IsNullOrWhiteSpace(dataDirectory))
                 throw new ArgumentException("Data directory path cannot be empty", nameof(dataDirectory));
@@ -50,7 +51,7 @@ namespace Sivar.Erp.Modules
                 documentTypeImportService,
                 businessEntityImportService,
                 itemImportService,
-                groupMembershipImportService);
+                groupMembershipImportService, taxRuleImportService);
         }
 
         /// <summary>

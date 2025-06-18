@@ -32,7 +32,7 @@ namespace Sivar.Erp.Modules
                 var itemImportService = new ItemImportExportService();
                 var documentTypeImportService = new DocumentTypeImportExportService();
                 var groupMembershipImportService = new GroupMembershipImportExportService();
-
+                var taxRuleImportService = new TaxRuleImportExportService();
                 // Create the initializer
                 var initializer = new ElSalvadorCompanyInitializer(
                     dataDirectory,
@@ -42,7 +42,8 @@ namespace Sivar.Erp.Modules
                     documentTypeImportService,
                     businessEntityImportService,
                     itemImportService,
-                    groupMembershipImportService);
+                    groupMembershipImportService,
+                    taxRuleImportService);
 
                 // Option 1: Create a new company with all data
                 var (objectDb, results) = await initializer.CreateNewCompanyAsync();

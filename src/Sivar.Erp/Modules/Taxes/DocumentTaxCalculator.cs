@@ -210,7 +210,7 @@ namespace Sivar.Erp.Services.Taxes
         /// <summary>
         /// Apply tax accounting info to a total if available
         /// </summary>
-        private void ApplyTaxAccountingInfo(TotalDto total, TaxDto tax)
+        private void ApplyTaxAccountingInfo(ITotal total, ITax tax)
         {
             if (_taxAccountingService != null && _document.DocumentType != null)
             {
@@ -275,7 +275,7 @@ namespace Sivar.Erp.Services.Taxes
         /// <summary>
         /// Calculates the tax amount based on tax type for document-level taxes
         /// </summary>
-        private decimal CalculateDocumentTaxAmount(TaxDto tax, decimal documentTotal)
+        private decimal CalculateDocumentTaxAmount(ITax tax, decimal documentTotal)
         {
             switch (tax.TaxType)
             {
@@ -300,7 +300,7 @@ namespace Sivar.Erp.Services.Taxes
         /// <summary>
         /// Calculates the tax amount based on tax type for line-level taxes
         /// </summary>
-        private decimal CalculateLineTaxAmount(TaxDto tax, LineDto line)
+        private decimal CalculateLineTaxAmount(ITax tax, LineDto line)
         {
             switch (tax.TaxType)
             {

@@ -19,6 +19,7 @@ namespace Tests.Modules
         private IBusinessEntityImportExportService _businessEntityImportService;
         private IItemImportExportService _itemImportService;
         private IDocumentTypeImportExportService _documentTypeImportService;
+        private ITaxRuleImportExportService _taxRuleImportService;
         private IGroupMembershipImportExportService _groupMembershipImportService;
         private DataImportHelper _dataImportHelper;
         private ObjectDb _objectDb;
@@ -45,6 +46,7 @@ namespace Tests.Modules
                 _businessEntityImportService,
                 _itemImportService,
                 _groupMembershipImportService,
+                _taxRuleImportService,
                 "DataImportHelperTest");
 
             // Create an empty ObjectDb

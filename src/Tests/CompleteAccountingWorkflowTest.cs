@@ -117,6 +117,11 @@ namespace Sivar.Erp.Tests
                 results.Add($"✓ Transaction balanced: {Math.Abs(totalDebits - totalCredits) < 0.01m}");
                 results.Add("");
 
+
+                results.Add("=== Document ===");
+                results.Add(DocumentFormatter.FormatDocument(document));
+                results.Add("=== Document ===");
+
                 // Step 5: Transaction Posting
                 results.Add("=== STEP 5: TRANSACTION POSTING ===");
 
@@ -131,6 +136,10 @@ namespace Sivar.Erp.Tests
                 results.Add($"✓ Transaction is posted: {transaction.IsPosted}");
                 results.Add("");
 
+
+
+             
+
                 // Step 6: Balance Verification
                 results.Add("=== STEP 6: BALANCE VERIFICATION ===");
                 await VerifyAccountBalances(_accountingModule, _objectDb.Transactions, results);
@@ -141,15 +150,15 @@ namespace Sivar.Erp.Tests
                 await ExportTransactionData(results);
 
                 results.Add("🎉 Complete accounting workflow test executed successfully!");
-
+                
             }
             catch (Exception ex)
             {
                 results.Add($"❌ Error during workflow execution: {ex.Message}");
                 results.Add($"Stack trace: {ex.StackTrace}");
             }
+            var ouput = string.Join(Environment.NewLine, results);
 
-            var ouput=string.Join(Environment.NewLine, results);
         }
         // Add this before creating the sales document
         private ITransaction AddInitialInventory()
@@ -200,6 +209,7 @@ namespace Sivar.Erp.Tests
             var itemImportService = new ItemImportExportService();
             var documentTypeImportService = new DocumentTypeImportExportService();
             var groupMembershipImportService = new GroupMembershipImportExportService();
+            var taxRuleImportService = new TaxRuleImportExportService(new TaxRuleValidator());
 
             // Use your existing data directory with CSV files
             var dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "ElSalvador");
@@ -219,7 +229,7 @@ namespace Sivar.Erp.Tests
                 documentTypeImportService,
                 businessEntityImportService,
                 itemImportService,
-                groupMembershipImportService);
+                groupMembershipImportService, taxRuleImportService);
 
             // Import all data
             (_objectDb, var importResults) = await initializer.CreateNewCompanyAsync();
@@ -325,38 +335,44 @@ namespace Sivar.Erp.Tests
         private void SetupTaxRulesAndAccounting()
         {
             // Create tax accounting profile service
+            //_taxAccountingService = new TaxAccountingProfileService();
+
+            //// Get imported tax rules from ObjectDb (populated by DataImportHelper)
+            //var taxRules = _objectDb.TaxRules?.ToList() ?? new List<ITaxRule>();
+
+            //_taxRuleEvaluator = new TaxRuleEvaluator(
+            //    taxRules,                                 // ✅ From CSV
+            //    _objectDb.Taxes,
+            //    _objectDb.GroupMemberships);
+
+            // Create tax accounting profile service
             _taxAccountingService = new TaxAccountingProfileService();
 
-            // Register IVA accounting profile for sales invoices
-            var ivaAccountingInfo = new TaxAccountingInfo
-            {
-                DebitAccountCode = "VAT_PAYABLE",      // IVA is a credit for sales
-                CreditAccountCode = "VAT_PAYABLE",     // IVA por Pagar
-                IncludeInTransaction = true,
-                AccountDescription = "IVA 13% por Ventas"
-            };
-            _taxAccountingService.RegisterTaxAccountingProfile(DocumentOperation.SalesInvoice, "IVA", ivaAccountingInfo);
+            // Get imported tax rules from ObjectDb (populated by DataImportHelper)
+            var taxRules = _objectDb.TaxRules?.ToList() ?? new List<ITaxRule>();
 
-            // Create tax rules
-            var taxRules = new List<TaxRuleDto>
-            {
-                new TaxRuleDto
+            // Create tax rule evaluator with rules and group memberships
+            var groupMemberships = _objectDb.GroupMemberships?.ToList() ?? new List<GroupMembershipDto>();
+            _taxRuleEvaluator = new TaxRuleEvaluator( taxRules, _objectDb.Taxes, groupMemberships);
+
+            // 🔥 KEY FIX: Configure tax accounting for sales invoices
+            // This tells the system HOW to record VAT in the general ledger
+            _taxAccountingService.RegisterTaxAccountingProfile(
+                DocumentOperation.SalesInvoice,
+                "IVA",  // This should match the tax code in your tax data
+                new TaxAccountingInfo
                 {
-                    Oid = Guid.NewGuid(),
-                    TaxId = "IVA",
-                    DocumentOperation = DocumentOperation.SalesInvoice,
-                    BusinessEntityGroupId = "REGISTERED_TAXPAYERS",
-                    ItemGroupId = "TAXABLE_ITEMS",
-                    IsEnabled = true,
-                    Priority = 1
-                }
-            };
+                    DebitAccountCode = null,              // No debit for sales VAT
+                    CreditAccountCode = "VAT_PAYABLE",    // Credit the VAT liability account
+                    IncludeInTransaction = true,          // 🎯 CRITICAL: Include in transaction!
+                    AccountDescription = "IVA por Pagar - Débito Fiscal"
+                });
 
-            // Create tax rule evaluator
-            _taxRuleEvaluator = new TaxRuleEvaluator(
-                taxRules,
-                _objectDb.Taxes.Cast<TaxDto>().ToList(),
-                _objectDb.GroupMemberships);
+            // Also ensure VAT_PAYABLE is in account mappings
+            if (!_accountMappings.ContainsKey("VAT_PAYABLE"))
+            {
+                _accountMappings["VAT_PAYABLE"] = "21060101"; // IVA DEBITO FISCAL - CONTRIBUYENTES
+            }
         }
 
         /// <summary>

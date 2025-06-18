@@ -12,13 +12,13 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
     /// </summary>
     public class TaxRuleEvaluator
     {
-        private readonly IList<TaxRuleDto> _taxRules;
-        private readonly IList<TaxDto> _availableTaxes;
+        private readonly IList<ITaxRule> _taxRules;
+        private readonly IList<ITax> _availableTaxes;
         private readonly IList<GroupMembershipDto> _groupMemberships;
 
         public TaxRuleEvaluator(
-            IList<TaxRuleDto> taxRules,
-            IList<TaxDto> availableTaxes,
+            IList<ITaxRule> taxRules,
+            IList<ITax> availableTaxes,
             IList<GroupMembershipDto> groupMemberships)
         {
             _taxRules = taxRules;
@@ -29,7 +29,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// <summary>
         /// Gets applicable document-level taxes based on document type and business entity
         /// </summary>
-        public IList<TaxDto> GetApplicableDocumentTaxes(DocumentDto document, string documentTypeCode)
+        public IList<ITax> GetApplicableDocumentTaxes(DocumentDto document, string documentTypeCode)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -38,7 +38,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
             var businessEntityId = document.BusinessEntity?.Code;
 
             if (string.IsNullOrEmpty(businessEntityId))
-                return new List<TaxDto>();
+                return new List<ITax>();
 
             // Get all business entity groups that this entity belongs to
             var entityGroupIds = GetGroupsForEntity(businessEntityId, GroupType.BusinessEntity);
@@ -52,7 +52,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// <summary>
         /// Gets applicable line-level taxes based on document type, business entity, and item
         /// </summary>
-        public IList<TaxDto> GetApplicableLineTaxes(DocumentDto document, string documentTypeCode, LineDto line)
+        public IList<ITax> GetApplicableLineTaxes(DocumentDto document, string documentTypeCode, LineDto line)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -63,15 +63,16 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
             var businessEntityId = document.BusinessEntity.Code;
             var itemId = line.Item?.Code;
 
-            if (!string.IsNullOrEmpty(document.BusinessEntity.Code) || !string.IsNullOrEmpty(itemId))
-                return new List<TaxDto>();
+            if (string.IsNullOrEmpty(document.BusinessEntity.Code) || string.IsNullOrEmpty(itemId))
+                return new List<ITax>();
 
             // Get the groups these entities belong to
             var entityGroupIds = GetGroupsForEntity(businessEntityId, GroupType.BusinessEntity);
             var itemGroupIds = GetGroupsForEntity(itemId, GroupType.Item);
 
             // Find applicable line-level taxes
-            return GetApplicableTaxes(document.DocumentType.DocumentOperation, entityGroupIds, itemGroupIds)
+            IEnumerable<ITax> enumerable = GetApplicableTaxes(document.DocumentType.DocumentOperation, entityGroupIds, itemGroupIds);
+            return enumerable
                 .Where(tax => tax.ApplicationLevel == TaxApplicationLevel.Line)
                 .ToList();
         }
@@ -90,7 +91,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
         /// <summary>
         /// Gets taxes that apply based on document type, entity groups, and item groups
         /// </summary>
-        private IEnumerable<TaxDto> GetApplicableTaxes(
+        private IEnumerable<ITax> GetApplicableTaxes(
             DocumentOperation documentOperation,
             IList<string> entityGroupIds,
             IList<string> itemGroupIds)

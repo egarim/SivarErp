@@ -7,6 +7,7 @@ using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
+using Sivar.Erp.Services.Taxes.TaxRule;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,7 @@ namespace Sivar.Erp.Services
         /// Collection of all transaction batches in the system
         /// </summary>
         public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>();
+        public IList<ITaxRule> TaxRules { get; set; }=new List<ITaxRule>();
 
         public ObjectDb()
         {
