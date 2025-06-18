@@ -24,7 +24,6 @@ using Sivar.Erp.ErpSystem.Sequencers;
 
 namespace Sivar.Erp.Tests
 {
-    
     [TestFixture]
     /// <summary>
     /// Comprehensive test demonstrating the complete accounting workflow
@@ -84,7 +83,7 @@ namespace Sivar.Erp.Tests
 
                 results.Add("=== STEP 3.5: INVENTORY TRANSACTION ===");
 
-                var InventoryTransaction= AddInitialInventory();
+                var InventoryTransaction = AddInitialInventory();
                 // Post the transaction
                 var postedInventoryTransaction = await _accountingModule.PostTransactionAsync(InventoryTransaction);
 
@@ -97,8 +96,6 @@ namespace Sivar.Erp.Tests
                 // Step 4: Transaction Generation
                 results.Add("=== STEP 4: TRANSACTION GENERATION ===");
                 var (transaction, ledgerEntries) = await _transactionGenerator.GenerateTransactionAsync(document);
-
-
 
                 results.Add($"✓ Generated transaction {transaction.TransactionNumber}");
                 results.Add($"✓ Transaction has {ledgerEntries.Count} ledger entries:");
@@ -117,7 +114,6 @@ namespace Sivar.Erp.Tests
                 results.Add($"✓ Transaction balanced: {Math.Abs(totalDebits - totalCredits) < 0.01m}");
                 results.Add("");
 
-
                 results.Add("=== Document ===");
                 results.Add(DocumentFormatter.FormatDocument(document));
                 results.Add("=== Document ===");
@@ -131,14 +127,10 @@ namespace Sivar.Erp.Tests
                 // Post the transaction
                 var posted = await _accountingModule.PostTransactionAsync(transaction);
                 _objectDb.Transactions.Add(transaction);
-               
+
                 results.Add($"✓ Transaction posted successfully: {posted}");
                 results.Add($"✓ Transaction is posted: {transaction.IsPosted}");
                 results.Add("");
-
-
-
-             
 
                 // Step 6: Balance Verification
                 results.Add("=== STEP 6: BALANCE VERIFICATION ===");
@@ -150,50 +142,46 @@ namespace Sivar.Erp.Tests
                 await ExportTransactionData(results);
 
                 results.Add("🎉 Complete accounting workflow test executed successfully!");
-                
+
             }
             catch (Exception ex)
             {
                 results.Add($"❌ Error during workflow execution: {ex.Message}");
                 results.Add($"Stack trace: {ex.StackTrace}");
             }
-            var ouput = string.Join(Environment.NewLine, results);
-
+            var output = string.Join(Environment.NewLine, results);
         }
-        // Add this before creating the sales document
+
+        /// <summary>
+        /// Add this before creating the sales document
+        /// </summary>
         private ITransaction AddInitialInventory()
         {
             // Create a beginning balance transaction
             var beginningBalanceTransaction = new TransactionDto
             {
-               
                 TransactionDate = DateOnly.FromDateTime(DateTime.Now),
                 Description = "Beginning Inventory Balance",
                 IsPosted = false,
                 LedgerEntries = new List<LedgerEntryDto>
-        {
-            new LedgerEntryDto
-            {
-              
-                OfficialCode = "1105010201", // INVENTARIO PRODUCTO 1
-                EntryType = EntryType.Debit,
-                Amount = 500.00m // Add enough inventory to cover the sale
-            },
-            new LedgerEntryDto
-            {
-                
-                OfficialCode = "31010101", // CAPITAL SOCIAL PAGADO (or another equity account)
-                EntryType = EntryType.Credit,
-                Amount = 500.00m
-            }
-        }
+                {
+                    new LedgerEntryDto
+                    {
+                        OfficialCode = "1105010201", // INVENTARIO PRODUCTO 1
+                        EntryType = EntryType.Debit,
+                        Amount = 500.00m // Add enough inventory to cover the sale
+                    },
+                    new LedgerEntryDto
+                    {
+                        OfficialCode = "31010101", // CAPITAL SOCIAL PAGADO (or another equity account)
+                        EntryType = EntryType.Credit,
+                        Amount = 500.00m
+                    }
+                }
             };
-           
-            return beginningBalanceTransaction;
-            // Post this transaction before running the sales test
-        }
 
-    
+            return beginningBalanceTransaction;
+        }
 
         /// <summary>
         /// Sets up all required data and services for the test
@@ -229,7 +217,8 @@ namespace Sivar.Erp.Tests
                 documentTypeImportService,
                 businessEntityImportService,
                 itemImportService,
-                groupMembershipImportService, taxRuleImportService);
+                groupMembershipImportService,
+                taxRuleImportService);
 
             // Import all data
             (_objectDb, var importResults) = await initializer.CreateNewCompanyAsync();
@@ -246,8 +235,6 @@ namespace Sivar.Erp.Tests
             // Set up tax rules and accounting profiles
             SetupTaxRulesAndAccounting();
         }
-
-
 
         /// <summary>
         /// Sets up the fiscal period for transaction posting
@@ -335,17 +322,6 @@ namespace Sivar.Erp.Tests
         private void SetupTaxRulesAndAccounting()
         {
             // Create tax accounting profile service
-            //_taxAccountingService = new TaxAccountingProfileService();
-
-            //// Get imported tax rules from ObjectDb (populated by DataImportHelper)
-            //var taxRules = _objectDb.TaxRules?.ToList() ?? new List<ITaxRule>();
-
-            //_taxRuleEvaluator = new TaxRuleEvaluator(
-            //    taxRules,                                 // ✅ From CSV
-            //    _objectDb.Taxes,
-            //    _objectDb.GroupMemberships);
-
-            // Create tax accounting profile service
             _taxAccountingService = new TaxAccountingProfileService();
 
             // Get imported tax rules from ObjectDb (populated by DataImportHelper)
@@ -353,7 +329,7 @@ namespace Sivar.Erp.Tests
 
             // Create tax rule evaluator with rules and group memberships
             var groupMemberships = _objectDb.GroupMemberships?.ToList() ?? new List<GroupMembershipDto>();
-            _taxRuleEvaluator = new TaxRuleEvaluator( taxRules, _objectDb.Taxes, groupMemberships);
+            _taxRuleEvaluator = new TaxRuleEvaluator(taxRules, _objectDb.Taxes, groupMemberships);
 
             // 🔥 KEY FIX: Configure tax accounting for sales invoices
             // This tells the system HOW to record VAT in the general ledger
@@ -514,9 +490,8 @@ namespace Sivar.Erp.Tests
         /// <summary>
         /// Verifies account balances after transaction posting
         /// </summary>
-        private async Task VerifyAccountBalances(AccountingModule Module,IEnumerable<ITransaction> transactions, List<string> results)
+        private async Task VerifyAccountBalances(AccountingModule Module, IEnumerable<ITransaction> transactions, List<string> results)
         {
-            
             ILedgerEntry[] ledgerEntries = transactions.SelectMany(t => t.LedgerEntries).ToArray();
             var asOfDate = DateOnly.FromDateTime(DateTime.Now);
 
@@ -538,8 +513,6 @@ namespace Sivar.Erp.Tests
                 await VerifySpecificAccountBalance(accountCode, balance, results);
             }
         }
-
-        
 
         /// <summary>
         /// Verifies specific account balance expectations
@@ -585,9 +558,9 @@ namespace Sivar.Erp.Tests
             List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> transactionsWithEntries = new();
             foreach (ITransaction transaction in _objectDb.Transactions)
             {
-                transactionsWithEntries.Add(new (transaction, transaction.LedgerEntries));
+                transactionsWithEntries.Add(new(transaction, transaction.LedgerEntries));
             }
-           
+
             var csvContent = exportService.ExportTransactionsToCsv(transactionsWithEntries);
 
             // Save to temp file
@@ -596,9 +569,6 @@ namespace Sivar.Erp.Tests
 
             results.Add($"✓ Transaction data exported to: {tempFile}");
             results.Add($"✓ Export contains {_objectDb.Transactions.Count} transactions");
-
         }
     }
-
-    
 }
