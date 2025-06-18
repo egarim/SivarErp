@@ -205,9 +205,12 @@ namespace Sivar.Erp.Tests
         /// </summary>
         private async Task SetupTaxAccountingProfilesFromCsv()
         {
+
             // Create tax accounting profile service and import service
             _taxAccountingService = new TaxAccountingProfileService();
             _taxAccountingImportService = new TaxAccountingProfileImportExportService();
+
+
 
             // Get imported tax rules from ObjectDb (populated by DataImportHelper)
             var taxRules = _objectDb.TaxRules?.ToList() ?? new List<ITaxRule>();
@@ -217,8 +220,16 @@ namespace Sivar.Erp.Tests
             _taxRuleEvaluator = new TaxRuleEvaluator(taxRules, _objectDb.Taxes, groupMemberships);
 
             // Create tax accounting profiles CSV content
-            // This replaces the manual configuration with CSV-based configuration
-            var taxAccountingProfilesCsv = CreateTaxAccountingProfilesCsv();
+            // Read tax accounting profiles from CSV file
+            var dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
+            var csvFilePath = Path.Combine(dataDirectory, "TaxAccountingProfiles.csv");
+
+            if (!File.Exists(csvFilePath))
+            {
+                throw new FileNotFoundException($"Tax accounting profiles CSV file not found: {csvFilePath}");
+            }
+
+            var taxAccountingProfilesCsv = await File.ReadAllTextAsync(csvFilePath);
 
             // Import tax accounting profiles from CSV
             var (importedProfiles, errors) = await _taxAccountingImportService.ImportFromCsvAsync(taxAccountingProfilesCsv, "TestUser");
@@ -245,22 +256,7 @@ namespace Sivar.Erp.Tests
             }
         }
 
-        /// <summary>
-        /// Creates CSV content for tax accounting profiles
-        /// This replaces the manual configuration in the original test
-        /// </summary>
-        private string CreateTaxAccountingProfilesCsv()
-        {
-            var csvContent = @"TaxCode,DocumentOperation,DebitAccountCode,CreditAccountCode,AccountDescription,IncludeInTransaction
-IVA,SalesInvoice,,VAT_PAYABLE,IVA DEBITO FISCAL - CONTRIBUYENTES,true
-IVA,PurchaseInvoice,VAT_RECEIVABLE,,IVA CREDITO FISCAL,true
-IVA,SalesCreditNote,VAT_PAYABLE,,IVA DEBITO FISCAL - CONTRIBUYENTES,true
-IVA,PurchaseCreditNote,,VAT_RECEIVABLE,IVA CREDITO FISCAL,true
-RENTA,SalesInvoice,,WITHHOLDING_PAYABLE,RETENCION DE RENTA POR PAGAR,true
-RENTA,PurchaseInvoice,WITHHOLDING_RECEIVABLE,,RETENCION DE RENTA POR COBRAR,true";
-
-            return csvContent;
-        }
+     
 
         /// <summary>
         /// Sets up all required services
