@@ -27,6 +27,7 @@ namespace Sivar.Erp.Services.Accounting
         private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
         private const string BATCH_SEQUENCE_CODE = "BATCH";
         private const string FISCAL_SEQUENCE_CODE = "FISCAL";
+        private const string LEDGERENTRY_SEQUENCE_CODE = "LEDGERENTRY";
 
         public IAccountBalanceCalculator AccountBalanceCalculator { get => accountBalanceCalculator; set => accountBalanceCalculator = value; }
 
@@ -80,7 +81,11 @@ namespace Sivar.Erp.Services.Accounting
             {
                 transaction.TransactionNumber = await sequencerService.GetNextNumberAsync(TRANSACTION_SEQUENCE_CODE);
             }
-
+            foreach (ILedgerEntry ledgerEntry in transaction.LedgerEntries)
+            {
+                ledgerEntry.LedgerEntryNumber = await sequencerService.GetNextNumberAsync(LEDGERENTRY_SEQUENCE_CODE);
+            }
+       
             // Post the transaction
             transaction.Post();
             
@@ -282,6 +287,13 @@ namespace Sivar.Erp.Services.Accounting
             sequence.Prefix = "T";
             sequence.Suffix = "S";
 
+            SequenceDto ledgerEntry = new SequenceDto();
+            ledgerEntry.Code = LEDGERENTRY_SEQUENCE_CODE;
+            ledgerEntry.CurrentNumber = 1;
+            ledgerEntry.Name = "LedgerEntries";
+            ledgerEntry.Prefix = "LE";
+            ledgerEntry.Suffix = "S";
+
 
             SequenceDto BatchSequence = new SequenceDto();
             BatchSequence.Code = BATCH_SEQUENCE_CODE;
@@ -300,6 +312,7 @@ namespace Sivar.Erp.Services.Accounting
             this.sequencerService.CreateSequenceAsync(FiscalPeriod);
             this.sequencerService.CreateSequenceAsync(sequence);
             this.sequencerService.CreateSequenceAsync(BatchSequence);
+            this.sequencerService.CreateSequenceAsync(ledgerEntry);
         }
     }
 }
