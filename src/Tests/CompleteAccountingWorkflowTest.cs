@@ -196,9 +196,8 @@ namespace Sivar.Erp.Tests
                 }
             }
 
-            // Setup services and account mappings
+            // Setup services and account mappings (account mappings now loaded from CSV)
             await SetupServices();
-            SetupAccountMappings();
         }
 
         /// <summary>
@@ -291,7 +290,6 @@ RENTA,PurchaseInvoice,WITHHOLDING_RECEIVABLE,,RETENCION DE RENTA POR COBRAR,true
             // Create fiscal period for 2025
             var fiscalPeriod = new FiscalPeriodDto
             {
-                
                 StartDate = new DateOnly(2025, 1, 1),
                 EndDate = new DateOnly(2025, 12, 31),
                 Status = FiscalPeriodStatus.Open,
@@ -299,40 +297,51 @@ RENTA,PurchaseInvoice,WITHHOLDING_RECEIVABLE,,RETENCION DE RENTA POR COBRAR,true
             };
 
             await fiscalPeriodService.CreateFiscalPeriodAsync(fiscalPeriod, "TestUser");
+
+            // Setup account mappings from CSV instead of hardcoded values
+            await SetupAccountMappingsFromCsv();
         }
 
         /// <summary>
-        /// Sets up account mappings for transaction generation using actual chart of accounts
+        /// Sets up account mappings for transaction generation by importing from CSV
         /// </summary>
-        private void SetupAccountMappings()
+        private async Task SetupAccountMappingsFromCsv()
         {
-            _accountMappings = new Dictionary<string, string>
+            // Create account mapping import service
+            var accountMappingImportService = new TestAccountMappingImportExportService();
+
+            // Get the data directory path (same as used for other CSV imports)
+            var dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "ElSalvador");
+            dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
+
+            var csvFilePath = Path.Combine(dataDirectory, "TestAccountMappings.csv");
+
+            // Import account mappings from CSV
+            var (accountMappings, errors) = await accountMappingImportService.ImportFromFileAsync(csvFilePath, "TestUser");
+
+            // Check for import errors
+            if (errors.Any())
             {
-                ["ACCOUNTS_RECEIVABLE"] = "11030101",    // CLIENTES NACIONALES
-                ["INVENTORY_PRODUCT_1"] = "1105010201",  // INVENTARIO PRODUCTO 1
-                ["INVENTORY_PRODUCT_2"] = "1105010202",  // INVENTARIO PRODUCTO 2
-                ["INVENTORY_PRODUCT_3"] = "1105010203",  // INVENTARIO PRODUCTO 3
-                ["INVENTORY_PRODUCT_4"] = "1105010204",  // INVENTARIO PRODUCTO 4
-                ["INVENTORY_PRODUCT_5"] = "1105010205",  // INVENTARIO PRODUCTO 5
-                ["SALES_PRODUCT_1"] = "51010101",        // VENTA DE PRODUCTO 1
-                ["SALES_PRODUCT_2"] = "51010102",        // VENTA DE PRODUCTO 2
-                ["SALES_PRODUCT_3"] = "51010103",        // VENTA DE PRODUCTO 3
-                ["SALES_PRODUCT_4"] = "51010104",        // VENTA DE PRODUCTO 4
-                ["SALES_PRODUCT_5"] = "51010105",        // VENTA DE PRODUCTO 5
-                ["VAT_PAYABLE"] = "21060101",             // IVA DEBITO FISCAL - CONTRIBUYENTES
-                ["VAT_RECEIVABLE"] = "11050201",          // IVA CREDITO FISCAL
-                ["WITHHOLDING_PAYABLE"] = "21070101",     // RETENCION DE RENTA POR PAGAR
-                ["WITHHOLDING_RECEIVABLE"] = "11050301",  // RETENCION DE RENTA POR COBRAR
-                ["COST_OF_SALES_PRODUCT_1"] = "41010111", // COSTO DE VENTA PRODUCTO 1
-                ["COST_OF_SALES_PRODUCT_2"] = "41010112", // COSTO DE VENTA PRODUCTO 2
-                ["COST_OF_SALES_PRODUCT_3"] = "41010113", // COSTO DE VENTA PRODUCTO 3
-                ["COST_OF_SALES_PRODUCT_4"] = "41010114", // COSTO DE VENTA PRODUCTO 4
-                ["COST_OF_SALES_PRODUCT_5"] = "41010115", // COSTO DE VENTA PRODUCTO 5
-                ["CASH"] = "11010101",                    // CAJA GENERAL
-                ["BANK_CUSCATLAN"] = "11010201",          // BANCO CUSCATLAN
-                ["BANK_AGRICOLA"] = "11010202"            // BANCO AGRICOLA
+                throw new InvalidOperationException($"Account mapping import errors: {string.Join(", ", errors)}");
+            }
+
+            // Validate that we have all required mappings
+            var requiredMappings = new[]
+            {
+                "ACCOUNTS_RECEIVABLE", "VAT_PAYABLE", "VAT_RECEIVABLE",
+                "WITHHOLDING_PAYABLE", "WITHHOLDING_RECEIVABLE", "CASH"
             };
 
+            var missingMappings = requiredMappings.Where(req => !accountMappings.ContainsKey(req)).ToList();
+            if (missingMappings.Any())
+            {
+                throw new InvalidOperationException($"Missing required account mappings: {string.Join(", ", missingMappings)}");
+            }
+
+            // Set the account mappings
+            _accountMappings = accountMappings;
+
+            // Create transaction generator with imported mappings
             _transactionGenerator = new TransactionGeneratorService(_accountMappings);
         }
 
