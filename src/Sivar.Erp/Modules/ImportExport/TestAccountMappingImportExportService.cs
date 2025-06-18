@@ -9,7 +9,7 @@ namespace Sivar.Erp.Services.ImportExport
     /// <summary>
     /// Service for importing and exporting test account mappings
     /// </summary>
-    public class TestAccountMappingImportExportService
+    public class TestAccountMappingImportExportService : ITestAccountMappingImportExportService
     {
         /// <summary>
         /// Imports account mappings from CSV content
