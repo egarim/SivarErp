@@ -1,0 +1,2 @@
+Code,Type,Description,BasePrice,Unit,IsActive,Notes
+PR001,Product,Laptop Dell XPS 13,1200.00,UNIT,true,High performance laptop

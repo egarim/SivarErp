@@ -1,0 +1,2 @@
+Oid,Code,Name,TaxType,Percentage,Amount,ApplicationLevel,IsEnabled,Country
+e8d9af79-db97-4f98-8b79-ae26551a8981,IVA,Impuesto al Valor Agregado,Percentage,13,0.00,Line,true,SV

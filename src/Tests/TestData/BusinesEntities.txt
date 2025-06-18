@@ -1,0 +1,2 @@
+Code,Name,Address,City,State,ZipCode,Country,PhoneNumber,Email
+CL001,Empresa ABC SA de CV,Calle Principal 123,San Salvador,San Salvador,1101,SV,2222-1111,info@empresaabc.com

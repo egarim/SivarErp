@@ -1,0 +1,8 @@
+OfficialCode,AccountName,IsControlAccount,AccountType,Active
+11010101,CAJA GENERAL,false,Asset,true
+11010201,BANCO CUSCATLAN CTA. CTE,false,Asset,true
+11020101,CUENTAS POR COBRAR CLIENTES,false,Asset,true
+21060101,IVA POR PAGAR,false,Liability,true
+31010101,CAPITAL SOCIAL,false,Equity,true
+510101,VENTAS NACIONALES,false,Revenue,true
+410101,COSTO DE VENTAS DE MERCADERIA,false,Expense,true
