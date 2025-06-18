@@ -7,7 +7,48 @@ public class TestDataImportService
     {
         _dataDirectory = dataDirectory;
     }
+    public Dictionary<string, string> LoadAccountMappings()
+    {
+        var csvPath = Path.Combine(_dataDirectory, "TestAccountMappings.csv");
+        var lines = File.ReadAllLines(csvPath);
+        var result = new Dictionary<string, string>();
 
+        foreach (var line in lines.Skip(1)) // Skip header
+        {
+            var fields = line.Split(',');
+            result[fields[0]] = fields[1]; // LogicalName -> AccountCode
+        }
+
+        return result;
+    }
+    ///// <summary>
+    ///// Loads account mappings from CSV file
+    ///// </summary>
+    ///// <returns>Dictionary mapping logical names to account codes</returns>
+    //public Dictionary<string, string> LoadAccountMappings()
+    //{
+    //    var csvPath = Path.Combine(_dataDirectory, "TestAccountMappings.csv");
+    //    var lines = File.ReadAllLines(csvPath);
+    //    var result = new Dictionary<string, string>();
+
+    //    // Skip header line
+    //    foreach (var line in lines.Skip(1))
+    //    {
+    //        var fields = line.Split(',');
+    //        if (fields.Length >= 2)
+    //        {
+    //            var logicalName = fields[0].Trim();
+    //            var accountCode = fields[1].Trim();
+
+    //            if (!string.IsNullOrEmpty(logicalName) && !string.IsNullOrEmpty(accountCode))
+    //            {
+    //                result[logicalName] = accountCode;
+    //            }
+    //        }
+    //    }
+
+    //    return result;
+    //}
     public TestScenarioConfig LoadTestScenario(string scenarioId)
     {
         var csvPath = Path.Combine(_dataDirectory, "TestScenarios.csv");
@@ -61,20 +102,7 @@ public class TestDataImportService
         return result.OrderBy(x => x.LineNumber).ToList();
     }
 
-    public Dictionary<string, string> LoadAccountMappings()
-    {
-        var csvPath = Path.Combine(_dataDirectory, "TestAccountMappings.csv");
-        var lines = File.ReadAllLines(csvPath);
-        var result = new Dictionary<string, string>();
 
-        foreach (var line in lines.Skip(1)) // Skip header
-        {
-            var fields = line.Split(',');
-            result[fields[0]] = fields[1]; // LogicalName -> AccountCode
-        }
-
-        return result;
-    }
 
     public List<TestInitialTransaction> LoadInitialTransactions(string scenarioId)
     {
