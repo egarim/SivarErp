@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
@@ -22,9 +23,11 @@ using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.Tests.Infrastructure;
 using NUnit.Framework;
 using System.Diagnostics;
+using System.Text;
 
 namespace Sivar.Erp.Tests
 {
@@ -140,6 +143,13 @@ namespace Sivar.Erp.Tests
 
                 results.Add("=== WORKFLOW COMPLETED SUCCESSFULLY ===");
                 results.Add("All steps executed without errors!");
+
+                // Step 8: Print Performance Logs
+                results.Add("");
+                results.Add("=== STEP 8: PERFORMANCE METRICS ===");
+                var perfLogs = PrintPerformanceLogs();
+                results.AddRange(perfLogs);
+                results.Add("");
 
                 // Output all results
                 foreach (var result in results)
@@ -263,6 +273,7 @@ namespace Sivar.Erp.Tests
             // Get services from the service provider where possible
             var dateTimeZoneService = _serviceProvider.GetRequiredService<IDateTimeZoneService>();
             var optionService = _serviceProvider.GetRequiredService<IOptionService>();
+            var logger = _serviceProvider.GetRequiredService<ILogger<AccountingModule>>();
 
             // Create services that require ObjectDb instance (these can't be pre-configured in factory)
             var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb);
@@ -270,14 +281,16 @@ namespace Sivar.Erp.Tests
             var fiscalPeriodService = new FiscalPeriodService(_objectDb);
             var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);
 
-            // Create accounting module with correct parameter order
+            // Create accounting module with correct parameter order, including the logger and objectDb
             _accountingModule = new AccountingModule(
                 optionService,
                 activityStreamService,
                 dateTimeZoneService,
                 fiscalPeriodService,
                 accountBalanceCalculator,
-                sequencerService);
+                sequencerService,
+                logger,
+                _objectDb);
 
             // Register sequences
             _accountingModule.RegisterSequence(_objectDb.Sequences);
@@ -488,6 +501,64 @@ namespace Sivar.Erp.Tests
             var totalDebits = entries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
             var totalCredits = entries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
             return Math.Abs(totalDebits - totalCredits) < 0.01m; // Allow for small rounding differences
+        }
+
+        /// <summary>
+        /// Prints the performance logs stored in ObjectDb
+        /// </summary>
+        private List<string> PrintPerformanceLogs()
+        {
+            var results = new List<string>();
+
+            if (_objectDb.PerformanceLogs == null || !_objectDb.PerformanceLogs.Any())
+            {
+                results.Add("No performance logs available.");
+                return results;
+            }
+
+            results.Add($"Total performance logs: {_objectDb.PerformanceLogs.Count}");
+            results.Add("");
+            results.Add("| Method | Execution Time (ms) | Memory (bytes) | Slow | Memory Intensive |");
+            results.Add("|--------|-------------------|---------------|------|-----------------|");
+
+            foreach (var log in _objectDb.PerformanceLogs.OrderByDescending(l => l.ExecutionTimeMs))
+            {
+                results.Add($"| {log.Method} | {log.ExecutionTimeMs} | {log.MemoryDeltaBytes:N0} | {(log.IsSlow ? "⚠️" : "")} | {(log.IsMemoryIntensive ? "⚠️" : "")} |");
+            }
+
+            // Performance summary
+            results.Add("");
+            results.Add("Performance Summary:");
+
+            var slowMethods = _objectDb.PerformanceLogs.Where(l => l.IsSlow).ToList();
+            if (slowMethods.Any())
+            {
+                results.Add($"⚠️ Slow methods detected: {slowMethods.Count}");
+                foreach (var slowMethod in slowMethods.OrderByDescending(m => m.ExecutionTimeMs))
+                {
+                    results.Add($"  - {slowMethod.Method}: {slowMethod.ExecutionTimeMs} ms");
+                }
+            }
+            else
+            {
+                results.Add("✓ No slow methods detected");
+            }
+
+            var memoryIntensiveMethods = _objectDb.PerformanceLogs.Where(l => l.IsMemoryIntensive).ToList();
+            if (memoryIntensiveMethods.Any())
+            {
+                results.Add($"⚠️ Memory intensive methods detected: {memoryIntensiveMethods.Count}");
+                foreach (var memMethod in memoryIntensiveMethods.OrderByDescending(m => m.MemoryDeltaBytes))
+                {
+                    results.Add($"  - {memMethod.Method}: {memMethod.MemoryDeltaBytes:N0} bytes");
+                }
+            }
+            else
+            {
+                results.Add("✓ No memory intensive methods detected");
+            }
+
+            return results;
         }
     }
 }

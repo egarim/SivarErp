@@ -1,6 +1,7 @@
 ﻿using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
@@ -9,12 +10,14 @@ using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sivar.Erp.Services
 {
     public interface IObjectDb
     {
+        IList<PerformanceLog> PerformanceLogs { get; set; } 
         IList<IFiscalPeriod> fiscalPeriods { get; set; }
         IList<IAccount> Accounts { get; set; }
         IList<IBusinessEntity> BusinessEntities { get; set; }

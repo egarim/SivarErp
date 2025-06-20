@@ -1,59 +1,55 @@
+using Microsoft.Extensions.Logging;
 using Sivar.Erp.Documents;
-
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.Services;
 using Sivar.Erp.ErpSystem.TimeService;
+using Sivar.Erp.ErpSystem.Diagnostics;
+using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting.BalanceCalculators;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.Accounting
+public class AccountingModule : ErpModuleBase
 {
-    public class AccountingModule : ErpModuleBase
+    protected IFiscalPeriodService FiscalPeriodService;
+    private IAccountBalanceCalculator accountBalanceCalculator;
+    private readonly PerformanceLogger<AccountingModule> _performanceLogger;
+
+    // Constants for transaction number sequence codes
+    private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
+    private const string BATCH_SEQUENCE_CODE = "BATCH";
+    private const string FISCAL_SEQUENCE_CODE = "FISCAL";
+    private const string LEDGERENTRY_SEQUENCE_CODE = "LEDGERENTRY";
+
+    public IAccountBalanceCalculator AccountBalanceCalculator { get => accountBalanceCalculator; set => accountBalanceCalculator = value; }
+
+    public AccountingModule(
+        IOptionService optionService,
+        IActivityStreamService activityStreamService,
+        IDateTimeZoneService dateTimeZoneService,
+        IFiscalPeriodService fiscalPeriodService,
+        IAccountBalanceCalculator accountBalanceCalculator,
+        ISequencerService sequencerService,
+        ILogger<AccountingModule> logger,
+        IObjectDb objectDb = null)
+        : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
     {
-        protected IFiscalPeriodService FiscalPeriodService;
-        private IAccountBalanceCalculator accountBalanceCalculator;
+        FiscalPeriodService = fiscalPeriodService;
+        AccountBalanceCalculator = accountBalanceCalculator;
+        _performanceLogger = new PerformanceLogger<AccountingModule>(logger, PerformanceLogMode.All, 100, 10_000_000, objectDb);
+    }
 
-
-
-        // Constants for transaction number sequence codes
-        private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
-        private const string BATCH_SEQUENCE_CODE = "BATCH";
-        private const string FISCAL_SEQUENCE_CODE = "FISCAL";
-        private const string LEDGERENTRY_SEQUENCE_CODE = "LEDGERENTRY";
-
-        public IAccountBalanceCalculator AccountBalanceCalculator { get => accountBalanceCalculator; set => accountBalanceCalculator = value; }
-
-        public AccountingModule(
-            IOptionService optionService, 
-            IActivityStreamService activityStreamService, 
-            IDateTimeZoneService dateTimeZoneService,
-            IFiscalPeriodService fiscalPeriodService, 
-            IAccountBalanceCalculator accountBalanceCalculator, 
-          
-            ISequencerService sequencerService) 
-            : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
-        {
-            FiscalPeriodService = fiscalPeriodService;
-            AccountBalanceCalculator = accountBalanceCalculator;
-           
-           
-        }
-
-        /// <summary>
-        /// Posts a transaction after validating fiscal period is open
-        /// </summary>
-        /// <param name="transaction">Transaction to post</param>
-        /// <returns>True if posted successfully, false otherwise</returns>
-        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
-        public async Task<bool> PostTransactionAsync(ITransaction transaction)
+    /// <summary>
+    /// Posts a transaction after validating fiscal period is open
+    /// </summary>
+    /// <param name="transaction">Transaction to post</param>
+    /// <returns>True if posted successfully, false otherwise</returns>
+    /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+    public async Task<bool> PostTransactionAsync(ITransaction transaction)
+    {
+        return await _performanceLogger.Track(nameof(PostTransactionAsync), async () =>
         {
             if (transaction == null)
                 throw new ArgumentNullException(nameof(transaction));
@@ -63,15 +59,15 @@ namespace Sivar.Erp.Services.Accounting
 
             // Validate that transaction is in an open fiscal period
             var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
-            
+
             if (fiscalPeriod == null)
                 throw new InvalidOperationException($"No fiscal period found for date {transaction.TransactionDate}");
-                
+
             if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
                 throw new InvalidOperationException($"Cannot post transaction: Fiscal period '{fiscalPeriod.Name}' is closed");
 
             // Validate transaction balance (debits = credits)
-            bool isValid =await transaction.ValidateTransactionAsync();
+            bool isValid = await transaction.ValidateTransactionAsync();
 
             if (!isValid)
                 throw new InvalidOperationException("Transaction has unbalanced debits and credits");
@@ -85,32 +81,35 @@ namespace Sivar.Erp.Services.Accounting
             {
                 ledgerEntry.LedgerEntryNumber = await sequencerService.GetNextNumberAsync(LEDGERENTRY_SEQUENCE_CODE);
             }
-       
+
             // Post the transaction
             transaction.Post();
-            
+
             // Log the activity
             var systemActor = CreateSystemStreamObject();
             var transactionTarget = CreateStreamObject(
-                "Transaction", 
-                transaction.TransactionNumber, 
+                "Transaction",
+                transaction.TransactionNumber,
                 $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
-                
+
             await RecordActivityAsync(
                 systemActor,
                 "Posted",
                 transactionTarget);
-                
-            return true;
-        }
 
-        /// <summary>
-        /// Unposts a transaction if possible
-        /// </summary>
-        /// <param name="transaction">Transaction to unpost</param>
-        /// <returns>True if unposted successfully, false otherwise</returns>
-        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
-        public async Task<bool> UnPostTransactionAsync(ITransaction transaction)
+            return true;
+        });
+    }
+
+    /// <summary>
+    /// Unposts a transaction if possible
+    /// </summary>
+    /// <param name="transaction">Transaction to unpost</param>
+    /// <returns>True if unposted successfully, false otherwise</returns>
+    /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+    public async Task<bool> UnPostTransactionAsync(ITransaction transaction)
+    {
+        return await _performanceLogger.Track(nameof(UnPostTransactionAsync), async () =>
         {
             if (transaction == null)
                 throw new ArgumentNullException(nameof(transaction));
@@ -120,38 +119,41 @@ namespace Sivar.Erp.Services.Accounting
 
             // Validate that transaction is in an open fiscal period
             var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
-            
+
             if (fiscalPeriod == null)
                 throw new InvalidOperationException($"No fiscal period found for date {transaction.TransactionDate}");
-                
+
             if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
                 throw new InvalidOperationException($"Cannot unpost transaction: Fiscal period '{fiscalPeriod.Name}' is closed");
 
             // Unpost the transaction
             transaction.UnPost();
-            
+
             // Log the activity
             var systemActor = CreateSystemStreamObject();
             var transactionTarget = CreateStreamObject(
-                "Transaction", 
-                transaction.TransactionNumber, 
+                "Transaction",
+                transaction.TransactionNumber,
                 $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
-                
+
             await RecordActivityAsync(
                 systemActor,
                 "Unposted",
                 transactionTarget);
-                
-            return true;
-        }
 
-        /// <summary>
-        /// Posts a transaction batch and all its transactions
-        /// </summary>
-        /// <param name="batch">Transaction batch to post</param>
-        /// <returns>True if posted successfully, false otherwise</returns>
-        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
-        public async Task<bool> PostTransactionBatchAsync(ITransactionBatch batch)
+            return true;
+        });
+    }
+
+    /// <summary>
+    /// Posts a transaction batch and all its transactions
+    /// </summary>
+    /// <param name="batch">Transaction batch to post</param>
+    /// <returns>True if posted successfully, false otherwise</returns>
+    /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+    public async Task<bool> PostTransactionBatchAsync(ITransactionBatch batch)
+    {
+        return await _performanceLogger.Track(nameof(PostTransactionBatchAsync), async () =>
         {
             if (batch == null)
                 throw new ArgumentNullException(nameof(batch));
@@ -161,10 +163,10 @@ namespace Sivar.Erp.Services.Accounting
 
             // Validate that batch is in an open fiscal period
             var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(batch.BatchDate);
-            
+
             if (fiscalPeriod == null)
                 throw new InvalidOperationException($"No fiscal period found for date {batch.BatchDate}");
-                
+
             if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
                 throw new InvalidOperationException($"Cannot post batch: Fiscal period '{fiscalPeriod.Name}' is closed");
 
@@ -178,7 +180,7 @@ namespace Sivar.Erp.Services.Accounting
             // Assuming we can access transactions through a cast to TransactionBatchDto
             // In a real implementation, we would use a repository or other data access method
             var batchDto = batch as TransactionBatchDto;
-            
+
             if (batchDto?.Transactions != null)
             {
                 // Post each transaction in the batch
@@ -190,32 +192,35 @@ namespace Sivar.Erp.Services.Accounting
 
             // Post the batch itself
             batch.Post();
-            
+
             // Update batch status
             batch.Status = BatchStatus.Processed;
-            
+
             // Log the activity
             var systemActor = CreateSystemStreamObject();
             var batchTarget = CreateStreamObject(
-                "TransactionBatch", 
-                batch.TransactionNumber, 
+                "TransactionBatch",
+                batch.TransactionNumber,
                 $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
-                
+
             await RecordActivityAsync(
                 systemActor,
                 "Posted",
                 batchTarget);
-                
-            return true;
-        }
 
-        /// <summary>
-        /// Unposts a transaction batch and all its transactions
-        /// </summary>
-        /// <param name="batch">Transaction batch to unpost</param>
-        /// <returns>True if unposted successfully, false otherwise</returns>
-        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
-        public async Task<bool> UnPostTransactionBatchAsync(ITransactionBatch batch)
+            return true;
+        });
+    }
+
+    /// <summary>
+    /// Unposts a transaction batch and all its transactions
+    /// </summary>
+    /// <param name="batch">Transaction batch to unpost</param>
+    /// <returns>True if unposted successfully, false otherwise</returns>
+    /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
+    public async Task<bool> UnPostTransactionBatchAsync(ITransactionBatch batch)
+    {
+        return await _performanceLogger.Track(nameof(UnPostTransactionBatchAsync), async () =>
         {
             if (batch == null)
                 throw new ArgumentNullException(nameof(batch));
@@ -225,10 +230,10 @@ namespace Sivar.Erp.Services.Accounting
 
             // Validate that batch is in an open fiscal period
             var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(batch.BatchDate);
-            
+
             if (fiscalPeriod == null)
                 throw new InvalidOperationException($"No fiscal period found for date {batch.BatchDate}");
-                
+
             if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
                 throw new InvalidOperationException($"Cannot unpost batch: Fiscal period '{fiscalPeriod.Name}' is closed");
 
@@ -236,7 +241,7 @@ namespace Sivar.Erp.Services.Accounting
             // Assuming we can access transactions through a cast to TransactionBatchDto
             // In a real implementation, we would use a repository or other data access method
             var batchDto = batch as TransactionBatchDto;
-            
+
             if (batchDto?.Transactions != null)
             {
                 // Unpost each transaction in the batch
@@ -248,37 +253,43 @@ namespace Sivar.Erp.Services.Accounting
 
             // Unpost the batch itself
             batch.UnPost();
-            
+
             // Update batch status
             batch.Status = BatchStatus.Approved;
-            
+
             // Log the activity
             var systemActor = CreateSystemStreamObject();
             var batchTarget = CreateStreamObject(
-                "TransactionBatch", 
-                batch.TransactionNumber, 
+                "TransactionBatch",
+                batch.TransactionNumber,
                 $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
-                
+
             await RecordActivityAsync(
                 systemActor,
                 "Unposted",
                 batchTarget);
-                
-            return true;
-        }
 
-        /// <summary>
-        /// Checks if a date falls within an open fiscal period
-        /// </summary>
-        /// <param name="date">Date to check</param>
-        /// <returns>True if date is within an open fiscal period, false otherwise</returns>
-        public async Task<bool> IsDateInOpenFiscalPeriodAsync(DateOnly date)
+            return true;
+        });
+    }
+
+    /// <summary>
+    /// Checks if a date falls within an open fiscal period
+    /// </summary>
+    /// <param name="date">Date to check</param>
+    /// <returns>True if date is within an open fiscal period, false otherwise</returns>
+    public async Task<bool> IsDateInOpenFiscalPeriodAsync(DateOnly date)
+    {
+        return await _performanceLogger.Track(nameof(IsDateInOpenFiscalPeriodAsync), async () =>
         {
             var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(date);
             return fiscalPeriod != null && fiscalPeriod.Status == FiscalPeriodStatus.Open;
-        }
+        });
+    }
 
-        public override void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos)
+    public override void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos)
+    {
+        _performanceLogger.Track(nameof(RegisterSequence), () =>
         {
             SequenceDto sequence = new SequenceDto();
             sequence.Code = TRANSACTION_SEQUENCE_CODE;
@@ -293,7 +304,6 @@ namespace Sivar.Erp.Services.Accounting
             ledgerEntry.Name = "LedgerEntries";
             ledgerEntry.Prefix = "LE";
             ledgerEntry.Suffix = "S";
-
 
             SequenceDto BatchSequence = new SequenceDto();
             BatchSequence.Code = BATCH_SEQUENCE_CODE;
@@ -313,6 +323,6 @@ namespace Sivar.Erp.Services.Accounting
             this.sequencerService.CreateSequenceAsync(sequence);
             this.sequencerService.CreateSequenceAsync(BatchSequence);
             this.sequencerService.CreateSequenceAsync(ledgerEntry);
-        }
+        });
     }
 }

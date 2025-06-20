@@ -1,6 +1,7 @@
 ﻿using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
@@ -44,6 +45,7 @@ namespace Sivar.Erp.Services
         /// </summary>
         public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>();
         public IList<ITaxRule> TaxRules { get; set; }=new List<ITaxRule>();
+        public IList<PerformanceLog> PerformanceLogs { get; set; }=new List<PerformanceLog>();
 
         public ObjectDb()
         {

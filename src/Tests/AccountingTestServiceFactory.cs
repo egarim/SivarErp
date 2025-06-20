@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
@@ -27,6 +29,9 @@ namespace Sivar.Erp.Tests.Infrastructure
         public static ServiceCollection ConfigureServices()
         {
             var services = new ServiceCollection();
+
+            // Register logging services
+            RegisterLoggingServices(services);
 
             // Register validators with specific configurations
             RegisterValidators(services);
@@ -65,6 +70,19 @@ namespace Sivar.Erp.Tests.Infrastructure
             var services = ConfigureServices();
             configureServices?.Invoke(services);
             return services.BuildServiceProvider();
+        }
+
+        private static void RegisterLoggingServices(ServiceCollection services)
+        {
+            // Add logging services
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            });
+            
+            // Add generic ILogger<T> resolution
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
         }
 
         private static void RegisterValidators(ServiceCollection services)
