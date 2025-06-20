@@ -28,6 +28,7 @@ using Sivar.Erp.Tests.Infrastructure;
 using NUnit.Framework;
 using System.Diagnostics;
 using System.Text;
+using Sivar.Erp.Modules.Accounting;
 
 namespace Sivar.Erp.Tests
 {
