@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Documents;
@@ -10,24 +11,19 @@ using Sivar.Erp.ErpSystem.Services;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.Services;
-using Sivar.Erp.Services.Accounting;
 using Sivar.Erp.Services.Accounting.BalanceCalculators;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
 
 namespace Sivar.Erp.Modules.Accounting
 {
-    /// <summary>
-    /// Module for accounting operations that other modules can use to record financial transactions
-    /// and manage fiscal periods
-    /// </summary>
     public class AccountingModule : ErpModuleBase, IAccountingModule
     {
         protected IFiscalPeriodService FiscalPeriodService;
         private IAccountBalanceCalculator accountBalanceCalculator;
         private readonly PerformanceLogger<AccountingModule> _performanceLogger;
+        private readonly IObjectDb _objectDb;
 
-        // Constants for transaction number sequence codes
         private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
         private const string BATCH_SEQUENCE_CODE = "BATCH";
         private const string FISCAL_SEQUENCE_CODE = "FISCAL";
@@ -47,8 +43,72 @@ namespace Sivar.Erp.Modules.Accounting
             : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
         {
             FiscalPeriodService = fiscalPeriodService;
-            AccountBalanceCalculator = accountBalanceCalculator;
-            _performanceLogger = new PerformanceLogger<AccountingModule>(logger, PerformanceLogMode.All, 100, 10_000_000, objectDb);
+            this.accountBalanceCalculator = accountBalanceCalculator;
+            _objectDb = objectDb;
+            _performanceLogger = new PerformanceLogger<AccountingModule>(logger, PerformanceLogMode.All, 100, 10_000_000, _objectDb);
+        }
+
+        /// <summary>
+        /// Creates a transaction from a document with accounting entries based on document totals
+        /// </summary>
+        /// <param name="document">The source document for the transaction</param>
+        /// <param name="description">Optional description for the transaction</param>
+        /// <returns>A transaction ready for posting</returns>
+        public async Task<ITransaction> CreateTransactionFromDocumentAsync(IDocument document, string description = null)
+        {
+            return await _performanceLogger.Track(nameof(CreateTransactionFromDocumentAsync), async () =>
+            {
+                if (document == null)
+                    throw new ArgumentNullException(nameof(document));
+
+                // Create a new transaction
+                var transaction = new TransactionDto
+                {
+                    TransactionDate = document.Date,
+                    Description = description ?? $"Document {document.DocumentType.Name} #{document.DocumentNumber}",
+                    DocumentNumber = document.DocumentNumber,
+                    LedgerEntries = new List<ILedgerEntry>()
+                };
+
+                // Generate ledger entries from document totals
+                if (document.DocumentTotals != null)
+                {
+                    foreach (var total in document.DocumentTotals)
+                    {
+                        // Only create entries for totals marked for inclusion in transactions
+                        if (total.IncludeInTransaction)
+                        {
+                            // Create debit entry if applicable
+                            if (!string.IsNullOrEmpty(total.DebitAccountCode) && total.Total > 0)
+                            {
+                                var debitEntry = new LedgerEntryDto
+                                {
+                                    OfficialCode = total.DebitAccountCode,
+                                    EntryType = EntryType.Debit,
+                                    Amount = total.Total,
+                                    AccountName = total.Concept
+                                };
+                                ((List<ILedgerEntry>)transaction.LedgerEntries).Add(debitEntry);
+                            }
+
+                            // Create credit entry if applicable
+                            if (!string.IsNullOrEmpty(total.CreditAccountCode) && total.Total > 0)
+                            {
+                                var creditEntry = new LedgerEntryDto
+                                {
+                                    OfficialCode = total.CreditAccountCode,
+                                    EntryType = EntryType.Credit,
+                                    Amount = total.Total,
+                                    AccountName = total.Concept
+                                };
+                                ((List<ILedgerEntry>)transaction.LedgerEntries).Add(creditEntry);
+                            }
+                        }
+                    }
+                }
+
+                return transaction;
+            });
         }
 
         /// <summary>
@@ -156,128 +216,125 @@ namespace Sivar.Erp.Modules.Accounting
         }
 
         /// <summary>
-        /// Posts a transaction batch and all its transactions
+        /// Checks if a transaction is balanced (total debits = total credits) and valid for posting
         /// </summary>
-        /// <param name="batch">Transaction batch to post</param>
-        /// <returns>True if posted successfully, false otherwise</returns>
-        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
-        public async Task<bool> PostTransactionBatchAsync(ITransactionBatch batch)
+        /// <param name="transaction">Transaction to validate</param>
+        /// <returns>True if the transaction is valid</returns>
+        public async Task<bool> ValidateTransactionAsync(ITransaction transaction)
         {
-            return await _performanceLogger.Track(nameof(PostTransactionBatchAsync), async () =>
+            return await _performanceLogger.Track(nameof(ValidateTransactionAsync), async () =>
             {
-                if (batch == null)
-                    throw new ArgumentNullException(nameof(batch));
+                if (transaction == null)
+                    throw new ArgumentNullException(nameof(transaction));
 
-                if (batch.IsPosted)
-                    return true; // Already posted
+                // Delegate to the transaction's validation method
+                return await transaction.ValidateTransactionAsync();
+            });
+        }
 
-                // Validate that batch is in an open fiscal period
-                var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(batch.BatchDate);
+        /// <summary>
+        /// Gets the balance of an account as of a specific date
+        /// </summary>
+        /// <param name="accountCode">Account code to query</param>
+        /// <param name="asOfDate">Date for which to get the balance</param>
+        /// <returns>The account balance</returns>
+        public async Task<decimal> GetAccountBalanceAsync(string accountCode, DateOnly asOfDate)
+        {
+            return await _performanceLogger.Track(nameof(GetAccountBalanceAsync), async () =>
+            {
+                if (string.IsNullOrEmpty(accountCode))
+                    throw new ArgumentException("Account code cannot be null or empty", nameof(accountCode));
+
+                // Use the account balance calculator to get the balance
+                return AccountBalanceCalculator.CalculateAccountBalance(accountCode, asOfDate);
+            });
+        }
+
+        /// <summary>
+        /// Opens a fiscal period to allow transaction posting
+        /// </summary>
+        /// <param name="periodCode">Code of the fiscal period to open</param>
+        /// <param name="userId">User opening the period</param>
+        /// <returns>True if opened successfully</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period doesn't exist</exception>
+        public async Task<bool> OpenFiscalPeriodAsync(string periodCode, string userId)
+        {
+            return await _performanceLogger.Track(nameof(OpenFiscalPeriodAsync), async () =>
+            {
+                if (string.IsNullOrEmpty(periodCode))
+                    throw new ArgumentNullException(nameof(periodCode));
+
+                if (string.IsNullOrEmpty(userId))
+                    throw new ArgumentNullException(nameof(userId));
+
+                // We need to search all fiscal periods as the period could be in either state
+                // First try closed periods since that's what we're looking to open
+                var closedFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Closed);
+                var fiscalPeriod = closedFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
 
                 if (fiscalPeriod == null)
-                    throw new InvalidOperationException($"No fiscal period found for date {batch.BatchDate}");
+                {
+                    // If not found in closed periods, check open periods as well (maybe it's already open)
+                    var openFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Open);
+                    fiscalPeriod = openFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
+                }
 
+                if (fiscalPeriod == null)
+                    throw new InvalidOperationException($"Fiscal period with code {periodCode} not found");
+
+                // Only update if needed
                 if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
-                    throw new InvalidOperationException($"Cannot post batch: Fiscal period '{fiscalPeriod.Name}' is closed");
-
-                // Generate batch transaction number if not already set
-                if (string.IsNullOrEmpty(batch.TransactionNumber))
                 {
-                    batch.TransactionNumber = await sequencerService.GetNextNumberAsync(BATCH_SEQUENCE_CODE);
+                    // Open the fiscal period
+                    fiscalPeriod.Status = FiscalPeriodStatus.Open;
+                    fiscalPeriod.UpdatedBy = userId;
+                    fiscalPeriod.UpdatedAt = DateTime.UtcNow;
                 }
-
-                // Get all transactions in this batch
-                // Assuming we can access transactions through a cast to TransactionBatchDto
-                // In a real implementation, we would use a repository or other data access method
-                var batchDto = batch as TransactionBatchDto;
-
-                if (batchDto?.Transactions != null)
-                {
-                    // Post each transaction in the batch
-                    foreach (var transaction in batchDto.Transactions)
-                    {
-                        await PostTransactionAsync(transaction);
-                    }
-                }
-
-                // Post the batch itself
-                batch.Post();
-
-                // Update batch status
-                batch.Status = BatchStatus.Processed;
-
-                // Log the activity
-                var systemActor = CreateSystemStreamObject();
-                var batchTarget = CreateStreamObject(
-                    "TransactionBatch",
-                    batch.TransactionNumber,
-                    $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
-
-                await RecordActivityAsync(
-                    systemActor,
-                    "Posted",
-                    batchTarget);
 
                 return true;
             });
         }
 
         /// <summary>
-        /// Unposts a transaction batch and all its transactions
+        /// Closes a fiscal period to prevent further transaction posting
         /// </summary>
-        /// <param name="batch">Transaction batch to unpost</param>
-        /// <returns>True if unposted successfully, false otherwise</returns>
-        /// <exception cref="InvalidOperationException">Thrown when fiscal period is closed</exception>
-        public async Task<bool> UnPostTransactionBatchAsync(ITransactionBatch batch)
+        /// <param name="periodCode">Code of the fiscal period to close</param>
+        /// <param name="userId">User closing the period</param>
+        /// <returns>True if closed successfully</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period doesn't exist</exception>
+        public async Task<bool> CloseFiscalPeriodAsync(string periodCode, string userId)
         {
-            return await _performanceLogger.Track(nameof(UnPostTransactionBatchAsync), async () =>
+            return await _performanceLogger.Track(nameof(CloseFiscalPeriodAsync), async () =>
             {
-                if (batch == null)
-                    throw new ArgumentNullException(nameof(batch));
+                if (string.IsNullOrEmpty(periodCode))
+                    throw new ArgumentNullException(nameof(periodCode));
 
-                if (!batch.IsPosted)
-                    return true; // Already unposted
+                if (string.IsNullOrEmpty(userId))
+                    throw new ArgumentNullException(nameof(userId));
 
-                // Validate that batch is in an open fiscal period
-                var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(batch.BatchDate);
+                // We need to search all fiscal periods as the period could be in either state
+                // First try open periods since that's what we're looking to close
+                var openFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Open);
+                var fiscalPeriod = openFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
 
                 if (fiscalPeriod == null)
-                    throw new InvalidOperationException($"No fiscal period found for date {batch.BatchDate}");
-
-                if (fiscalPeriod.Status == FiscalPeriodStatus.Closed)
-                    throw new InvalidOperationException($"Cannot unpost batch: Fiscal period '{fiscalPeriod.Name}' is closed");
-
-                // Get all transactions in this batch
-                // Assuming we can access transactions through a cast to TransactionBatchDto
-                // In a real implementation, we would use a repository or other data access method
-                var batchDto = batch as TransactionBatchDto;
-
-                if (batchDto?.Transactions != null)
                 {
-                    // Unpost each transaction in the batch
-                    foreach (var transaction in batchDto.Transactions)
-                    {
-                        await UnPostTransactionAsync(transaction);
-                    }
+                    // If not found in open periods, check closed periods as well (maybe it's already closed)
+                    var closedFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Closed);
+                    fiscalPeriod = closedFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
                 }
 
-                // Unpost the batch itself
-                batch.UnPost();
+                if (fiscalPeriod == null)
+                    throw new InvalidOperationException($"Fiscal period with code {periodCode} not found");
 
-                // Update batch status
-                batch.Status = BatchStatus.Approved;
-
-                // Log the activity
-                var systemActor = CreateSystemStreamObject();
-                var batchTarget = CreateStreamObject(
-                    "TransactionBatch",
-                    batch.TransactionNumber,
-                    $"Transaction batch {batch.TransactionNumber} '{batch.ReferenceCode}'");
-
-                await RecordActivityAsync(
-                    systemActor,
-                    "Unposted",
-                    batchTarget);
+                // Only update if needed
+                if (fiscalPeriod.Status == FiscalPeriodStatus.Open)
+                {
+                    // Close the fiscal period
+                    fiscalPeriod.Status = FiscalPeriodStatus.Closed;
+                    fiscalPeriod.UpdatedBy = userId;
+                    fiscalPeriod.UpdatedAt = DateTime.UtcNow;
+                }
 
                 return true;
             });
@@ -297,10 +354,6 @@ namespace Sivar.Erp.Modules.Accounting
             });
         }
 
-        /// <summary>
-        /// Gets the fiscal period service for advanced operations
-        /// </summary>
-        /// <returns>The fiscal period service</returns>
         public IFiscalPeriodService GetFiscalPeriodService()
         {
             return FiscalPeriodService;

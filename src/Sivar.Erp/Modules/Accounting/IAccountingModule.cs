@@ -13,6 +13,14 @@ namespace Sivar.Erp.Modules.Accounting
     public interface IAccountingModule
     {
         /// <summary>
+        /// Creates a transaction from a document with accounting entries based on document totals
+        /// </summary>
+        /// <param name="document">The source document for the transaction</param>
+        /// <param name="description">Optional description for the transaction</param>
+        /// <returns>A transaction ready for posting</returns>
+        Task<ITransaction> CreateTransactionFromDocumentAsync(IDocument document, string description = null);
+        
+        /// <summary>
         /// Posts a transaction after validating fiscal period is open
         /// </summary>
         /// <param name="transaction">Transaction to post</param>
@@ -25,6 +33,39 @@ namespace Sivar.Erp.Modules.Accounting
         /// <param name="transaction">Transaction to unpost</param>
         /// <returns>True if unposted successfully</returns>
         Task<bool> UnPostTransactionAsync(ITransaction transaction);
+        
+        /// <summary>
+        /// Checks if a transaction is balanced (total debits = total credits) and valid for posting
+        /// </summary>
+        /// <param name="transaction">Transaction to validate</param>
+        /// <returns>True if the transaction is valid</returns>
+        Task<bool> ValidateTransactionAsync(ITransaction transaction);
+        
+        /// <summary>
+        /// Gets the balance of an account as of a specific date
+        /// </summary>
+        /// <param name="accountCode">Account code to query</param>
+        /// <param name="asOfDate">Date for which to get the balance</param>
+        /// <returns>The account balance</returns>
+        Task<decimal> GetAccountBalanceAsync(string accountCode, DateOnly asOfDate);
+        
+        /// <summary>
+        /// Opens a fiscal period to allow transaction posting
+        /// </summary>
+        /// <param name="periodCode">Code of the fiscal period to open</param>
+        /// <param name="userId">User opening the period</param>
+        /// <returns>True if opened successfully</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period doesn't exist</exception>
+        Task<bool> OpenFiscalPeriodAsync(string periodCode, string userId);
+        
+        /// <summary>
+        /// Closes a fiscal period to prevent further transaction posting
+        /// </summary>
+        /// <param name="periodCode">Code of the fiscal period to close</param>
+        /// <param name="userId">User closing the period</param>
+        /// <returns>True if closed successfully</returns>
+        /// <exception cref="InvalidOperationException">Thrown when fiscal period doesn't exist</exception>
+        Task<bool> CloseFiscalPeriodAsync(string periodCode, string userId);
         
         /// <summary>
         /// Checks if a date falls within an open fiscal period
