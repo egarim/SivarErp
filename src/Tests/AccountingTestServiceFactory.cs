@@ -9,6 +9,7 @@ using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Modules;
 using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Services.Documents;
 using Sivar.Erp.Services.ImportExport;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
 using Sivar.Erp.Services.Taxes.TaxGroup;
@@ -113,6 +114,17 @@ namespace Sivar.Erp.Tests.Infrastructure
 
             services.AddTransient<IGroupMembershipImportExportService>(provider =>
                 new GroupMembershipImportExportService(provider.GetRequiredService<GroupMembershipValidator>()));
+
+            services.AddTransient<IDocumentTotalsService>(sp =>
+            {
+                var objectDb = sp.GetRequiredService<IObjectDb>();
+                var dateTimeService = sp.GetRequiredService<IDateTimeZoneService>();
+                var logger = sp.GetRequiredService<ILogger<DocumentTotalsService>>();
+                return new DocumentTotalsService(objectDb, dateTimeService, logger);
+            });
+
+            // Register the document accounting profile import/export service
+            services.AddTransient<IDocumentAccountingProfileImportExportService, DocumentAccountingProfileImportExportService>();
 
             services.AddTransient<ITaxRuleImportExportService>(provider =>
                 new TaxRuleImportExportService(provider.GetRequiredService<TaxRuleValidator>()));

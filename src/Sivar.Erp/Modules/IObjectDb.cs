@@ -17,7 +17,7 @@ namespace Sivar.Erp.Services
 {
     public interface IObjectDb
     {
-        IList<PerformanceLog> PerformanceLogs { get; set; } 
+        IList<PerformanceLog> PerformanceLogs { get; set; }
         IList<IFiscalPeriod> fiscalPeriods { get; set; }
         IList<IAccount> Accounts { get; set; }
         IList<IBusinessEntity> BusinessEntities { get; set; }
@@ -30,6 +30,11 @@ namespace Sivar.Erp.Services
         IList<GroupMembershipDto> GroupMemberships { get; set; }
         IList<ActivityRecord> ActivityRecords { get; set; }
         IList<SequenceDto> Sequences { get; set; }
+
+        /// <summary>
+        /// Collection of document accounting profiles used for transaction generation
+        /// </summary>
+        IList<IDocumentAccountingProfile> DocumentAccountingProfiles { get; set; }
 
         /// <summary>
         /// Collection of all transactions in the system

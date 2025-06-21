@@ -46,6 +46,7 @@ namespace Sivar.Erp.Services
         public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>();
         public IList<ITaxRule> TaxRules { get; set; }=new List<ITaxRule>();
         public IList<PerformanceLog> PerformanceLogs { get; set; }=new List<PerformanceLog>();
+        public IList<IDocumentAccountingProfile> DocumentAccountingProfiles { get; set; }=new List<IDocumentAccountingProfile>();
 
         public ObjectDb()
         {

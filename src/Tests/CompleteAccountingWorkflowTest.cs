@@ -16,6 +16,7 @@ using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
+using Sivar.Erp.Services.Documents;
 using Sivar.Erp.Documents;
 using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Modules;
@@ -40,15 +41,16 @@ namespace Sivar.Erp.Tests
     /// </summary>
     public class CompleteAccountingWorkflowTest
     {
-        private IServiceProvider _serviceProvider;
-        private IObjectDb _objectDb;
-        private AccountingModule _accountingModule;
-        private TransactionGeneratorService _transactionGenerator;
-        private DocumentTaxCalculator _taxCalculator;
-        private Dictionary<string, string> _accountMappings;
-        private TaxRuleEvaluator _taxRuleEvaluator;
-        private ITaxAccountingProfileService _taxAccountingService;
-        private ITaxAccountingProfileImportExportService _taxAccountingImportService;
+    private IServiceProvider _serviceProvider = null!;
+        private IObjectDb _objectDb = null!;
+        private AccountingModule? _accountingModule;
+        private TransactionGeneratorService? _transactionGenerator;
+        private DocumentTaxCalculator? _taxCalculator;
+        private Dictionary<string, string>? _accountMappings;
+        private TaxRuleEvaluator? _taxRuleEvaluator;
+        private ITaxAccountingProfileService? _taxAccountingService;
+        private ITaxAccountingProfileImportExportService? _taxAccountingImportService;
+        private IDocumentTotalsService? _documentTotalsService;
 
         [SetUp]
         public void Setup()
@@ -170,7 +172,7 @@ namespace Sivar.Erp.Tests
                 var log2 = results.Aggregate((current, next) => current + Environment.NewLine + next);
                 Debug.WriteLine(log2);
                 Assert.Fail($"Workflow failed: {ex.Message}");
-               
+
             }
 
             var log = results.Aggregate((current, next) => current + Environment.NewLine + next);
@@ -345,6 +347,25 @@ namespace Sivar.Erp.Tests
 
             // Create transaction generator with imported mappings
             _transactionGenerator = new TransactionGeneratorService(_accountMappings);
+
+            // Create and configure the document totals service
+            var dateTimeService = _serviceProvider.GetRequiredService<IDateTimeZoneService>();
+            var loggerDocumentTotals = _serviceProvider.GetRequiredService<ILogger<DocumentTotalsService>>();
+            _documentTotalsService = new DocumentTotalsService(_objectDb, dateTimeService, loggerDocumentTotals);
+
+            // Create a default sales invoice accounting profile
+            var salesInvoiceProfile = new DocumentAccountingProfileDto
+            {
+                DocumentOperation = "SalesInvoice",
+                SalesAccountCode = "SALES_PRODUCT_1",
+                AccountsReceivableCode = "ACCOUNTS_RECEIVABLE",
+                CostOfGoodsSoldAccountCode = "COST_OF_SALES_PRODUCT_1",
+                InventoryAccountCode = "INVENTORY_PRODUCT_1",
+                CostRatio = 0.6m
+            };
+
+            // Add the profile
+            await _documentTotalsService.CreateDocumentAccountingProfileAsync(salesInvoiceProfile, "TestUser");
         }
 
         /// <summary>
@@ -440,58 +461,8 @@ namespace Sivar.Erp.Tests
         /// </summary>
         private void AddAccountingTotals(DocumentDto document)
         {
-            // Subtotal (line amounts before tax) - credit to sales account
-            var subtotal = document.Lines.OfType<LineDto>().Sum(l => l.Amount);
-            var subtotalDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Subtotal",
-                Total = subtotal,
-                CreditAccountCode = "SALES_PRODUCT_1", // Will use VENTA DE PRODUCTO 1 for simplicity
-                IncludeInTransaction = true
-            };
-
-            // Add subtotal at the beginning
-            document.DocumentTotals.Insert(0, subtotalDto);
-
-            // Calculate total amount including taxes
-            var totalAmount = document.DocumentTotals.Sum(t => t.Total);
-
-            // Add accounts receivable (debit)
-            var accountsReceivableDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Accounts Receivable",
-                Total = totalAmount,
-                DebitAccountCode = "ACCOUNTS_RECEIVABLE",
-                IncludeInTransaction = true
-            };
-
-            document.DocumentTotals.Add(accountsReceivableDto);
-
-            // Add cost of goods sold and inventory reduction totals (matching original test)
-            var costOfGoodsSold = subtotal * 0.6m; // Assuming 60% cost ratio
-
-            var cogsDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Cost of Goods Sold",
-                Total = costOfGoodsSold,
-                DebitAccountCode = "COST_OF_SALES_PRODUCT_1",
-                IncludeInTransaction = true
-            };
-
-            var inventoryReductionDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Inventory Reduction",
-                Total = costOfGoodsSold,
-                CreditAccountCode = "INVENTORY_PRODUCT_1",
-                IncludeInTransaction = true
-            };
-
-            document.DocumentTotals.Add(cogsDto);
-            document.DocumentTotals.Add(inventoryReductionDto);
+            // Use the service to add document totals for sales invoice
+            _documentTotalsService.AddDocumentAccountingTotals(document, "SalesInvoice");
         }
 
         /// <summary>
