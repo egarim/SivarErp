@@ -14,6 +14,8 @@ using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting.BalanceCalculators;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
+using Sivar.Erp.Modules.Accounting.JournalEntries;
+using Sivar.Erp.Modules.Accounting.Reports;
 
 namespace Sivar.Erp.Modules.Accounting
 {
@@ -22,7 +24,9 @@ namespace Sivar.Erp.Modules.Accounting
         protected IFiscalPeriodService FiscalPeriodService;
         private IAccountBalanceCalculator accountBalanceCalculator;
         private readonly PerformanceLogger<AccountingModule> _performanceLogger;
-        private readonly IObjectDb _objectDb;
+        private readonly IObjectDb? _objectDb;
+        private readonly IJournalEntryService _journalEntryService;
+        private readonly IJournalEntryReportService _reportService;
 
         private const string TRANSACTION_SEQUENCE_CODE = "TRANS";
         private const string BATCH_SEQUENCE_CODE = "BATCH";
@@ -30,7 +34,6 @@ namespace Sivar.Erp.Modules.Accounting
         private const string LEDGERENTRY_SEQUENCE_CODE = "LEDGERENTRY";
 
         public IAccountBalanceCalculator AccountBalanceCalculator { get => accountBalanceCalculator; set => accountBalanceCalculator = value; }
-
         public AccountingModule(
             IOptionService optionService,
             IActivityStreamService activityStreamService,
@@ -39,12 +42,16 @@ namespace Sivar.Erp.Modules.Accounting
             IAccountBalanceCalculator accountBalanceCalculator,
             ISequencerService sequencerService,
             ILogger<AccountingModule> logger,
-            IObjectDb objectDb = null)
+            IJournalEntryService journalEntryService,
+            IJournalEntryReportService reportService,
+            IObjectDb? objectDb = null)
             : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
         {
             FiscalPeriodService = fiscalPeriodService;
             this.accountBalanceCalculator = accountBalanceCalculator;
             _objectDb = objectDb;
+            _journalEntryService = journalEntryService;
+            _reportService = reportService;
             _performanceLogger = new PerformanceLogger<AccountingModule>(logger, PerformanceLogMode.All, 100, 10_000_000, _objectDb);
         }
 
@@ -54,7 +61,7 @@ namespace Sivar.Erp.Modules.Accounting
         /// <param name="document">The source document for the transaction</param>
         /// <param name="description">Optional description for the transaction</param>
         /// <returns>A transaction ready for posting</returns>
-        public async Task<ITransaction> CreateTransactionFromDocumentAsync(IDocument document, string description = null)
+        public async Task<ITransaction> CreateTransactionFromDocumentAsync(IDocument document, string? description = null)
         {
             return await _performanceLogger.Track(nameof(CreateTransactionFromDocumentAsync), async () =>
             {
@@ -396,6 +403,58 @@ namespace Sivar.Erp.Modules.Accounting
                 this.sequencerService.CreateSequenceAsync(BatchSequence);
                 this.sequencerService.CreateSequenceAsync(ledgerEntry);
             });
+        }
+
+        // Journal Entry Operations
+
+        /// <summary>
+        /// Gets journal entries for a specific transaction
+        /// </summary>
+        /// <param name="transactionNumber">Transaction number</param>
+        /// <returns>Collection of journal entries</returns>
+        public async Task<IEnumerable<ILedgerEntry>> GetTransactionJournalEntriesAsync(string transactionNumber)
+        {
+            return await _journalEntryService.GetJournalEntriesByTransactionAsync(transactionNumber);
+        }
+
+        /// <summary>
+        /// Validates if a transaction is balanced (total debits = total credits)
+        /// </summary>
+        /// <param name="transactionNumber">Transaction number</param>
+        /// <returns>True if transaction is balanced</returns>
+        public async Task<bool> ValidateTransactionBalanceAsync(string transactionNumber)
+        {
+            return await _journalEntryService.IsTransactionBalancedAsync(transactionNumber);
+        }
+
+        /// <summary>
+        /// Gets journal entries based on query criteria
+        /// </summary>
+        /// <param name="options">Query options for filtering</param>
+        /// <returns>Collection of journal entries</returns>
+        public async Task<IEnumerable<ILedgerEntry>> GetJournalEntriesAsync(JournalEntryQueryOptions options)
+        {
+            return await _journalEntryService.GetJournalEntriesAsync(options);
+        }
+
+        /// <summary>
+        /// Generates a journal entry report
+        /// </summary>
+        /// <param name="options">Query options for the report</param>
+        /// <returns>Journal entry report data</returns>
+        public async Task<JournalEntryReportDto> GenerateJournalReportAsync(JournalEntryQueryOptions options)
+        {
+            return await _reportService.GenerateJournalEntryReportAsync(options);
+        }
+
+        /// <summary>
+        /// Generates a transaction audit trail
+        /// </summary>
+        /// <param name="transactionNumber">Transaction number</param>
+        /// <returns>Transaction audit trail data</returns>
+        public async Task<TransactionAuditTrailDto> GenerateTransactionAuditTrailAsync(string transactionNumber)
+        {
+            return await _reportService.GenerateTransactionAuditTrailAsync(transactionNumber);
         }
     }
 }

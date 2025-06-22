@@ -14,6 +14,8 @@ using Sivar.Erp.Services.ImportExport;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
+using Sivar.Erp.Modules.Accounting.JournalEntries;
+using Sivar.Erp.Modules.Accounting.Reports;
 using System;
 
 namespace Sivar.Erp.Tests.Infrastructure
@@ -146,12 +148,25 @@ namespace Sivar.Erp.Tests.Infrastructure
             // Note: SequencerService and ActivityStreamService require ObjectDb, 
             // so they'll be created manually in the test with the specific ObjectDb instance
         }
-
         private static void RegisterAccountingServices(ServiceCollection services)
         {
             // Tax and accounting services
             services.AddTransient<ITaxAccountingProfileService, TaxAccountingProfileService>();
             services.AddTransient<ITaxAccountingProfileImportExportService, TaxAccountingProfileImportExportService>();
+
+            // Journal Entry services
+            services.AddTransient<IJournalEntryService>(provider =>
+            {
+                var objectDb = provider.GetRequiredService<IObjectDb>();
+                return new JournalEntryService(objectDb);
+            });
+
+            services.AddTransient<IJournalEntryReportService>(provider =>
+            {
+                var objectDb = provider.GetRequiredService<IObjectDb>();
+                var journalEntryService = provider.GetRequiredService<IJournalEntryService>();
+                return new JournalEntryReportService(objectDb, journalEntryService);
+            });
 
             // Transaction services will be created manually as they need specific configurations
         }

@@ -30,13 +30,25 @@ using NUnit.Framework;
 using System.Diagnostics;
 using System.Text;
 using Sivar.Erp.Modules.Accounting;
+using Sivar.Erp.Modules.Accounting.JournalEntries;
+using Sivar.Erp.Modules.Accounting.Reports;
 
 namespace Sivar.Erp.Tests
 {
     [TestFixture]
     /// <summary>
     /// Comprehensive test demonstrating the complete accounting workflow
-    /// from data import to transaction posting and balance verification
+    /// from data import to transaction posting and balance verification.
+    /// 
+    /// NEW FUNCTIONALITY: This test now includes comprehensive journal entry analysis
+    /// demonstrating the new journal entry viewing capabilities including:
+    /// - Viewing journal entries by transaction
+    /// - Generating transaction audit trails  
+    /// - Creating comprehensive journal entry reports
+    /// - Account activity analysis
+    /// - Trial balance generation from journal entries
+    /// - Advanced query examples
+    /// 
     /// Uses AccountingTestServiceFactory for dependency injection
     /// </summary>
     public class CompleteAccountingWorkflowTest
@@ -44,6 +56,8 @@ namespace Sivar.Erp.Tests
         private IServiceProvider _serviceProvider = null!;
         private IObjectDb _objectDb = null!;
         private AccountingModule? _accountingModule;
+        private IJournalEntryService? _journalEntryService;
+        private IJournalEntryReportService? _journalEntryReportService;
         private TransactionGeneratorService? _transactionGenerator;
         private DocumentTaxCalculator? _taxCalculator;
         private Dictionary<string, string>? _accountMappings;
@@ -219,7 +233,14 @@ namespace Sivar.Erp.Tests
                     var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
                     results.Add($"    {entry.EntryType}: {entry.OfficialCode} - {account?.AccountName}: ${entry.Amount:F2}");
                 }
-                results.Add(""); results.Add("=== WORKFLOW COMPLETED SUCCESSFULLY ===");
+                results.Add("");
+
+                // Step 6b: Journal Entry Analysis (NEW FUNCTIONALITY)
+                results.Add("=== STEP 6B: JOURNAL ENTRY ANALYSIS ===");
+                await DemonstrateJournalEntryFunctionality(results, purchaseTransaction, salesTransaction);
+                results.Add("");
+
+                results.Add("=== WORKFLOW COMPLETED SUCCESSFULLY ===");
                 results.Add("Both purchase and sales transactions executed without errors!");
 
                 // Step 7: Print Performance Logs
@@ -391,10 +412,13 @@ namespace Sivar.Erp.Tests
             var logger = _serviceProvider.GetRequiredService<ILogger<AccountingModule>>();
 
             // Create services that require ObjectDb instance (these can't be pre-configured in factory)
-            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb);
-            var sequencerService = new SequencerService(_objectDb);
+            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb); var sequencerService = new SequencerService(_objectDb);
             var fiscalPeriodService = new FiscalPeriodService(_objectDb);
             var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);
+
+            // Create journal entry services
+            _journalEntryService = new JournalEntryService(_objectDb);
+            _journalEntryReportService = new JournalEntryReportService(_objectDb, _journalEntryService);
 
             // Create accounting module with correct parameter order, including the logger and objectDb
             _accountingModule = new AccountingModule(
@@ -405,6 +429,8 @@ namespace Sivar.Erp.Tests
                 accountBalanceCalculator,
                 sequencerService,
                 logger,
+                _journalEntryService,
+                _journalEntryReportService,
                 _objectDb);
 
             // Register sequences
@@ -728,8 +754,185 @@ namespace Sivar.Erp.Tests
             {
                 results.Add("✓ No memory intensive methods detected");
             }
-
             return results;
+        }
+
+        /// <summary>
+        /// Demonstrates the new journal entry functionality
+        /// </summary>
+        private async Task DemonstrateJournalEntryFunctionality(List<string> results, ITransaction purchaseTransaction, ITransaction salesTransaction)
+        {
+            results.Add("✓ Demonstrating Journal Entry Functionality:");
+            results.Add("");
+
+            // 1. View journal entries for specific transactions
+            results.Add("1. JOURNAL ENTRIES BY TRANSACTION:");
+            results.Add("");
+
+            // Purchase transaction journal entries
+            results.Add($"Purchase Transaction ({purchaseTransaction.TransactionNumber}) Journal Entries:");
+            var purchaseJournalEntries = await _accountingModule!.GetTransactionJournalEntriesAsync(purchaseTransaction.TransactionNumber); foreach (var entry in purchaseJournalEntries.OrderBy(e => e.EntryType).ThenBy(e => e.OfficialCode))
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.LedgerEntryNumber} | {entry.EntryType} | {entry.OfficialCode} - {account?.AccountName} | ${entry.Amount:F2}");
+            }
+
+            // Validate transaction balance
+            var isPurchaseBalanced = await _accountingModule.ValidateTransactionBalanceAsync(purchaseTransaction.TransactionNumber);
+            results.Add($"  ✓ Transaction is balanced: {isPurchaseBalanced}");
+            results.Add("");
+
+            // Sales transaction journal entries
+            results.Add($"Sales Transaction ({salesTransaction.TransactionNumber}) Journal Entries:");
+            var salesJournalEntries = await _accountingModule.GetTransactionJournalEntriesAsync(salesTransaction.TransactionNumber); foreach (var entry in salesJournalEntries.OrderBy(e => e.EntryType).ThenBy(e => e.OfficialCode))
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.LedgerEntryNumber} | {entry.EntryType} | {entry.OfficialCode} - {account?.AccountName} | ${entry.Amount:F2}");
+            }
+
+            var isSalesBalanced = await _accountingModule.ValidateTransactionBalanceAsync(salesTransaction.TransactionNumber);
+            results.Add($"  ✓ Transaction is balanced: {isSalesBalanced}");
+            results.Add("");
+
+            // 2. Generate Transaction Audit Trails
+            results.Add("2. TRANSACTION AUDIT TRAILS:");
+            results.Add("");
+
+            var purchaseAuditTrail = await _accountingModule.GenerateTransactionAuditTrailAsync(purchaseTransaction.TransactionNumber);
+            results.Add($"Purchase Transaction Audit Trail:");
+            results.Add($"  Transaction: {purchaseAuditTrail.TransactionNumber}");
+            results.Add($"  Document: {purchaseAuditTrail.DocumentNumber}");
+            results.Add($"  Date: {purchaseAuditTrail.TransactionDate:yyyy-MM-dd}");
+            results.Add($"  Posted: {purchaseAuditTrail.IsPosted}");
+            results.Add($"  Total Debits: ${purchaseAuditTrail.TotalDebits:F2}");
+            results.Add($"  Total Credits: ${purchaseAuditTrail.TotalCredits:F2}");
+            results.Add($"  Is Balanced: {purchaseAuditTrail.IsBalanced}");
+            results.Add($"  Affected Accounts: {string.Join(", ", purchaseAuditTrail.AffectedAccounts)}");
+            results.Add("");
+
+            var salesAuditTrail = await _accountingModule.GenerateTransactionAuditTrailAsync(salesTransaction.TransactionNumber);
+            results.Add($"Sales Transaction Audit Trail:");
+            results.Add($"  Transaction: {salesAuditTrail.TransactionNumber}");
+            results.Add($"  Document: {salesAuditTrail.DocumentNumber}");
+            results.Add($"  Date: {salesAuditTrail.TransactionDate:yyyy-MM-dd}");
+            results.Add($"  Posted: {salesAuditTrail.IsPosted}");
+            results.Add($"  Total Debits: ${salesAuditTrail.TotalDebits:F2}");
+            results.Add($"  Total Credits: ${salesAuditTrail.TotalCredits:F2}");
+            results.Add($"  Is Balanced: {salesAuditTrail.IsBalanced}");
+            results.Add($"  Affected Accounts: {string.Join(", ", salesAuditTrail.AffectedAccounts)}");
+            results.Add("");
+
+            // 3. Generate Journal Entry Report for the day
+            results.Add("3. JOURNAL ENTRY REPORT (Today's Transactions):");
+            results.Add("");
+
+            var reportOptions = new JournalEntryQueryOptions
+            {
+                FromDate = new DateOnly(2025, 6, 17), // Purchase date
+                ToDate = new DateOnly(2025, 6, 18),   // Sales date
+                OnlyPosted = true
+            };
+
+            var journalReport = await _accountingModule.GenerateJournalReportAsync(reportOptions);
+            results.Add($"Report: {journalReport.ReportTitle}");
+            results.Add($"Period: {journalReport.FromDate} to {journalReport.ToDate}");
+            results.Add($"Total Entries: {journalReport.TotalEntries}");
+            results.Add($"Total Debits: ${journalReport.TotalDebits:F2}");
+            results.Add($"Total Credits: ${journalReport.TotalCredits:F2}");
+            results.Add($"Is Balanced: {journalReport.IsBalanced}");
+            results.Add("");
+
+            results.Add("All Journal Entries:"); foreach (var entry in journalReport.Entries.OrderBy(e => e.TransactionNumber).ThenBy(e => e.EntryType))
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.TransactionNumber} | {entry.LedgerEntryNumber} | {entry.EntryType} | {entry.OfficialCode} - {account?.AccountName} | ${entry.Amount:F2}");
+            }
+            results.Add("");
+
+            // 4. Account Activity Analysis
+            results.Add("4. ACCOUNT ACTIVITY ANALYSIS:");
+            results.Add("");
+
+            // Analyze cash account activity
+            var cashAccountCode = _accountMappings?.GetValueOrDefault("CASH") ?? "1100";
+            if (!string.IsNullOrEmpty(cashAccountCode))
+            {
+                var cashActivityReport = await _journalEntryReportService!.GenerateAccountActivityReportAsync(
+                    cashAccountCode,
+                    new DateOnly(2025, 6, 17),
+                    new DateOnly(2025, 6, 18));
+
+                results.Add($"Cash Account ({cashActivityReport.AccountCode}) Activity:");
+                results.Add($"  Account Name: {cashActivityReport.AccountName}");
+                results.Add($"  Opening Balance: ${cashActivityReport.OpeningBalance:F2}");
+                results.Add($"  Total Debits: ${cashActivityReport.TotalDebits:F2}");
+                results.Add($"  Total Credits: ${cashActivityReport.TotalCredits:F2}");
+                results.Add($"  Closing Balance: ${cashActivityReport.ClosingBalance:F2}");
+                results.Add($"  Total Transactions: {cashActivityReport.TotalTransactions}");
+                results.Add("");
+            }
+
+            // 5. Generate Trial Balance from Journal Entries
+            results.Add("5. TRIAL BALANCE FROM JOURNAL ENTRIES:");
+            results.Add("");
+
+            var trialBalance = await _journalEntryReportService!.GenerateTrialBalanceFromJournalEntriesAsync(
+                new DateOnly(2025, 6, 18),
+                onlyPosted: true);
+
+            results.Add($"Trial Balance as of {trialBalance.AsOfDate:yyyy-MM-dd}:");
+            results.Add($"Total Debits: ${trialBalance.TotalDebits:F2}");
+            results.Add($"Total Credits: ${trialBalance.TotalCredits:F2}");
+            results.Add($"Is Balanced: {trialBalance.IsBalanced}");
+            results.Add("");
+
+            results.Add("Account Details:");
+            results.Add("Account Code          | Account Name                 | Debit Balance | Credit Balance | Net Balance");
+            results.Add(new string('-', 100));
+
+            foreach (var account in trialBalance.Accounts.OrderBy(a => a.AccountCode))
+            {
+                results.Add($"{account.AccountCode,-20} | {account.AccountName,-28} | {account.DebitBalance,12:C} | {account.CreditBalance,13:C} | {account.NetBalance,10:C}");
+            }
+
+            results.Add(new string('-', 100));
+            results.Add($"{"TOTALS",-51} | {trialBalance.TotalDebits,12:C} | {trialBalance.TotalCredits,13:C} | {(trialBalance.TotalDebits - trialBalance.TotalCredits),10:C}");
+            results.Add("");
+
+            // 6. Query Examples
+            results.Add("6. ADVANCED QUERY EXAMPLES:");
+            results.Add("");
+
+            // Find all debit entries
+            var debitQueryOptions = new JournalEntryQueryOptions
+            {
+                EntryType = EntryType.Debit,
+                OnlyPosted = true
+            };
+
+            var debitEntries = await _accountingModule.GetJournalEntriesAsync(debitQueryOptions);
+            results.Add($"All Debit Entries: {debitEntries.Count()} entries totaling ${debitEntries.Sum(e => e.Amount):F2}");
+
+            // Find all accounts receivable entries
+            var arAccountCode = _accountMappings?.GetValueOrDefault("ACCOUNTS_RECEIVABLE");
+            if (!string.IsNullOrEmpty(arAccountCode))
+            {
+                var arQueryOptions = new JournalEntryQueryOptions
+                {
+                    AccountCode = arAccountCode,
+                    OnlyPosted = true
+                };
+
+                var arEntries = await _accountingModule.GetJournalEntriesAsync(arQueryOptions);
+                results.Add($"Accounts Receivable Entries: {arEntries.Count()} entries");
+                foreach (var entry in arEntries)
+                {
+                    results.Add($"  {entry.TransactionNumber} | {entry.EntryType} | ${entry.Amount:F2}");
+                }
+            }
+
+            results.Add("");
+            results.Add("✓ Journal Entry Functionality Demonstration Complete!");
         }
     }
 }
