@@ -41,5 +41,6 @@ namespace Sivar.Erp.ErpSystem.TimeService
         /// </summary>
         /// <returns>Current system timezone ID</returns>
         string GetSystemTimeZoneId();
+        DateTime Now();
     }
 }

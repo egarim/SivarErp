@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
@@ -15,6 +16,7 @@ using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
+using Sivar.Erp.Services.Documents;
 using Sivar.Erp.Documents;
 using Sivar.Erp.BusinessEntities;
 using Sivar.Erp.Modules;
@@ -22,36 +24,59 @@ using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.Tests.Infrastructure;
 using NUnit.Framework;
 using System.Diagnostics;
+using System.Text;
+using Sivar.Erp.Modules.Accounting;
+using Sivar.Erp.Modules.Accounting.JournalEntries;
+using Sivar.Erp.Modules.Accounting.Reports;
 
 namespace Sivar.Erp.Tests
 {
     [TestFixture]
     /// <summary>
     /// Comprehensive test demonstrating the complete accounting workflow
-    /// from data import to transaction posting and balance verification
+    /// from data import to transaction posting and balance verification.
+    /// 
+    /// NEW FUNCTIONALITY: This test now includes comprehensive journal entry analysis
+    /// demonstrating the new journal entry viewing capabilities including:
+    /// - Viewing journal entries by transaction
+    /// - Generating transaction audit trails  
+    /// - Creating comprehensive journal entry reports
+    /// - Account activity analysis
+    /// - Trial balance generation from journal entries
+    /// - Advanced query examples
+    /// 
     /// Uses AccountingTestServiceFactory for dependency injection
     /// </summary>
     public class CompleteAccountingWorkflowTest
     {
-        private IServiceProvider _serviceProvider;
-        private IObjectDb _objectDb;
-        private AccountingModule _accountingModule;
-        private TransactionGeneratorService _transactionGenerator;
-        private DocumentTaxCalculator _taxCalculator;
-        private Dictionary<string, string> _accountMappings;
-        private TaxRuleEvaluator _taxRuleEvaluator;
-        private ITaxAccountingProfileService _taxAccountingService;
-        private ITaxAccountingProfileImportExportService _taxAccountingImportService;
-
-        [SetUp]
+        private IServiceProvider _serviceProvider = null!;
+        private IObjectDb _objectDb = null!;
+        private AccountingModule? _accountingModule;
+        private IJournalEntryService? _journalEntryService;
+        private IJournalEntryReportService? _journalEntryReportService;
+        private TransactionGeneratorService? _transactionGenerator;
+        private DocumentTaxCalculator? _taxCalculator;
+        private Dictionary<string, string>? _accountMappings;
+        private TaxRuleEvaluator? _taxRuleEvaluator;
+        private ITaxAccountingProfileService? _taxAccountingService; private ITaxAccountingProfileImportExportService? _taxAccountingImportService;
+        private IDocumentTotalsService? _documentTotalsService;
+        private Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
+        private IDocumentAccountingProfileService? _documentAccountingProfileService; [SetUp]
         public void Setup()
         {
-            // Use AccountingTestServiceFactory to configure all services
-            _serviceProvider = AccountingTestServiceFactory.CreateServiceProvider();
+            // Create ObjectDb instance first
             _objectDb = new ObjectDb();
+
+            // Use AccountingTestServiceFactory to configure all services with ObjectDb registration
+            _serviceProvider = AccountingTestServiceFactory.CreateServiceProvider(services =>
+            {
+                // Register the ObjectDb instance as a singleton
+                services.AddSingleton<IObjectDb>(_objectDb);
+            });
         }
 
         [TearDown]
@@ -63,10 +88,9 @@ namespace Sivar.Erp.Tests
                 disposableProvider.Dispose();
             }
         }
-
         [Test]
         /// <summary>
-        /// Main test method that executes the complete workflow using AccountingTestServiceFactory
+        /// Main test method that executes the complete workflow: Purchase -> Sales
         /// </summary>
         public async Task ExecuteCompleteWorkflowTest()
         {
@@ -90,56 +114,141 @@ namespace Sivar.Erp.Tests
                 results.Add("=== STEP 2: TAX ACCOUNTING PROFILE SETUP ===");
                 await SetupTaxAccountingProfilesFromCsv();
                 results.Add("✓ Loaded tax accounting profiles from CSV");
-                results.Add($"✓ Configured tax accounting for SalesInvoice operations");
+                results.Add($"✓ Configured tax accounting for Purchase and Sales operations");
                 results.Add("");
 
-                // Step 3: Document Creation
-                results.Add("=== STEP 3: DOCUMENT CREATION ===");
-                var document = CreateSalesInvoiceDocument();
-                results.Add($"✓ Created CCF document #{document.DocumentNumber}");
-                results.Add($"✓ Document date: {document.Date:M/d/yyyy}");
-                results.Add($"✓ Business entity: {document.BusinessEntity.Name}");
-                results.Add($"✓ Document has {document.Lines.Count} lines");
+                // Step 2b: Document Accounting Profile Setup
+                results.Add("=== STEP 2b: DOCUMENT ACCOUNTING PROFILE SETUP ===");
+                await SetupDocumentAccountingProfilesFromCsv();
+                results.Add($"✓ Imported {_objectDb.DocumentAccountingProfiles.Count} document accounting profiles");
+                results.Add($"✓ Configured document accounting for Sales, Purchase, and Cash operations");
                 results.Add("");
 
-                // Step 4: Tax Calculation
-                results.Add("=== STEP 4: TAX CALCULATION ===");
-                CalculateDocumentTaxes(document);
-                results.Add($"✓ Calculated taxes for document");
-                results.Add($"✓ Document has {document.DocumentTotals.Count} totals:");
-                foreach (var total in document.DocumentTotals)
+                // PHASE 1: PURCHASE TRANSACTION (Inventory In)
+                results.Add("=== PHASE 1: PURCHASE TRANSACTION (INVENTORY IN) ===");
+
+                // Step 3a: Purchase Document Creation
+                results.Add("=== STEP 3A: PURCHASE DOCUMENT CREATION ===");
+                var purchaseDocument = CreatePurchaseInvoiceDocument();
+                results.Add($"✓ Created Purchase Invoice #{purchaseDocument.DocumentNumber}");
+                results.Add($"✓ Document date: {purchaseDocument.Date:M/d/yyyy}");
+                results.Add($"✓ Supplier: {purchaseDocument.BusinessEntity.Name}");
+                results.Add($"✓ Document has {purchaseDocument.Lines.Count} lines"); results.Add("");
+
+                // Step 4a: Purchase Tax Calculation
+                results.Add("=== STEP 4A: PURCHASE TAX CALCULATION ===");
+                CalculateDocumentTaxes(purchaseDocument, "PurchaseInvoice");
+                results.Add($"✓ Calculated taxes for purchase document");
+                results.Add($"✓ Purchase document has {purchaseDocument.DocumentTotals.Count} totals:");
+                foreach (var total in purchaseDocument.DocumentTotals)
                 {
-                    results.Add($"   - {total.Concept}: ${total.Total:F2}");
+                    var totalDto = total as TotalDto;
+                    results.Add($"   - {total.Concept}: ${total.Total:F2} " +
+                        $"(Debit: {totalDto?.DebitAccountCode ?? "N/A"}, " +
+                        $"Credit: {totalDto?.CreditAccountCode ?? "N/A"}, " +
+                        $"Include: {totalDto?.IncludeInTransaction ?? false})");
                 }
                 results.Add("");
 
-                // Step 5: Transaction Generation
-                results.Add("=== STEP 5: TRANSACTION GENERATION ===");
-                var (transaction, ledgerEntries) = await _transactionGenerator.GenerateTransactionAsync(document);
-                results.Add($"✓ Generated transaction with {ledgerEntries.Count} entries");
-                var isBalanced = IsTransactionBalanced(ledgerEntries);
-                results.Add($"✓ Transaction is balanced: {isBalanced}");
+                // Step 5a: Purchase Transaction Generation and Posting
+                results.Add("=== STEP 5A: PURCHASE TRANSACTION GENERATION & POSTING ===");
+                var (purchaseTransaction, purchaseLedgerEntries) = await _transactionGenerator!.GenerateTransactionAsync(purchaseDocument);
+                results.Add($"✓ Generated purchase transaction with {purchaseLedgerEntries.Count} entries");
+
+                var isPurchaseBalanced = IsTransactionBalanced(purchaseLedgerEntries);
+                results.Add($"✓ Purchase transaction is balanced: {isPurchaseBalanced}");
+
+                // Post purchase transaction
+                purchaseTransaction.LedgerEntries = purchaseLedgerEntries;
+                await _accountingModule!.PostTransactionAsync(purchaseTransaction);
+                results.Add("✓ Purchase transaction posted successfully");
                 results.Add("");
 
-                // Step 6: Transaction Details
-                results.Add("=== STEP 6: TRANSACTION DETAILS ===");
-                foreach (var entry in ledgerEntries.OrderBy(e => e.EntryType).ThenBy(e => e.OfficialCode))
+                // PHASE 2: SALES TRANSACTION (Inventory Out)
+                results.Add("=== PHASE 2: SALES TRANSACTION (INVENTORY OUT) ===");
+
+                // Step 3b: Sales Document Creation
+                results.Add("=== STEP 3B: SALES DOCUMENT CREATION ===");
+                var salesDocument = CreateSalesInvoiceDocument();
+                results.Add($"✓ Created Sales Invoice (CCF) #{salesDocument.DocumentNumber}");
+                results.Add($"✓ Document date: {salesDocument.Date:M/d/yyyy}");
+                results.Add($"✓ Customer: {salesDocument.BusinessEntity.Name}");
+                results.Add($"✓ Document has {salesDocument.Lines.Count} lines");
+                results.Add("");
+
+                // Step 4b: Sales Tax Calculation
+                results.Add("=== STEP 4B: SALES TAX CALCULATION ===");
+                CalculateDocumentTaxes(salesDocument, "SalesInvoice");
+                results.Add($"✓ Calculated taxes for sales document");
+                results.Add($"✓ Sales document has {salesDocument.DocumentTotals.Count} totals:");
+                foreach (var total in salesDocument.DocumentTotals)
+                {
+                    var totalDto = total as TotalDto;
+                    results.Add($"   - {total.Concept}: ${total.Total:F2} " +
+                        $"(Debit: {totalDto?.DebitAccountCode ?? "N/A"}, " +
+                        $"Credit: {totalDto?.CreditAccountCode ?? "N/A"}, " +
+                        $"Include: {totalDto?.IncludeInTransaction ?? false})");
+                }
+                results.Add("");
+
+                // Step 5b: Sales Transaction Generation and Posting
+                results.Add("=== STEP 5B: SALES TRANSACTION GENERATION & POSTING ===");
+                var (salesTransaction, salesLedgerEntries) = await _transactionGenerator!.GenerateTransactionAsync(salesDocument);
+                results.Add($"✓ Generated sales transaction with {salesLedgerEntries.Count} entries");
+
+                var isSalesBalanced = IsTransactionBalanced(salesLedgerEntries);
+                results.Add($"✓ Sales transaction is balanced: {isSalesBalanced}");
+
+                // Post sales transaction
+                salesTransaction.LedgerEntries = salesLedgerEntries;
+                await _accountingModule!.PostTransactionAsync(salesTransaction);
+                results.Add("✓ Sales transaction posted successfully");
+                results.Add("");
+
+                // Step 6: Final Transaction Details
+                results.Add("=== STEP 6: TRANSACTION SUMMARY ===");
+                results.Add("PURCHASE TRANSACTION:");
+                var purchaseTotalDebits = purchaseLedgerEntries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
+                var purchaseTotalCredits = purchaseLedgerEntries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
+                results.Add($"  Total Debits: ${purchaseTotalDebits:F2}");
+                results.Add($"  Total Credits: ${purchaseTotalCredits:F2}");
+                results.Add($"  Difference: ${Math.Abs(purchaseTotalDebits - purchaseTotalCredits):F2}");
+
+                foreach (var entry in purchaseLedgerEntries.OrderBy(e => e.EntryType).ThenBy(e => e.OfficialCode))
                 {
                     var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
-                    results.Add($"  {entry.EntryType}: {entry.OfficialCode} - {account?.AccountName}: ${entry.Amount:F2}");
+                    results.Add($"    {entry.EntryType}: {entry.OfficialCode} - {account?.AccountName}: ${entry.Amount:F2}");
                 }
                 results.Add("");
 
-                // Step 7: Transaction Posting & Balance Verification
-                results.Add("=== STEP 7: TRANSACTION POSTING & BALANCE VERIFICATION ===");
-                transaction.LedgerEntries = ledgerEntries;
-                await _accountingModule.PostTransactionAsync(transaction);
-                results.Add("✓ Transaction posted successfully");
-                results.Add("✓ Account balances updated");
+                results.Add("SALES TRANSACTION:");
+                var salesTotalDebits = salesLedgerEntries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
+                var salesTotalCredits = salesLedgerEntries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
+                results.Add($"  Total Debits: ${salesTotalDebits:F2}");
+                results.Add($"  Total Credits: ${salesTotalCredits:F2}");
+                results.Add($"  Difference: ${Math.Abs(salesTotalDebits - salesTotalCredits):F2}");
+
+                foreach (var entry in salesLedgerEntries.OrderBy(e => e.EntryType).ThenBy(e => e.OfficialCode))
+                {
+                    var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                    results.Add($"    {entry.EntryType}: {entry.OfficialCode} - {account?.AccountName}: ${entry.Amount:F2}");
+                }
+                results.Add("");
+
+                // Step 6b: Journal Entry Analysis (NEW FUNCTIONALITY)
+                results.Add("=== STEP 6B: JOURNAL ENTRY ANALYSIS ===");
+                await DemonstrateJournalEntryFunctionality(results, purchaseTransaction, salesTransaction);
                 results.Add("");
 
                 results.Add("=== WORKFLOW COMPLETED SUCCESSFULLY ===");
-                results.Add("All steps executed without errors!");
+                results.Add("Both purchase and sales transactions executed without errors!");
+
+                // Step 7: Print Performance Logs
+                results.Add("");
+                results.Add("=== STEP 7: PERFORMANCE METRICS ===");
+                var perfLogs = PrintPerformanceLogs();
+                results.AddRange(perfLogs);
+                results.Add("");
 
                 // Output all results
                 foreach (var result in results)
@@ -159,7 +268,7 @@ namespace Sivar.Erp.Tests
                 var log2 = results.Aggregate((current, next) => current + Environment.NewLine + next);
                 Debug.WriteLine(log2);
                 Assert.Fail($"Workflow failed: {ex.Message}");
-               
+
             }
 
             var log = results.Aggregate((current, next) => current + Environment.NewLine + next);
@@ -256,6 +365,43 @@ namespace Sivar.Erp.Tests
         }
 
         /// <summary>
+        /// Sets up document accounting profiles using factory-configured services
+        /// </summary>
+        private async Task SetupDocumentAccountingProfilesFromCsv()
+        {
+            // Get services from the service provider (configured by factory)
+            _documentAccountingProfileService = _serviceProvider.GetRequiredService<Sivar.Erp.Services.Documents.IDocumentAccountingProfileService>();
+            _documentAccountingProfileImportService = _serviceProvider.GetRequiredService<Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService>();
+
+            // Read document accounting profiles from CSV file
+            var dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
+            var csvFilePath = Path.Combine(dataDirectory, "DocumentAccountingProfiles.csv");
+
+            if (!File.Exists(csvFilePath))
+            {
+                throw new FileNotFoundException($"Document accounting profiles CSV file not found: {csvFilePath}");
+            }
+
+            var documentAccountingProfilesCsv = await File.ReadAllTextAsync(csvFilePath);
+
+            // Import document accounting profiles from CSV
+            var result = await _documentAccountingProfileImportService.ImportFromCsvAsync(documentAccountingProfilesCsv, "TestUser");
+            var importedProfiles = result.ImportedProfiles;
+            var errors = result.Errors;
+
+            if (errors.Any())
+            {
+                throw new InvalidOperationException($"Document accounting profile import errors: {string.Join(", ", errors)}");
+            }
+
+            // Register each imported profile with the document accounting service
+            foreach (var profile in importedProfiles)
+            {
+                await _documentAccountingProfileService.CreateProfileAsync(profile, "TestUser");
+            }
+        }
+
+        /// <summary>
         /// Sets up all required services using factory-configured dependencies
         /// </summary>
         private async Task SetupServices()
@@ -263,21 +409,29 @@ namespace Sivar.Erp.Tests
             // Get services from the service provider where possible
             var dateTimeZoneService = _serviceProvider.GetRequiredService<IDateTimeZoneService>();
             var optionService = _serviceProvider.GetRequiredService<IOptionService>();
+            var logger = _serviceProvider.GetRequiredService<ILogger<AccountingModule>>();
 
             // Create services that require ObjectDb instance (these can't be pre-configured in factory)
-            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb);
-            var sequencerService = new SequencerService(_objectDb);
+            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb); var sequencerService = new SequencerService(_objectDb);
             var fiscalPeriodService = new FiscalPeriodService(_objectDb);
             var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);
 
-            // Create accounting module with correct parameter order
+            // Create journal entry services
+            _journalEntryService = new JournalEntryService(_objectDb);
+            _journalEntryReportService = new JournalEntryReportService(_objectDb, _journalEntryService);
+
+            // Create accounting module with correct parameter order, including the logger and objectDb
             _accountingModule = new AccountingModule(
                 optionService,
                 activityStreamService,
                 dateTimeZoneService,
                 fiscalPeriodService,
                 accountBalanceCalculator,
-                sequencerService);
+                sequencerService,
+                logger,
+                _journalEntryService,
+                _journalEntryReportService,
+                _objectDb);
 
             // Register sequences
             _accountingModule.RegisterSequence(_objectDb.Sequences);
@@ -312,11 +466,10 @@ namespace Sivar.Erp.Tests
             }
 
             // Convert imported mappings to dictionary
-            var accountMappingsDict = accountMappings.ToDictionary(m => m.Key, m => m.Value);
-            // Validate required mappings
+            var accountMappingsDict = accountMappings.ToDictionary(m => m.Key, m => m.Value);            // Validate required mappings
             var requiredMappings = new[]
             {
-                "ACCOUNTS_RECEIVABLE", "VAT_PAYABLE", "VAT_RECEIVABLE",
+                "ACCOUNTS_RECEIVABLE", "ACCOUNTS_PAYABLE", "VAT_PAYABLE", "VAT_RECEIVABLE",
                 "WITHHOLDING_PAYABLE", "WITHHOLDING_RECEIVABLE", "CASH"
             };
 
@@ -331,6 +484,54 @@ namespace Sivar.Erp.Tests
 
             // Create transaction generator with imported mappings
             _transactionGenerator = new TransactionGeneratorService(_accountMappings);
+
+            // Create and configure the document totals service
+            var dateTimeService = _serviceProvider.GetRequiredService<IDateTimeZoneService>();
+            var loggerDocumentTotals = _serviceProvider.GetRequiredService<ILogger<DocumentTotalsService>>();
+            _documentTotalsService = new DocumentTotalsService(_objectDb, dateTimeService, loggerDocumentTotals);
+
+            // Create a default sales invoice accounting profile
+            var salesInvoiceProfile = new DocumentAccountingProfileDto
+            {
+                DocumentOperation = "SalesInvoice",
+                SalesAccountCode = "SALES_PRODUCT_1",
+                AccountsReceivableCode = "ACCOUNTS_RECEIVABLE",
+                CostOfGoodsSoldAccountCode = "COST_OF_SALES_PRODUCT_1",
+                InventoryAccountCode = "INVENTORY_PRODUCT_1",
+                CostRatio = 0.6m
+            };
+
+            // Add the profile
+            await _documentTotalsService.CreateDocumentAccountingProfileAsync(salesInvoiceProfile, "TestUser");
+
+            // Import document accounting profiles from CSV
+            await ImportDocumentAccountingProfilesFromCsv();
+        }        /// <summary>
+                 /// Imports document accounting profiles from CSV file
+                 /// </summary>
+        private async Task ImportDocumentAccountingProfilesFromCsv()
+        {
+            // Get the service
+            var documentAccountingProfileService = _serviceProvider.GetRequiredService<Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService>();
+
+            // Read document accounting profiles from CSV file
+            var dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
+            var csvFilePath = Path.Combine(dataDirectory, "DocumentAccountingProfiles.csv");
+
+            if (!File.Exists(csvFilePath))
+            {
+                throw new FileNotFoundException($"Document accounting profiles CSV file not found: {csvFilePath}");
+            }
+
+            var documentAccountingProfilesCsv = await File.ReadAllTextAsync(csvFilePath);
+
+            // Import document accounting profiles from CSV
+            var (importedProfiles, errors) = await documentAccountingProfileService.ImportFromCsvAsync(documentAccountingProfilesCsv, "TestUser");
+
+            if (errors.Any())
+            {
+                throw new InvalidOperationException($"Document accounting profile import errors: {string.Join(", ", errors)}");
+            }
         }
 
         /// <summary>
@@ -395,18 +596,82 @@ namespace Sivar.Erp.Tests
             // This matches the original test results exactly
 
             return document;
-        }
+        }        /// <summary>
+                 /// Creates a purchase invoice document for testing (inventory acquisition)
+                 /// </summary>
+        private DocumentDto CreatePurchaseInvoiceDocument()
+        {
+            // Get supplier business entity and purchase document type
+            var supplier = _objectDb.BusinessEntities.FirstOrDefault(be => be.Code == "PR001"); // Use a supplier code
+            var documentType = _objectDb.DocumentTypes.FirstOrDefault(dt => dt.Code == "PIF"); // Purchase Invoice
 
-        /// <summary>
-        /// Calculates taxes for the document using the configured tax accounting profiles
-        /// </summary>
-        private void CalculateDocumentTaxes(DocumentDto document)
+            if (supplier == null)
+            {
+                // If no specific supplier found, use the first business entity as supplier
+                supplier = _objectDb.BusinessEntities.First();
+            }
+
+            if (documentType == null)
+            {
+                // If no PIF document type found, create a generic purchase type
+                documentType = new DocumentTypeDto { Code = "PIF", Name = "Purchase Invoice" };
+            }
+
+            // Create purchase document
+            var document = new DocumentDto
+            {
+                DocumentType = documentType,
+                DocumentNumber = "PIF-2025-001",
+                Date = new DateOnly(2025, 6, 17), // Day before sales
+                BusinessEntity = supplier,
+                Lines = new List<IDocumentLine>(),
+                DocumentTotals = new List<ITotal>()
+            };
+
+            // Add purchase lines (same items we'll sell later)
+            var item1 = _objectDb.Items.FirstOrDefault(i => i.Code == "PR001");
+            var item2 = _objectDb.Items.FirstOrDefault(i => i.Code == "PR002");
+
+            if (item1 != null)
+            {
+                var line1 = new LineDto
+                {
+                    LineNumber = 1,
+                    Item = item1,
+                    Quantity = 2,
+                    UnitPrice = 90.0m,  // Purchase cost (lower than sales price)
+                    Amount = 180.0m     // 2 × $90 = $180
+                };
+                document.Lines.Add(line1);
+            }
+
+            if (item2 != null)
+            {
+                var line2 = new LineDto
+                {
+                    LineNumber = 2,
+                    Item = item2,
+                    Quantity = 1,
+                    UnitPrice = 90.0m,  // Purchase cost (lower than sales price)
+                    Amount = 90.0m      // 1 × $90 = $90
+                };
+                document.Lines.Add(line2);
+            }
+
+            // Total purchase cost: $270 ($180 + $90)
+            // This will become the inventory cost and COGS for the sales transaction
+
+            return document;
+        }        /// <summary>
+                 /// Calculates taxes for the document using the configured tax accounting profiles
+                 /// </summary>
+        private void CalculateDocumentTaxes(DocumentDto document, string documentOperation = "SalesInvoice")
         {
             _taxCalculator = new DocumentTaxCalculator(
                 document,
                 document.DocumentType.Code,
-                _taxRuleEvaluator,
-                _taxAccountingService);
+                _taxRuleEvaluator!,
+                _taxAccountingService!);
 
             // Calculate line taxes first
             foreach (var line in document.Lines.OfType<LineDto>())
@@ -415,69 +680,14 @@ namespace Sivar.Erp.Tests
             }
 
             // Then calculate document taxes and totals
-            _taxCalculator.CalculateDocumentTaxes();
-
-            // Add basic accounting totals
-            AddAccountingTotals(document);
-        }
-
-        /// <summary>
-        /// Adds basic accounting totals to the document
-        /// </summary>
-        private void AddAccountingTotals(DocumentDto document)
-        {
-            // Subtotal (line amounts before tax) - credit to sales account
-            var subtotal = document.Lines.OfType<LineDto>().Sum(l => l.Amount);
-            var subtotalDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Subtotal",
-                Total = subtotal,
-                CreditAccountCode = "SALES_PRODUCT_1", // Will use VENTA DE PRODUCTO 1 for simplicity
-                IncludeInTransaction = true
-            };
-
-            // Add subtotal at the beginning
-            document.DocumentTotals.Insert(0, subtotalDto);
-
-            // Calculate total amount including taxes
-            var totalAmount = document.DocumentTotals.Sum(t => t.Total);
-
-            // Add accounts receivable (debit)
-            var accountsReceivableDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Accounts Receivable",
-                Total = totalAmount,
-                DebitAccountCode = "ACCOUNTS_RECEIVABLE",
-                IncludeInTransaction = true
-            };
-
-            document.DocumentTotals.Add(accountsReceivableDto);
-
-            // Add cost of goods sold and inventory reduction totals (matching original test)
-            var costOfGoodsSold = subtotal * 0.6m; // Assuming 60% cost ratio
-
-            var cogsDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Cost of Goods Sold",
-                Total = costOfGoodsSold,
-                DebitAccountCode = "COST_OF_SALES_PRODUCT_1",
-                IncludeInTransaction = true
-            };
-
-            var inventoryReductionDto = new TotalDto
-            {
-                Oid = Guid.NewGuid(),
-                Concept = "Inventory Reduction",
-                Total = costOfGoodsSold,
-                CreditAccountCode = "INVENTORY_PRODUCT_1",
-                IncludeInTransaction = true
-            };
-
-            document.DocumentTotals.Add(cogsDto);
-            document.DocumentTotals.Add(inventoryReductionDto);
+            _taxCalculator.CalculateDocumentTaxes();            // Add basic accounting totals
+            AddAccountingTotals(document, documentOperation);
+        }        /// <summary>
+                 /// Adds basic accounting totals to the document
+                 /// </summary>
+        private void AddAccountingTotals(DocumentDto document, string documentOperation = "SalesInvoice")
+        {            // Use the service to add document totals for the specified operation
+            _documentTotalsService!.AddDocumentAccountingTotals(document, documentOperation);
         }
 
         /// <summary>
@@ -488,6 +698,241 @@ namespace Sivar.Erp.Tests
             var totalDebits = entries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
             var totalCredits = entries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
             return Math.Abs(totalDebits - totalCredits) < 0.01m; // Allow for small rounding differences
+        }
+
+        /// <summary>
+        /// Prints the performance logs stored in ObjectDb
+        /// </summary>
+        private List<string> PrintPerformanceLogs()
+        {
+            var results = new List<string>();
+
+            if (_objectDb.PerformanceLogs == null || !_objectDb.PerformanceLogs.Any())
+            {
+                results.Add("No performance logs available.");
+                return results;
+            }
+
+            results.Add($"Total performance logs: {_objectDb.PerformanceLogs.Count}");
+            results.Add("");
+            results.Add("| Method | Execution Time (ms) | Memory (bytes) | Slow | Memory Intensive |");
+            results.Add("|--------|-------------------|---------------|------|-----------------|");
+
+            foreach (var log in _objectDb.PerformanceLogs.OrderByDescending(l => l.ExecutionTimeMs))
+            {
+                results.Add($"| {log.Method} | {log.ExecutionTimeMs} | {log.MemoryDeltaBytes:N0} | {(log.IsSlow ? "⚠️" : "")} | {(log.IsMemoryIntensive ? "⚠️" : "")} |");
+            }
+
+            // Performance summary
+            results.Add("");
+            results.Add("Performance Summary:");
+
+            var slowMethods = _objectDb.PerformanceLogs.Where(l => l.IsSlow).ToList();
+            if (slowMethods.Any())
+            {
+                results.Add($"⚠️ Slow methods detected: {slowMethods.Count}");
+                foreach (var slowMethod in slowMethods.OrderByDescending(m => m.ExecutionTimeMs))
+                {
+                    results.Add($"  - {slowMethod.Method}: {slowMethod.ExecutionTimeMs} ms");
+                }
+            }
+            else
+            {
+                results.Add("✓ No slow methods detected");
+            }
+
+            var memoryIntensiveMethods = _objectDb.PerformanceLogs.Where(l => l.IsMemoryIntensive).ToList();
+            if (memoryIntensiveMethods.Any())
+            {
+                results.Add($"⚠️ Memory intensive methods detected: {memoryIntensiveMethods.Count}");
+                foreach (var memMethod in memoryIntensiveMethods.OrderByDescending(m => m.MemoryDeltaBytes))
+                {
+                    results.Add($"  - {memMethod.Method}: {memMethod.MemoryDeltaBytes:N0} bytes");
+                }
+            }
+            else
+            {
+                results.Add("✓ No memory intensive methods detected");
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// Demonstrates the new journal entry functionality
+        /// </summary>
+        private async Task DemonstrateJournalEntryFunctionality(List<string> results, ITransaction purchaseTransaction, ITransaction salesTransaction)
+        {
+            results.Add("✓ Demonstrating Journal Entry Functionality:");
+            results.Add("");
+
+            // 1. View journal entries for specific transactions
+            results.Add("1. JOURNAL ENTRIES BY TRANSACTION:");
+            results.Add("");
+
+            // Purchase transaction journal entries
+            results.Add($"Purchase Transaction ({purchaseTransaction.TransactionNumber}) Journal Entries:");
+            var purchaseJournalEntries = await _accountingModule!.GetTransactionJournalEntriesAsync(purchaseTransaction.TransactionNumber); foreach (var entry in purchaseJournalEntries.OrderBy(e => e.EntryType).ThenBy(e => e.OfficialCode))
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.LedgerEntryNumber} | {entry.EntryType} | {entry.OfficialCode} - {account?.AccountName} | ${entry.Amount:F2}");
+            }
+
+            // Validate transaction balance
+            var isPurchaseBalanced = await _accountingModule.ValidateTransactionBalanceAsync(purchaseTransaction.TransactionNumber);
+            results.Add($"  ✓ Transaction is balanced: {isPurchaseBalanced}");
+            results.Add("");
+
+            // Sales transaction journal entries
+            results.Add($"Sales Transaction ({salesTransaction.TransactionNumber}) Journal Entries:");
+            var salesJournalEntries = await _accountingModule.GetTransactionJournalEntriesAsync(salesTransaction.TransactionNumber); foreach (var entry in salesJournalEntries.OrderBy(e => e.EntryType).ThenBy(e => e.OfficialCode))
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.LedgerEntryNumber} | {entry.EntryType} | {entry.OfficialCode} - {account?.AccountName} | ${entry.Amount:F2}");
+            }
+
+            var isSalesBalanced = await _accountingModule.ValidateTransactionBalanceAsync(salesTransaction.TransactionNumber);
+            results.Add($"  ✓ Transaction is balanced: {isSalesBalanced}");
+            results.Add("");
+
+            // 2. Generate Transaction Audit Trails
+            results.Add("2. TRANSACTION AUDIT TRAILS:");
+            results.Add("");
+
+            var purchaseAuditTrail = await _accountingModule.GenerateTransactionAuditTrailAsync(purchaseTransaction.TransactionNumber);
+            results.Add($"Purchase Transaction Audit Trail:");
+            results.Add($"  Transaction: {purchaseAuditTrail.TransactionNumber}");
+            results.Add($"  Document: {purchaseAuditTrail.DocumentNumber}");
+            results.Add($"  Date: {purchaseAuditTrail.TransactionDate:yyyy-MM-dd}");
+            results.Add($"  Posted: {purchaseAuditTrail.IsPosted}");
+            results.Add($"  Total Debits: ${purchaseAuditTrail.TotalDebits:F2}");
+            results.Add($"  Total Credits: ${purchaseAuditTrail.TotalCredits:F2}");
+            results.Add($"  Is Balanced: {purchaseAuditTrail.IsBalanced}");
+            results.Add($"  Affected Accounts: {string.Join(", ", purchaseAuditTrail.AffectedAccounts)}");
+            results.Add("");
+
+            var salesAuditTrail = await _accountingModule.GenerateTransactionAuditTrailAsync(salesTransaction.TransactionNumber);
+            results.Add($"Sales Transaction Audit Trail:");
+            results.Add($"  Transaction: {salesAuditTrail.TransactionNumber}");
+            results.Add($"  Document: {salesAuditTrail.DocumentNumber}");
+            results.Add($"  Date: {salesAuditTrail.TransactionDate:yyyy-MM-dd}");
+            results.Add($"  Posted: {salesAuditTrail.IsPosted}");
+            results.Add($"  Total Debits: ${salesAuditTrail.TotalDebits:F2}");
+            results.Add($"  Total Credits: ${salesAuditTrail.TotalCredits:F2}");
+            results.Add($"  Is Balanced: {salesAuditTrail.IsBalanced}");
+            results.Add($"  Affected Accounts: {string.Join(", ", salesAuditTrail.AffectedAccounts)}");
+            results.Add("");
+
+            // 3. Generate Journal Entry Report for the day
+            results.Add("3. JOURNAL ENTRY REPORT (Today's Transactions):");
+            results.Add("");
+
+            var reportOptions = new JournalEntryQueryOptions
+            {
+                FromDate = new DateOnly(2025, 6, 17), // Purchase date
+                ToDate = new DateOnly(2025, 6, 18),   // Sales date
+                OnlyPosted = true
+            };
+
+            var journalReport = await _accountingModule.GenerateJournalReportAsync(reportOptions);
+            results.Add($"Report: {journalReport.ReportTitle}");
+            results.Add($"Period: {journalReport.FromDate} to {journalReport.ToDate}");
+            results.Add($"Total Entries: {journalReport.TotalEntries}");
+            results.Add($"Total Debits: ${journalReport.TotalDebits:F2}");
+            results.Add($"Total Credits: ${journalReport.TotalCredits:F2}");
+            results.Add($"Is Balanced: {journalReport.IsBalanced}");
+            results.Add("");
+
+            results.Add("All Journal Entries:"); foreach (var entry in journalReport.Entries.OrderBy(e => e.TransactionNumber).ThenBy(e => e.EntryType))
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.TransactionNumber} | {entry.LedgerEntryNumber} | {entry.EntryType} | {entry.OfficialCode} - {account?.AccountName} | ${entry.Amount:F2}");
+            }
+            results.Add("");
+
+            // 4. Account Activity Analysis
+            results.Add("4. ACCOUNT ACTIVITY ANALYSIS:");
+            results.Add("");
+
+            // Analyze cash account activity
+            var cashAccountCode = _accountMappings?.GetValueOrDefault("CASH") ?? "1100";
+            if (!string.IsNullOrEmpty(cashAccountCode))
+            {
+                var cashActivityReport = await _journalEntryReportService!.GenerateAccountActivityReportAsync(
+                    cashAccountCode,
+                    new DateOnly(2025, 6, 17),
+                    new DateOnly(2025, 6, 18));
+
+                results.Add($"Cash Account ({cashActivityReport.AccountCode}) Activity:");
+                results.Add($"  Account Name: {cashActivityReport.AccountName}");
+                results.Add($"  Opening Balance: ${cashActivityReport.OpeningBalance:F2}");
+                results.Add($"  Total Debits: ${cashActivityReport.TotalDebits:F2}");
+                results.Add($"  Total Credits: ${cashActivityReport.TotalCredits:F2}");
+                results.Add($"  Closing Balance: ${cashActivityReport.ClosingBalance:F2}");
+                results.Add($"  Total Transactions: {cashActivityReport.TotalTransactions}");
+                results.Add("");
+            }
+
+            // 5. Generate Trial Balance from Journal Entries
+            results.Add("5. TRIAL BALANCE FROM JOURNAL ENTRIES:");
+            results.Add("");
+
+            var trialBalance = await _journalEntryReportService!.GenerateTrialBalanceFromJournalEntriesAsync(
+                new DateOnly(2025, 6, 18),
+                onlyPosted: true);
+
+            results.Add($"Trial Balance as of {trialBalance.AsOfDate:yyyy-MM-dd}:");
+            results.Add($"Total Debits: ${trialBalance.TotalDebits:F2}");
+            results.Add($"Total Credits: ${trialBalance.TotalCredits:F2}");
+            results.Add($"Is Balanced: {trialBalance.IsBalanced}");
+            results.Add("");
+
+            results.Add("Account Details:");
+            results.Add("Account Code          | Account Name                 | Debit Balance | Credit Balance | Net Balance");
+            results.Add(new string('-', 100));
+
+            foreach (var account in trialBalance.Accounts.OrderBy(a => a.AccountCode))
+            {
+                results.Add($"{account.AccountCode,-20} | {account.AccountName,-28} | {account.DebitBalance,12:C} | {account.CreditBalance,13:C} | {account.NetBalance,10:C}");
+            }
+
+            results.Add(new string('-', 100));
+            results.Add($"{"TOTALS",-51} | {trialBalance.TotalDebits,12:C} | {trialBalance.TotalCredits,13:C} | {(trialBalance.TotalDebits - trialBalance.TotalCredits),10:C}");
+            results.Add("");
+
+            // 6. Query Examples
+            results.Add("6. ADVANCED QUERY EXAMPLES:");
+            results.Add("");
+
+            // Find all debit entries
+            var debitQueryOptions = new JournalEntryQueryOptions
+            {
+                EntryType = EntryType.Debit,
+                OnlyPosted = true
+            };
+
+            var debitEntries = await _accountingModule.GetJournalEntriesAsync(debitQueryOptions);
+            results.Add($"All Debit Entries: {debitEntries.Count()} entries totaling ${debitEntries.Sum(e => e.Amount):F2}");
+
+            // Find all accounts receivable entries
+            var arAccountCode = _accountMappings?.GetValueOrDefault("ACCOUNTS_RECEIVABLE");
+            if (!string.IsNullOrEmpty(arAccountCode))
+            {
+                var arQueryOptions = new JournalEntryQueryOptions
+                {
+                    AccountCode = arAccountCode,
+                    OnlyPosted = true
+                };
+
+                var arEntries = await _accountingModule.GetJournalEntriesAsync(arQueryOptions);
+                results.Add($"Accounts Receivable Entries: {arEntries.Count()} entries");
+                foreach (var entry in arEntries)
+                {
+                    results.Add($"  {entry.TransactionNumber} | {entry.EntryType} | ${entry.Amount:F2}");
+                }
+            }
+
+            results.Add("");
+            results.Add("✓ Journal Entry Functionality Demonstration Complete!");
         }
     }
 }

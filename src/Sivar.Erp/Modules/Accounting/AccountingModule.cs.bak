@@ -1,0 +1,31 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Sivar.Erp.Documents;
+using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.Options;
+using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.ErpSystem.Services;
+using Sivar.Erp.ErpSystem.TimeService;
+using Sivar.Erp.ErpSystem.Diagnostics;
+using Sivar.Erp.Services;
+using Sivar.Erp.Services.Accounting;
+using Sivar.Erp.Services.Accounting.BalanceCalculators;
+using Sivar.Erp.Services.Accounting.FiscalPeriods;
+using Sivar.Erp.Services.Accounting.Transactions;
+
+namespace Sivar.Erp.Modules.Accounting
+{
+    /// <summary>
+    /// Module for accounting operations that other modules can use to record financial transactions
+    /// and manage fiscal periods
+    /// </summary>
+    public class AccountingModule : ErpModuleBase, IAccountingModule
+    {
+        protected IFiscalPeriodService FiscalPeriodService;
+        private IAccountBalanceCalculator accountBalanceCalculator;
+        private readonly PerformanceLogger<AccountingModule> _performanceLogger;
+
+        // Constants for transaction number sequence codes
+        private const string TRANSACTION_SEQUENCE

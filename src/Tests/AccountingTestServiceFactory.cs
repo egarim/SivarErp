@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
@@ -7,10 +9,13 @@ using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Modules;
 using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Services.Documents;
 using Sivar.Erp.Services.ImportExport;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
+using Sivar.Erp.Modules.Accounting.JournalEntries;
+using Sivar.Erp.Modules.Accounting.Reports;
 using System;
 
 namespace Sivar.Erp.Tests.Infrastructure
@@ -27,6 +32,9 @@ namespace Sivar.Erp.Tests.Infrastructure
         public static ServiceCollection ConfigureServices()
         {
             var services = new ServiceCollection();
+
+            // Register logging services
+            RegisterLoggingServices(services);
 
             // Register validators with specific configurations
             RegisterValidators(services);
@@ -67,6 +75,19 @@ namespace Sivar.Erp.Tests.Infrastructure
             return services.BuildServiceProvider();
         }
 
+        private static void RegisterLoggingServices(ServiceCollection services)
+        {
+            // Add logging services
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            });
+
+            // Add generic ILogger<T> resolution
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+        }
+
         private static void RegisterValidators(ServiceCollection services)
         {
             // Register El Salvador specific account validator
@@ -94,7 +115,23 @@ namespace Sivar.Erp.Tests.Infrastructure
                 new ItemImportExportService(provider.GetRequiredService<ItemValidator>()));
 
             services.AddTransient<IGroupMembershipImportExportService>(provider =>
-                new GroupMembershipImportExportService(provider.GetRequiredService<GroupMembershipValidator>()));
+                new GroupMembershipImportExportService(provider.GetRequiredService<GroupMembershipValidator>())); services.AddTransient<IDocumentTotalsService>(sp =>
+            {
+                var objectDb = sp.GetRequiredService<IObjectDb>();
+                var dateTimeService = sp.GetRequiredService<IDateTimeZoneService>();
+                var logger = sp.GetRequiredService<ILogger<DocumentTotalsService>>();
+                return new DocumentTotalsService(objectDb, dateTimeService, logger);
+            });
+
+            // Register the document accounting profile services
+            services.AddTransient<IDocumentAccountingProfileService>(sp =>
+            {
+                var objectDb = sp.GetRequiredService<IObjectDb>();
+                var logger = sp.GetRequiredService<ILogger<DocumentAccountingProfileService>>();
+                return new DocumentAccountingProfileService(objectDb, logger);
+            });
+
+            services.AddTransient<Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService, Sivar.Erp.Services.Documents.DocumentAccountingProfileImportExportService>();
 
             services.AddTransient<ITaxRuleImportExportService>(provider =>
                 new TaxRuleImportExportService(provider.GetRequiredService<TaxRuleValidator>()));
@@ -111,12 +148,25 @@ namespace Sivar.Erp.Tests.Infrastructure
             // Note: SequencerService and ActivityStreamService require ObjectDb, 
             // so they'll be created manually in the test with the specific ObjectDb instance
         }
-
         private static void RegisterAccountingServices(ServiceCollection services)
         {
             // Tax and accounting services
             services.AddTransient<ITaxAccountingProfileService, TaxAccountingProfileService>();
             services.AddTransient<ITaxAccountingProfileImportExportService, TaxAccountingProfileImportExportService>();
+
+            // Journal Entry services
+            services.AddTransient<IJournalEntryService>(provider =>
+            {
+                var objectDb = provider.GetRequiredService<IObjectDb>();
+                return new JournalEntryService(objectDb);
+            });
+
+            services.AddTransient<IJournalEntryReportService>(provider =>
+            {
+                var objectDb = provider.GetRequiredService<IObjectDb>();
+                var journalEntryService = provider.GetRequiredService<IJournalEntryService>();
+                return new JournalEntryReportService(objectDb, journalEntryService);
+            });
 
             // Transaction services will be created manually as they need specific configurations
         }

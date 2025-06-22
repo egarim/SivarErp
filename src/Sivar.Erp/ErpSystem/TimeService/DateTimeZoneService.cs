@@ -147,5 +147,10 @@ namespace Sivar.Erp.ErpSystem.TimeService
         {
             return TimeZoneInfo.Local.Id;
         }
+
+        public DateTime Now()
+        {
+            return DateTime.UtcNow; // Return current time in UTC
+        }
     }
 }
