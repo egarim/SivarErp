@@ -200,14 +200,52 @@ namespace Sivar.Erp.Services.Documents
                 return false;
             }
         }
-
         private bool AddPurchaseInvoiceTotals(IDocument document, IDocumentAccountingProfile profile)
         {
-            // Implementation for purchase invoice
-            // This would follow a similar pattern but with different accounts
-            // For now, return false as not implemented
-            _logger.LogWarning("Purchase invoice totals not yet implemented");
-            return false;
+            try
+            {
+                // Calculate subtotal from document lines
+                var subtotal = document.Lines.Sum(l => l.Amount);
+
+                // For purchase invoices, we need:
+                // 1. Debit Inventory (increase asset)
+                // 2. Credit Accounts Payable (increase liability)
+
+                // Create inventory entry (debit to inventory account)
+                var inventoryDto = new TotalDto
+                {
+                    Oid = Guid.NewGuid(),
+                    Concept = "Inventory Purchase",
+                    Total = subtotal,
+                    DebitAccountCode = profile.InventoryAccountCode,
+                    IncludeInTransaction = true
+                };
+
+                document.DocumentTotals.Add(inventoryDto);
+
+                // Calculate total amount including taxes
+                var totalAmount = document.DocumentTotals.Sum(t => t.Total);
+
+                // Add accounts payable (credit)
+                var accountsPayableDto = new TotalDto
+                {
+                    Oid = Guid.NewGuid(),
+                    Concept = "Accounts Payable",
+                    Total = totalAmount,
+                    CreditAccountCode = "ACCOUNTS_PAYABLE", // Use mapping key
+                    IncludeInTransaction = true
+                };
+
+                document.DocumentTotals.Add(accountsPayableDto);
+
+                _logger.LogInformation("Added purchase invoice totals to document {DocumentNumber}", document.DocumentNumber);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding purchase invoice totals to document {DocumentNumber}", document.DocumentNumber);
+                return false;
+            }
         }
 
         #endregion

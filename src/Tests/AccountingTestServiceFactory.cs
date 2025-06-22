@@ -81,7 +81,7 @@ namespace Sivar.Erp.Tests.Infrastructure
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
             });
-            
+
             // Add generic ILogger<T> resolution
             services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
         }
@@ -113,9 +113,7 @@ namespace Sivar.Erp.Tests.Infrastructure
                 new ItemImportExportService(provider.GetRequiredService<ItemValidator>()));
 
             services.AddTransient<IGroupMembershipImportExportService>(provider =>
-                new GroupMembershipImportExportService(provider.GetRequiredService<GroupMembershipValidator>()));
-
-            services.AddTransient<IDocumentTotalsService>(sp =>
+                new GroupMembershipImportExportService(provider.GetRequiredService<GroupMembershipValidator>())); services.AddTransient<IDocumentTotalsService>(sp =>
             {
                 var objectDb = sp.GetRequiredService<IObjectDb>();
                 var dateTimeService = sp.GetRequiredService<IDateTimeZoneService>();
@@ -123,8 +121,15 @@ namespace Sivar.Erp.Tests.Infrastructure
                 return new DocumentTotalsService(objectDb, dateTimeService, logger);
             });
 
-            // Register the document accounting profile import/export service
-            services.AddTransient<IDocumentAccountingProfileImportExportService, DocumentAccountingProfileImportExportService>();
+            // Register the document accounting profile services
+            services.AddTransient<IDocumentAccountingProfileService>(sp =>
+            {
+                var objectDb = sp.GetRequiredService<IObjectDb>();
+                var logger = sp.GetRequiredService<ILogger<DocumentAccountingProfileService>>();
+                return new DocumentAccountingProfileService(objectDb, logger);
+            });
+
+            services.AddTransient<Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService, Sivar.Erp.Services.Documents.DocumentAccountingProfileImportExportService>();
 
             services.AddTransient<ITaxRuleImportExportService>(provider =>
                 new TaxRuleImportExportService(provider.GetRequiredService<TaxRuleValidator>()));
