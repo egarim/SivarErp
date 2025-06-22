@@ -1,0 +1,7 @@
+Code,Name,Type,AccountCode,RequiresBankAccount,RequiresReference,IsActive
+CASH,Cash,Cash,1100,false,false,true
+CHECK,Check,Check,1110,true,true,true
+TRANSFER,Bank Transfer,BankTransfer,1120,true,true,true
+CREDIT_CARD,Credit Card,CreditCard,1130,false,true,true
+DEBIT_CARD,Debit Card,DebitCard,1140,false,true,true
+DIGITAL_WALLET,Digital Wallet,DigitalWallet,1150,false,true,true

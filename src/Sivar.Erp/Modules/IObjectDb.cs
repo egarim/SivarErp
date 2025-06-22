@@ -10,6 +10,7 @@ using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
+using Sivar.Erp.Modules.Payments.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +50,16 @@ namespace Sivar.Erp.Services
                                                                /// Collection of all transaction batches in the system
                                                                /// </summary>
         IList<ITransactionBatch> TransactionBatches { get; set; }
+
+        /// <summary>
+        /// Collection of payment methods in the system
+        /// </summary>
+        IList<PaymentMethodDto> PaymentMethods { get; set; }
+
+        /// <summary>
+        /// Collection of payments in the system
+        /// </summary>
+        IList<PaymentDto> Payments { get; set; }
 
         /// <summary>
         /// Collection of users in the system

@@ -32,6 +32,8 @@ using Sivar.Erp.Modules.Accounting.Reports;
 using Sivar.Erp.Tests.Infrastructure;
 using Sivar.Erp.Modules;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.Modules.Payments.Services;
+using Sivar.Erp.Modules.Payments.Models;
 using System.Diagnostics;
 
 namespace Sivar.Erp.Tests
@@ -67,6 +69,8 @@ namespace Sivar.Erp.Tests
         private IDocumentTotalsService? _documentTotalsService;
         private Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
         private IDocumentAccountingProfileService? _documentAccountingProfileService; private ISecurityModule? _securityModule;
+        private IPaymentService? _paymentService;
+        private IPaymentMethodService? _paymentMethodService;
         [SetUp]
         public void Setup()
         {
@@ -262,6 +266,11 @@ namespace Sivar.Erp.Tests
                 // Step 6b: Journal Entry Analysis (NEW FUNCTIONALITY)
                 results.Add("=== STEP 6B: JOURNAL ENTRY ANALYSIS ===");
                 await DemonstrateJournalEntryFunctionality(results, purchaseTransaction, salesTransaction);
+                results.Add("");
+
+                // Step 6c: Payment Processing (NEW FUNCTIONALITY)
+                results.Add("=== STEP 6C: PAYMENT PROCESSING ===");
+                await DemonstratePaymentFunctionality(results, salesDocument, purchaseDocument);
                 results.Add("");
 
                 results.Add("=== WORKFLOW COMPLETED SUCCESSFULLY ===");
@@ -530,6 +539,9 @@ namespace Sivar.Erp.Tests
 
             // Import document accounting profiles from CSV
             await ImportDocumentAccountingProfilesFromCsv();
+
+            // Setup payment services and load payment methods
+            await SetupPaymentServices();
         }        /// <summary>
                  /// Imports document accounting profiles from CSV file
                  /// </summary>
@@ -555,6 +567,45 @@ namespace Sivar.Erp.Tests
             if (errors.Any())
             {
                 throw new InvalidOperationException($"Document accounting profile import errors: {string.Join(", ", errors)}");
+            }
+        }
+
+        /// <summary>
+        /// Sets up payment services and loads payment methods
+        /// </summary>
+        private async Task SetupPaymentServices()
+        {
+            // Get payment services from the service provider
+            _paymentService = _serviceProvider.GetRequiredService<IPaymentService>();
+            _paymentMethodService = _serviceProvider.GetRequiredService<IPaymentMethodService>();
+
+            // Load payment methods from the test data
+            await LoadPaymentMethods();
+        }        /// <summary>
+                 /// Loads payment methods into the system
+                 /// </summary>
+        private async Task LoadPaymentMethods()
+        {
+            var paymentMethods = new List<PaymentMethodDto>
+            {
+                new() { Code = "CASH", Name = "Cash", Type = PaymentMethodType.Cash, AccountCode = "1100", IsActive = true },
+                new() { Code = "CHECK", Name = "Check", Type = PaymentMethodType.Check, AccountCode = "1110", RequiresBankAccount = true, RequiresReference = true, IsActive = true },
+                new() { Code = "TRANSFER", Name = "Bank Transfer", Type = PaymentMethodType.BankTransfer, AccountCode = "1120", RequiresBankAccount = true, RequiresReference = true, IsActive = true },
+                new() { Code = "CREDIT_CARD", Name = "Credit Card", Type = PaymentMethodType.CreditCard, AccountCode = "1130", RequiresReference = true, IsActive = true },
+                new() { Code = "DEBIT_CARD", Name = "Debit Card", Type = PaymentMethodType.DebitCard, AccountCode = "1140", RequiresReference = true, IsActive = true },
+                new() { Code = "DIGITAL_WALLET", Name = "Digital Wallet", Type = PaymentMethodType.DigitalWallet, AccountCode = "1150", RequiresReference = true, IsActive = true }
+            };
+
+            // Initialize the collection if it doesn't exist
+            _objectDb.PaymentMethods ??= new List<PaymentMethodDto>();
+
+            // Only add payment methods that don't already exist
+            foreach (var pm in paymentMethods)
+            {
+                if (!_objectDb.PaymentMethods.Any(existing => existing.Code == pm.Code))
+                {
+                    await _paymentMethodService!.CreatePaymentMethodAsync(pm, "TestUser");
+                }
             }
         }
 
@@ -957,6 +1008,115 @@ namespace Sivar.Erp.Tests
 
             results.Add("");
             results.Add("✓ Journal Entry Functionality Demonstration Complete!");
+        }        /// <summary>
+                 /// Demonstrates the new payment processing functionality
+                 /// </summary>
+        private async Task DemonstratePaymentFunctionality(List<string> results, DocumentDto salesDocument, DocumentDto purchaseDocument)
+        {
+            results.Add("✓ Demonstrating Payment Processing Functionality:");
+            results.Add("");
+
+            // Update the payment service with proper account mappings
+            if (_paymentService is PaymentService paymentService && _accountMappings != null)
+            {
+                // Use reflection to update the account mappings
+                var accountMappingsField = typeof(PaymentService).GetField("_accountMappings",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                accountMappingsField?.SetValue(paymentService, _accountMappings);
+            }
+
+            // 1. Process payment for sales invoice (customer pays)
+            results.Add("1. PROCESSING PAYMENT FOR SALES INVOICE:");
+            results.Add("");
+
+            var salesPayment = new PaymentDto
+            {
+                DocumentNumber = salesDocument.DocumentNumber,
+                PaymentMethod = await _paymentService!.GetPaymentMethodAsync("CASH") ?? new PaymentMethodDto(),
+                Amount = 508.50m, // Total with tax from your test
+                PaymentDate = new DateOnly(2025, 6, 18),
+                Reference = "CASH-001",
+                Notes = "Cash payment for sales invoice"
+            };
+
+            var createdSalesPayment = await _paymentService.CreatePaymentAsync(salesPayment, "TestUser");
+            results.Add($"✓ Created sales payment: {createdSalesPayment.PaymentId}");
+            results.Add($"✓ Payment method: {salesPayment.PaymentMethod.Name}");
+            results.Add($"✓ Amount: ${salesPayment.Amount:F2}");
+
+            // Generate payment transaction
+            var (salesPaymentTransaction, salesPaymentEntries) = await _paymentService.GeneratePaymentTransactionAsync(createdSalesPayment, salesDocument);
+            results.Add($"✓ Generated sales payment transaction with {salesPaymentEntries.Count} entries");
+
+            // Post payment transaction
+            salesPaymentTransaction.LedgerEntries = salesPaymentEntries;
+            await _accountingModule!.PostTransactionAsync(salesPaymentTransaction);
+            results.Add("✓ Sales payment transaction posted successfully");
+            results.Add("");
+
+            // 2. Process payment for purchase invoice (we pay supplier)
+            results.Add("2. PROCESSING PAYMENT FOR PURCHASE INVOICE:");
+            results.Add("");
+
+            var purchasePayment = new PaymentDto
+            {
+                DocumentNumber = purchaseDocument.DocumentNumber,
+                PaymentMethod = await _paymentService.GetPaymentMethodAsync("CHECK") ?? new PaymentMethodDto(),
+                Amount = 311.40m, // Purchase total with tax (adjusted)
+                PaymentDate = new DateOnly(2025, 6, 19),
+                Reference = "CHK-001",
+                BankAccount = "Current Account - Bank ABC",
+                Notes = "Check payment to supplier"
+            };
+
+            var createdPurchasePayment = await _paymentService.CreatePaymentAsync(purchasePayment, "TestUser");
+            results.Add($"✓ Created purchase payment: {createdPurchasePayment.PaymentId}");
+            results.Add($"✓ Payment method: {purchasePayment.PaymentMethod.Name}");
+            results.Add($"✓ Amount: ${purchasePayment.Amount:F2}");
+
+            // Generate payment transaction
+            var (purchasePaymentTransaction, purchasePaymentEntries) = await _paymentService.GeneratePaymentTransactionAsync(createdPurchasePayment, purchaseDocument);
+            results.Add($"✓ Generated purchase payment transaction with {purchasePaymentEntries.Count} entries");
+
+            // Post payment transaction
+            purchasePaymentTransaction.LedgerEntries = purchasePaymentEntries;
+            await _accountingModule.PostTransactionAsync(purchasePaymentTransaction);
+            results.Add("✓ Purchase payment transaction posted successfully");
+            results.Add("");
+
+            // 3. Show payment transaction details
+            results.Add("3. PAYMENT TRANSACTION DETAILS:");
+            results.Add("");
+            results.Add("SALES PAYMENT ENTRIES:");
+            foreach (var entry in salesPaymentEntries)
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.EntryType}: {entry.OfficialCode} - {account?.AccountName}: ${entry.Amount:F2}");
+            }
+            results.Add("");
+
+            results.Add("PURCHASE PAYMENT ENTRIES:");
+            foreach (var entry in purchasePaymentEntries)
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.EntryType}: {entry.OfficialCode} - {account?.AccountName}: ${entry.Amount:F2}");
+            }
+            results.Add("");
+
+            // 4. Show available payment methods
+            results.Add("4. AVAILABLE PAYMENT METHODS:");
+            results.Add("");
+            var paymentMethods = await _paymentService.GetPaymentMethodsAsync();
+            foreach (var pm in paymentMethods)
+            {
+                results.Add($"  {pm.Code} - {pm.Name} ({pm.Type})");
+                results.Add($"    Account: {pm.AccountCode}");
+                results.Add($"    Requires Bank Account: {pm.RequiresBankAccount}");
+                results.Add($"    Requires Reference: {pm.RequiresReference}");
+                results.Add("");
+            }
+
+            results.Add("✓ Payment Processing Demonstration Complete!");
         }
 
         /// <summary>

@@ -16,6 +16,7 @@ using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
+using Sivar.Erp.Modules.Payments.Services;
 using System;
 
 namespace Sivar.Erp.Tests.Infrastructure
@@ -152,7 +153,26 @@ namespace Sivar.Erp.Tests.Infrastructure
         {
             // Tax and accounting services
             services.AddTransient<ITaxAccountingProfileService, TaxAccountingProfileService>();
-            services.AddTransient<ITaxAccountingProfileImportExportService, TaxAccountingProfileImportExportService>();            // Journal Entry services
+            services.AddTransient<ITaxAccountingProfileImportExportService, TaxAccountingProfileImportExportService>();
+
+            // Payment services
+            services.AddTransient<IPaymentService>(provider =>
+            {
+                var objectDb = provider.GetRequiredService<IObjectDb>();
+                var logger = provider.GetRequiredService<ILogger<PaymentService>>();
+                // Account mappings will be injected later in the test after import
+                var accountMappings = new Dictionary<string, string>();
+                return new PaymentService(objectDb, logger, accountMappings);
+            });
+
+            services.AddTransient<IPaymentMethodService>(provider =>
+            {
+                var objectDb = provider.GetRequiredService<IObjectDb>();
+                var logger = provider.GetRequiredService<ILogger<PaymentMethodService>>();
+                return new PaymentMethodService(objectDb, logger);
+            });
+
+            // Journal Entry services
             services.AddTransient<IJournalEntryService>(provider =>
             {
                 var objectDb = provider.GetRequiredService<IObjectDb>();
