@@ -147,9 +147,7 @@ namespace Sivar.Erp.Modules.Accounting
                 bool isValid = await transaction.ValidateTransactionAsync();
 
                 if (!isValid)
-                    throw new InvalidOperationException("Transaction has unbalanced debits and credits");
-
-                // Generate transaction number if not already set
+                    throw new InvalidOperationException("Transaction has unbalanced debits and credits");                // Generate transaction number if not already set
                 if (string.IsNullOrEmpty(transaction.TransactionNumber))
                 {
                     transaction.TransactionNumber = await sequencerService.GetNextNumberAsync(TRANSACTION_SEQUENCE_CODE);
@@ -157,10 +155,25 @@ namespace Sivar.Erp.Modules.Accounting
                 foreach (ILedgerEntry ledgerEntry in transaction.LedgerEntries)
                 {
                     ledgerEntry.LedgerEntryNumber = await sequencerService.GetNextNumberAsync(LEDGERENTRY_SEQUENCE_CODE);
+                    // Set the transaction number for each ledger entry
+                    ledgerEntry.TransactionNumber = transaction.TransactionNumber;
                 }
 
                 // Post the transaction
                 transaction.Post();
+
+                // Store the transaction in ObjectDb if available
+                if (_objectDb != null)
+                {
+                    // Add transaction to ObjectDb
+                    _objectDb.Transactions.Add(transaction);
+
+                    // Add all ledger entries to ObjectDb
+                    foreach (var ledgerEntry in transaction.LedgerEntries)
+                    {
+                        _objectDb.LedgerEntries.Add(ledgerEntry);
+                    }
+                }
 
                 // Log the activity
                 var systemActor = CreateSystemStreamObject();
