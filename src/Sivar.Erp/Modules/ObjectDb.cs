@@ -3,6 +3,7 @@ using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.ErpSystem.Modules.Security.Core;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
@@ -43,15 +44,29 @@ namespace Sivar.Erp.Services
         /// <summary>
         /// Collection of all transaction batches in the system
         /// </summary>
-        public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>();
-        public IList<ITaxRule> TaxRules { get; set; }=new List<ITaxRule>();
-        public IList<PerformanceLog> PerformanceLogs { get; set; }=new List<PerformanceLog>();
-        public IList<IDocumentAccountingProfile> DocumentAccountingProfiles { get; set; }=new List<IDocumentAccountingProfile>();
+        public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>(); public IList<ITaxRule> TaxRules { get; set; } = new List<ITaxRule>();
+        public IList<PerformanceLog> PerformanceLogs { get; set; } = new List<PerformanceLog>();
+        public IList<IDocumentAccountingProfile> DocumentAccountingProfiles { get; set; } = new List<IDocumentAccountingProfile>();
+
+        /// <summary>
+        /// Collection of users in the system
+        /// </summary>
+        public IList<User> Users { get; set; } = new List<User>();
+
+        /// <summary>
+        /// Collection of roles in the system
+        /// </summary>
+        public IList<Role> Roles { get; set; } = new List<Role>();
+
+        /// <summary>
+        /// Collection of security events and audit logs
+        /// </summary>
+        public IList<SecurityEvent> SecurityEvents { get; set; } = new List<SecurityEvent>();
 
         public ObjectDb()
         {
         }
 
-       
+
     }
 }

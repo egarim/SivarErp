@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NUnit.Framework;
 using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
@@ -18,20 +19,20 @@ using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
 using Sivar.Erp.Services.Documents;
 using Sivar.Erp.Documents;
-using Sivar.Erp.BusinessEntities;
-using Sivar.Erp.Modules;
-using Sivar.Erp.ErpSystem.ActivityStream;
-using Sivar.Erp.ErpSystem.Options;
-using Sivar.Erp.ErpSystem.TimeService;
-using Sivar.Erp.ErpSystem.Sequencers;
-using Sivar.Erp.ErpSystem.Diagnostics;
-using Sivar.Erp.Tests.Infrastructure;
-using NUnit.Framework;
-using System.Diagnostics;
-using System.Text;
-using Sivar.Erp.Modules.Accounting;
+using Sivar.Erp.ErpSystem.Modules.Security;
+using Sivar.Erp.ErpSystem.Modules.Security.Core;
+using Sivar.Erp.ErpSystem.Modules.Security.Platform;
+using Sivar.Erp.ErpSystem.Modules.Security.Extensions;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
+using Sivar.Erp.ErpSystem.Options;
+using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.TimeService;
+using Sivar.Erp.Modules.Accounting;
 using Sivar.Erp.Modules.Accounting.Reports;
+using Sivar.Erp.Tests.Infrastructure;
+using Sivar.Erp.Modules;
+using Sivar.Erp.ErpSystem.Sequencers;
+using System.Diagnostics;
 
 namespace Sivar.Erp.Tests
 {
@@ -65,7 +66,8 @@ namespace Sivar.Erp.Tests
         private ITaxAccountingProfileService? _taxAccountingService; private ITaxAccountingProfileImportExportService? _taxAccountingImportService;
         private IDocumentTotalsService? _documentTotalsService;
         private Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
-        private IDocumentAccountingProfileService? _documentAccountingProfileService; [SetUp]
+        private IDocumentAccountingProfileService? _documentAccountingProfileService; private ISecurityModule? _securityModule;
+        [SetUp]
         public void Setup()
         {
             // Create ObjectDb instance first
@@ -76,6 +78,28 @@ namespace Sivar.Erp.Tests
             {
                 // Register the ObjectDb instance as a singleton
                 services.AddSingleton<IObjectDb>(_objectDb);
+
+                // Add ERP Security Module
+                services.AddErpSecurityModule();
+
+                // Configure test user context
+                services.AddSingleton<GenericSecurityContext>(provider =>
+                {
+                    var context = new GenericSecurityContext();
+                    var testUser = new User
+                    {
+                        Id = "test-user-id",
+                        Username = "TestUser",
+                        Email = "test@example.com",
+                        FirstName = "Test",
+                        LastName = "User",
+                        Roles = new List<string> { Roles.SYSTEM_ADMINISTRATOR },
+                        DirectPermissions = new List<string>(),
+                        IsActive = true
+                    };
+                    context.SetCurrentUser(testUser);
+                    return context;
+                });
             });
         }
 
@@ -933,6 +957,116 @@ namespace Sivar.Erp.Tests
 
             results.Add("");
             results.Add("✓ Journal Entry Functionality Demonstration Complete!");
+        }
+
+        /// <summary>
+        /// Test security module functionality
+        /// </summary>
+        [Test]
+        public async Task TestSecurityModuleFunctionality()
+        {
+            var results = new List<string>();
+
+            try
+            {
+                results.Add("=== SECURITY MODULE TEST ===");
+
+                // Get security module
+                _securityModule = _serviceProvider.GetRequiredService<ISecurityModule>();
+
+                // Initialize security module
+                await _securityModule.InitializeAsync();
+                results.Add("✓ Security module initialized successfully");
+
+                // Test authentication
+                var authResult = await _securityModule.AuthenticateAsync("admin", "admin123");
+                if (authResult.IsSuccessful)
+                {
+                    results.Add($"✓ Authentication successful for user: {authResult.User?.Username}");
+                    results.Add($"✓ User roles: {string.Join(", ", authResult.User?.Roles ?? [])}");
+                }
+
+                // Test business operation authorization
+                var operations = new[]
+                {
+                    BusinessOperations.ACCOUNTING_POST_TRANSACTION,
+                    BusinessOperations.ACCOUNTING_VIEW_JOURNAL_ENTRIES,
+                    BusinessOperations.DOCUMENTS_CREATE_SALES_INVOICE,
+                    BusinessOperations.TAX_CALCULATE_TAXES
+                };
+
+                foreach (var operation in operations)
+                {
+                    var operationResult = await _securityModule.CheckBusinessOperationAsync(operation);
+                    if (operationResult.IsAuthorized)
+                    {
+                        results.Add($"✓ Authorized for: {operation}");
+                    }
+                    else
+                    {
+                        results.Add($"✗ NOT authorized for: {operation} - {operationResult.DenialReason}");
+                    }
+                }
+
+                // Test creating different user types
+                var accountantUser = await _securityModule.UserService.CreateUserAsync(new CreateUserRequest
+                {
+                    Username = "accountant1",
+                    Password = "password123",
+                    Email = "accountant@company.com",
+                    FirstName = "John",
+                    LastName = "Accountant",
+                    Roles = new List<string> { Roles.ACCOUNTANT },
+                    IsActive = true
+                });
+                results.Add($"✓ Created accountant user: {accountantUser.Username}");
+
+                var viewerUser = await _securityModule.UserService.CreateUserAsync(new CreateUserRequest
+                {
+                    Username = "viewer1",
+                    Password = "password123",
+                    Email = "viewer@company.com",
+                    FirstName = "Jane",
+                    LastName = "Viewer",
+                    Roles = new List<string> { Roles.VIEWER },
+                    IsActive = true
+                });
+                results.Add($"✓ Created viewer user: {viewerUser.Username}");
+
+                // Test role permissions
+                var accountantPermissions = await _securityModule.PermissionService.GetEffectiveUserPermissionsAsync(accountantUser.Id);
+                results.Add($"✓ Accountant has {accountantPermissions.Count()} permissions");
+
+                var viewerPermissions = await _securityModule.PermissionService.GetEffectiveUserPermissionsAsync(viewerUser.Id);
+                results.Add($"✓ Viewer has {viewerPermissions.Count()} permissions");
+
+                // Test audit trail
+                var auditEvents = await _securityModule.AuditService.GetSecurityEventsAsync(
+                    DateTime.UtcNow.AddHours(-1), DateTime.UtcNow);
+                results.Add($"✓ Generated {auditEvents.Count()} audit events");
+
+                results.Add("");
+                results.Add("=== SECURITY MODULE TEST COMPLETED ===");
+
+                // Output results
+                foreach (var result in results)
+                {
+                    Console.WriteLine(result);
+                }
+                Assert.That(authResult.IsSuccessful, Is.True, "Admin authentication should succeed");
+                Assert.That(accountantPermissions.Any(), Is.True, "Accountant should have permissions");
+                Assert.That(viewerPermissions.Any(), Is.True, "Viewer should have permissions");
+                Assert.That(auditEvents.Any(), Is.True, "Should have audit events");
+            }
+            catch (Exception ex)
+            {
+                results.Add($"✗ Error in security test: {ex.Message}");
+                foreach (var result in results)
+                {
+                    Console.WriteLine(result);
+                }
+                throw;
+            }
         }
     }
 }

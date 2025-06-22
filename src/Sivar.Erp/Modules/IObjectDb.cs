@@ -3,6 +3,7 @@ using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.ErpSystem.Modules.Security.Core;
 using Sivar.Erp.Services.Accounting.ChartOfAccounts;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
@@ -44,11 +45,24 @@ namespace Sivar.Erp.Services
         /// <summary>
         /// Collection of all ledger entries in the system
         /// </summary>
-        IList<ILedgerEntry> LedgerEntries { get; set; }
+        IList<ILedgerEntry> LedgerEntries { get; set; }        /// <summary>
+                                                               /// Collection of all transaction batches in the system
+                                                               /// </summary>
+        IList<ITransactionBatch> TransactionBatches { get; set; }
 
         /// <summary>
-        /// Collection of all transaction batches in the system
+        /// Collection of users in the system
         /// </summary>
-        IList<ITransactionBatch> TransactionBatches { get; set; }
+        IList<User> Users { get; set; }
+
+        /// <summary>
+        /// Collection of roles in the system
+        /// </summary>
+        IList<Role> Roles { get; set; }
+
+        /// <summary>
+        /// Collection of security events and audit logs
+        /// </summary>
+        IList<SecurityEvent> SecurityEvents { get; set; }
     }
 }
