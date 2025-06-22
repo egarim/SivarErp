@@ -409,16 +409,16 @@ namespace Sivar.Erp.Tests
             // Get services from the service provider where possible
             var dateTimeZoneService = _serviceProvider.GetRequiredService<IDateTimeZoneService>();
             var optionService = _serviceProvider.GetRequiredService<IOptionService>();
-            var logger = _serviceProvider.GetRequiredService<ILogger<AccountingModule>>();
-
-            // Create services that require ObjectDb instance (these can't be pre-configured in factory)
+            var logger = _serviceProvider.GetRequiredService<ILogger<AccountingModule>>();            // Create services that require ObjectDb instance (these can't be pre-configured in factory)
             var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb); var sequencerService = new SequencerService(_objectDb);
-            var fiscalPeriodService = new FiscalPeriodService(_objectDb);
-            var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);
+            var fiscalPeriodLogger = _serviceProvider.GetRequiredService<ILogger<FiscalPeriodService>>();
+            var fiscalPeriodService = new FiscalPeriodService(fiscalPeriodLogger, _objectDb);
+            var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);            // Create journal entry services
+            var journalEntryLogger = _serviceProvider.GetRequiredService<ILogger<JournalEntryService>>();
+            _journalEntryService = new JournalEntryService(journalEntryLogger, _objectDb);
 
-            // Create journal entry services
-            _journalEntryService = new JournalEntryService(_objectDb);
-            _journalEntryReportService = new JournalEntryReportService(_objectDb, _journalEntryService);
+            var journalEntryReportLogger = _serviceProvider.GetRequiredService<ILogger<JournalEntryReportService>>();
+            _journalEntryReportService = new JournalEntryReportService(journalEntryReportLogger, _objectDb, _journalEntryService);
 
             // Create accounting module with correct parameter order, including the logger and objectDb
             _accountingModule = new AccountingModule(

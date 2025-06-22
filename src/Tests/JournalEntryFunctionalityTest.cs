@@ -16,16 +16,23 @@ namespace Sivar.Erp.Tests
     /// </summary>
     public class JournalEntryFunctionalityTest
     {
-        private IObjectDb _objectDb = null!;
-        private IJournalEntryService _journalEntryService = null!;
+        private IObjectDb _objectDb = null!; private IJournalEntryService _journalEntryService = null!;
         private IJournalEntryReportService _reportService = null!;
+        private ILogger<JournalEntryService> _logger = null!;
+        private ILogger<JournalEntryReportService> _reportLogger = null!;
 
         [SetUp]
         public void Setup()
         {
             _objectDb = new ObjectDb();
-            _journalEntryService = new JournalEntryService(_objectDb);
-            _reportService = new JournalEntryReportService(_objectDb, _journalEntryService);
+
+            // Create logger for JournalEntryService
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            _logger = loggerFactory.CreateLogger<JournalEntryService>();
+            _reportLogger = loggerFactory.CreateLogger<JournalEntryReportService>();
+
+            _journalEntryService = new JournalEntryService(_logger, _objectDb);
+            _reportService = new JournalEntryReportService(_reportLogger, _objectDb, _journalEntryService);
 
             // Add some sample data for testing
             SetupSampleData();
@@ -102,7 +109,7 @@ namespace Sivar.Erp.Tests
             // Create sample accounts
             var account1 = new AccountDto
             {
-             
+
                 OfficialCode = "1100",
                 AccountName = "Cash Account",
                 AccountType = AccountType.Asset
@@ -110,7 +117,7 @@ namespace Sivar.Erp.Tests
 
             var account2 = new AccountDto
             {
-            
+
                 OfficialCode = "4100",
                 AccountName = "Sales Revenue",
                 AccountType = AccountType.Revenue
@@ -122,7 +129,7 @@ namespace Sivar.Erp.Tests
             // Create sample transaction
             var transaction = new TransactionDto
             {
-               
+
                 TransactionNumber = "TRANS-001",
                 TransactionDate = DateOnly.FromDateTime(DateTime.Today),
                 Description = "Sample sales transaction",
@@ -135,7 +142,7 @@ namespace Sivar.Erp.Tests
             // Create sample ledger entries
             var entry1 = new LedgerEntryDto
             {
-               
+
                 LedgerEntryNumber = "LE-001",
                 TransactionNumber = "TRANS-001",
                 OfficialCode = "1100",
@@ -146,7 +153,7 @@ namespace Sivar.Erp.Tests
 
             var entry2 = new LedgerEntryDto
             {
-               
+
                 LedgerEntryNumber = "LE-002",
                 TransactionNumber = "TRANS-001",
                 OfficialCode = "4100",

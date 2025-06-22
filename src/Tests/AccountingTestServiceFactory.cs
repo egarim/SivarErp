@@ -152,20 +152,18 @@ namespace Sivar.Erp.Tests.Infrastructure
         {
             // Tax and accounting services
             services.AddTransient<ITaxAccountingProfileService, TaxAccountingProfileService>();
-            services.AddTransient<ITaxAccountingProfileImportExportService, TaxAccountingProfileImportExportService>();
-
-            // Journal Entry services
+            services.AddTransient<ITaxAccountingProfileImportExportService, TaxAccountingProfileImportExportService>();            // Journal Entry services
             services.AddTransient<IJournalEntryService>(provider =>
             {
                 var objectDb = provider.GetRequiredService<IObjectDb>();
-                return new JournalEntryService(objectDb);
-            });
-
-            services.AddTransient<IJournalEntryReportService>(provider =>
+                var logger = provider.GetRequiredService<ILogger<JournalEntryService>>();
+                return new JournalEntryService(logger, objectDb);
+            }); services.AddTransient<IJournalEntryReportService>(provider =>
             {
                 var objectDb = provider.GetRequiredService<IObjectDb>();
                 var journalEntryService = provider.GetRequiredService<IJournalEntryService>();
-                return new JournalEntryReportService(objectDb, journalEntryService);
+                var logger = provider.GetRequiredService<ILogger<JournalEntryReportService>>();
+                return new JournalEntryReportService(logger, objectDb, journalEntryService);
             });
 
             // Transaction services will be created manually as they need specific configurations
