@@ -26,26 +26,24 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
                ),
                "bytes", // Unit (optional metadata, not the tag!)
                "Total managed heap memory"
-           );
-
-
-        private readonly ILogger<T> _logger;
+           ); private readonly ILogger<T> _logger;
         private readonly PerformanceLogMode _logMode;
         private readonly int _slowThresholdMs;
         private readonly long _memoryThresholdBytes;
-        private readonly IObjectDb _objectDb;
-
-        public PerformanceLogger(ILogger<T> logger,
+        private readonly IObjectDb? _objectDb;
+        private readonly IPerformanceContextProvider? _contextProvider; public PerformanceLogger(ILogger<T> logger,
                                  PerformanceLogMode logMode = PerformanceLogMode.All,
                                  int slowThresholdMs = 100,
                                  long memoryThresholdBytes = 10_000_000,
-                                 IObjectDb objectDb = null)
+                                 IObjectDb? objectDb = null,
+                                 IPerformanceContextProvider? contextProvider = null)
         {
             _logger = logger;
             _logMode = logMode;
             _slowThresholdMs = slowThresholdMs;
             _memoryThresholdBytes = memoryThresholdBytes;
             _objectDb = objectDb;
+            _contextProvider = contextProvider;
         }
 
         public void Track(string methodName, Action action)
@@ -67,7 +65,7 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
             stopwatch.Stop();
             long memoryAfter = GC.GetTotalMemory(false);
             long memoryDelta = memoryAfter - memoryBefore;
-            
+
             RecordPerformanceMetrics(methodName, stopwatch.ElapsedMilliseconds, memoryDelta);
         }
 
@@ -91,12 +89,12 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
             stopwatch.Stop();
             long memoryAfter = GC.GetTotalMemory(false);
             long memoryDelta = memoryAfter - memoryBefore;
-            
+
             RecordPerformanceMetrics(methodName, stopwatch.ElapsedMilliseconds, memoryDelta);
 
             return result;
         }
-        
+
         public async Task<TResult> Track<TResult>(string methodName, Func<Task<TResult>> func)
         {
             long memoryBefore = GC.GetTotalMemory(false);
@@ -117,17 +115,17 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
             stopwatch.Stop();
             long memoryAfter = GC.GetTotalMemory(false);
             long memoryDelta = memoryAfter - memoryBefore;
-            
+
             RecordPerformanceMetrics(methodName, stopwatch.ElapsedMilliseconds, memoryDelta);
 
             return result;
         }
-        
+
         private void RecordPerformanceMetrics(string methodName, long elapsedMilliseconds, long memoryDelta)
         {
             bool isSlow = elapsedMilliseconds > _slowThresholdMs;
             bool isMemoryIntensive = memoryDelta > _memoryThresholdBytes;
-            
+
             if (_logMode.HasFlag(PerformanceLogMode.Narrative))
             {
                 _logger.LogInformation("Method {Method} took {Elapsed} ms and used {MemoryDelta} bytes",
@@ -153,7 +151,6 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
                     memoryDelta,
                     KeyValuePair.Create("method", (object?)methodName));
             }
-            
             // Store performance log in ObjectDb if provided
             if (_objectDb != null)
             {
@@ -164,9 +161,14 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
                     ExecutionTimeMs = elapsedMilliseconds,
                     MemoryDeltaBytes = memoryDelta,
                     IsSlow = isSlow,
-                    IsMemoryIntensive = isMemoryIntensive
+                    IsMemoryIntensive = isMemoryIntensive,
+                    UserId = _contextProvider?.GetUserId(),
+                    UserName = _contextProvider?.GetUserName(),
+                    InstanceId = _contextProvider?.GetInstanceId(),
+                    SessionId = _contextProvider?.GetSessionId(),
+                    Context = _contextProvider?.GetContext()
                 };
-                
+
                 _objectDb.PerformanceLogs.Add(performanceLog);
             }
         }

@@ -15,13 +15,11 @@ namespace Sivar.Erp.Services.Accounting.FiscalPeriods
     {
         private readonly PerformanceLogger<FiscalPeriodService> _performanceLogger;
         private readonly FiscalPeriodValidator _validator;
-        private readonly IObjectDb _objectDb;
-
-        public FiscalPeriodService(ILogger<FiscalPeriodService> logger, IObjectDb objectDb)
+        private readonly IObjectDb _objectDb; public FiscalPeriodService(ILogger<FiscalPeriodService> logger, IObjectDb objectDb, IPerformanceContextProvider? contextProvider = null)
         {
             _objectDb = objectDb;
             _validator = new FiscalPeriodValidator();
-            _performanceLogger = new PerformanceLogger<FiscalPeriodService>(logger, PerformanceLogMode.All, 50, 5_000_000, objectDb);
+            _performanceLogger = new PerformanceLogger<FiscalPeriodService>(logger, PerformanceLogMode.All, 50, 5_000_000, objectDb, contextProvider);
         }
 
         /// <summary>

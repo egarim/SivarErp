@@ -44,7 +44,8 @@ namespace Sivar.Erp.Modules.Accounting
             ILogger<AccountingModule> logger,
             IJournalEntryService journalEntryService,
             IJournalEntryReportService reportService,
-            IObjectDb? objectDb = null)
+            IObjectDb? objectDb = null,
+            IPerformanceContextProvider? contextProvider = null)
             : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
         {
             FiscalPeriodService = fiscalPeriodService;
@@ -52,7 +53,7 @@ namespace Sivar.Erp.Modules.Accounting
             _objectDb = objectDb;
             _journalEntryService = journalEntryService;
             _reportService = reportService;
-            _performanceLogger = new PerformanceLogger<AccountingModule>(logger, PerformanceLogMode.All, 100, 10_000_000, _objectDb);
+            _performanceLogger = new PerformanceLogger<AccountingModule>(logger, PerformanceLogMode.All, 100, 10_000_000, _objectDb, contextProvider);
         }
 
         /// <summary>

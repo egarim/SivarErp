@@ -23,6 +23,7 @@ using Sivar.Erp.ErpSystem.Modules.Security;
 using Sivar.Erp.ErpSystem.Modules.Security.Core;
 using Sivar.Erp.ErpSystem.Modules.Security.Platform;
 using Sivar.Erp.ErpSystem.Modules.Security.Extensions;
+using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.ActivityStream;
@@ -75,9 +76,7 @@ namespace Sivar.Erp.Tests
         public void Setup()
         {
             // Create ObjectDb instance first
-            _objectDb = new ObjectDb();
-
-            // Use AccountingTestServiceFactory to configure all services with ObjectDb registration
+            _objectDb = new ObjectDb();            // Use AccountingTestServiceFactory to configure all services with ObjectDb registration
             _serviceProvider = AccountingTestServiceFactory.CreateServiceProvider(services =>
             {
                 // Register the ObjectDb instance as a singleton
@@ -103,6 +102,16 @@ namespace Sivar.Erp.Tests
                     };
                     context.SetCurrentUser(testUser);
                     return context;
+                });                // Register performance context provider for testing
+                services.AddSingleton<IPerformanceContextProvider>(provider =>
+                {
+                    var securityContext = provider.GetService<GenericSecurityContext>();
+                    return new DefaultPerformanceContextProvider(
+                        userId: securityContext?.UserId ?? "test-user-id",
+                        userName: securityContext?.UserName ?? "TestUser",
+                        sessionId: "test-session-12345",
+                        context: "CompleteAccountingWorkflowTest"
+                    );
                 });
             });
         }
@@ -443,17 +452,15 @@ namespace Sivar.Erp.Tests
             var dateTimeZoneService = _serviceProvider.GetRequiredService<IDateTimeZoneService>();
             var optionService = _serviceProvider.GetRequiredService<IOptionService>();
             var logger = _serviceProvider.GetRequiredService<ILogger<AccountingModule>>();            // Create services that require ObjectDb instance (these can't be pre-configured in factory)
-            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb); var sequencerService = new SequencerService(_objectDb);
-            var fiscalPeriodLogger = _serviceProvider.GetRequiredService<ILogger<FiscalPeriodService>>();
-            var fiscalPeriodService = new FiscalPeriodService(fiscalPeriodLogger, _objectDb);
+            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb); var sequencerService = new SequencerService(_objectDb); var fiscalPeriodLogger = _serviceProvider.GetRequiredService<ILogger<FiscalPeriodService>>();
+            var performanceContextProvider = _serviceProvider.GetService<IPerformanceContextProvider>();
+            var fiscalPeriodService = new FiscalPeriodService(fiscalPeriodLogger, _objectDb, performanceContextProvider);
             var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);            // Create journal entry services
             var journalEntryLogger = _serviceProvider.GetRequiredService<ILogger<JournalEntryService>>();
             _journalEntryService = new JournalEntryService(journalEntryLogger, _objectDb);
 
             var journalEntryReportLogger = _serviceProvider.GetRequiredService<ILogger<JournalEntryReportService>>();
-            _journalEntryReportService = new JournalEntryReportService(journalEntryReportLogger, _objectDb, _journalEntryService);
-
-            // Create accounting module with correct parameter order, including the logger and objectDb
+            _journalEntryReportService = new JournalEntryReportService(journalEntryReportLogger, _objectDb, _journalEntryService);            // Create accounting module with correct parameter order, including the logger and objectDb
             _accountingModule = new AccountingModule(
                 optionService,
                 activityStreamService,
@@ -464,7 +471,8 @@ namespace Sivar.Erp.Tests
                 logger,
                 _journalEntryService,
                 _journalEntryReportService,
-                _objectDb);
+                _objectDb,
+                performanceContextProvider);
 
             // Register sequences
             _accountingModule.RegisterSequence(_objectDb.Sequences);
@@ -773,11 +781,9 @@ namespace Sivar.Erp.Tests
             var totalDebits = entries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
             var totalCredits = entries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
             return Math.Abs(totalDebits - totalCredits) < 0.01m; // Allow for small rounding differences
-        }
-
-        /// <summary>
-        /// Prints the performance logs stored in ObjectDb
-        /// </summary>
+        }        /// <summary>
+                 /// Prints the performance logs stored in ObjectDb
+                 /// </summary>
         private List<string> PrintPerformanceLogs()
         {
             var results = new List<string>();
@@ -790,12 +796,12 @@ namespace Sivar.Erp.Tests
 
             results.Add($"Total performance logs: {_objectDb.PerformanceLogs.Count}");
             results.Add("");
-            results.Add("| Method | Execution Time (ms) | Memory (bytes) | Slow | Memory Intensive |");
-            results.Add("|--------|-------------------|---------------|------|-----------------|");
+            results.Add("| Method | Execution Time (ms) | Memory (bytes) | User | Instance | Slow | Memory Intensive |");
+            results.Add("|--------|-------------------|---------------|------|----------|------|-----------------|");
 
             foreach (var log in _objectDb.PerformanceLogs.OrderByDescending(l => l.ExecutionTimeMs))
             {
-                results.Add($"| {log.Method} | {log.ExecutionTimeMs} | {log.MemoryDeltaBytes:N0} | {(log.IsSlow ? "⚠️" : "")} | {(log.IsMemoryIntensive ? "⚠️" : "")} |");
+                results.Add($"| {log.Method} | {log.ExecutionTimeMs} | {log.MemoryDeltaBytes:N0} | {log.UserName ?? "N/A"} | {log.InstanceId?[..8] ?? "N/A"} | {(log.IsSlow ? "⚠️" : "")} | {(log.IsMemoryIntensive ? "⚠️" : "")} |");
             }
 
             // Performance summary
@@ -808,7 +814,7 @@ namespace Sivar.Erp.Tests
                 results.Add($"⚠️ Slow methods detected: {slowMethods.Count}");
                 foreach (var slowMethod in slowMethods.OrderByDescending(m => m.ExecutionTimeMs))
                 {
-                    results.Add($"  - {slowMethod.Method}: {slowMethod.ExecutionTimeMs} ms");
+                    results.Add($"  - {slowMethod.Method}: {slowMethod.ExecutionTimeMs} ms (User: {slowMethod.UserName ?? "N/A"})");
                 }
             }
             else
@@ -822,13 +828,21 @@ namespace Sivar.Erp.Tests
                 results.Add($"⚠️ Memory intensive methods detected: {memoryIntensiveMethods.Count}");
                 foreach (var memMethod in memoryIntensiveMethods.OrderByDescending(m => m.MemoryDeltaBytes))
                 {
-                    results.Add($"  - {memMethod.Method}: {memMethod.MemoryDeltaBytes:N0} bytes");
+                    results.Add($"  - {memMethod.Method}: {memMethod.MemoryDeltaBytes:N0} bytes (User: {memMethod.UserName ?? "N/A"})");
                 }
             }
             else
             {
                 results.Add("✓ No memory intensive methods detected");
-            }
+            }            // Context summary
+            results.Add("");
+            results.Add("Context Summary:");
+            var uniqueUsers = _objectDb.PerformanceLogs.Where(l => !string.IsNullOrEmpty(l.UserName)).Select(l => l.UserName!).Distinct().ToList();
+            var uniqueInstances = _objectDb.PerformanceLogs.Where(l => !string.IsNullOrEmpty(l.InstanceId)).Select(l => l.InstanceId!).Distinct().ToList();
+
+            results.Add($"✓ Users tracked: {uniqueUsers.Count} ({string.Join(", ", uniqueUsers)})");
+            results.Add($"✓ Instances tracked: {uniqueInstances.Count} ({string.Join(", ", uniqueInstances.Select(i => i[..8]))})");
+
             return results;
         }
 
