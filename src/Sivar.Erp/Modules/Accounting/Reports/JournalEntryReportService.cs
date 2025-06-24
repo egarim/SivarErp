@@ -100,7 +100,7 @@ public class JournalEntryReportService : IJournalEntryReportService
         return await _performanceLogger.Track(nameof(GenerateAccountActivityReportAsync), async () =>
         {
             var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == accountCode);
-            var accountName = account?.OfficialCode ?? "Unknown Account";
+            var accountName = account?.AccountName ?? "Unknown Account";
 
             var options = new JournalEntryQueryOptions
             {
@@ -176,7 +176,7 @@ public class JournalEntryReportService : IJournalEntryReportService
                 .Select(g => new TrialBalanceAccountDto
                 {
                     AccountCode = g.Key,
-                    AccountName = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == g.Key)?.OfficialCode ?? "Unknown",
+                    AccountName = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == g.Key)?.AccountName ?? "Unknown",
                     DebitBalance = g.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount),
                     CreditBalance = g.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount)
                 })

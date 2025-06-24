@@ -21,8 +21,8 @@ namespace Sivar.Erp.Modules.Accounting
 {
     public class AccountingModule : ErpModuleBase, IAccountingModule
     {
-        protected IFiscalPeriodService FiscalPeriodService;
-        private IAccountBalanceCalculator accountBalanceCalculator;
+        private readonly IFiscalPeriodService _fiscalPeriodService;
+        private readonly IAccountBalanceCalculator _accountBalanceCalculator;
         private readonly PerformanceLogger<AccountingModule> _performanceLogger;
         private readonly IObjectDb? _objectDb;
         private readonly IJournalEntryService _journalEntryService;
@@ -33,7 +33,11 @@ namespace Sivar.Erp.Modules.Accounting
         private const string FISCAL_SEQUENCE_CODE = "FISCAL";
         private const string LEDGERENTRY_SEQUENCE_CODE = "LEDGERENTRY";
 
-        public IAccountBalanceCalculator AccountBalanceCalculator { get => accountBalanceCalculator; set => accountBalanceCalculator = value; }
+        /// <summary>
+        /// Gets the account balance calculator used by this module
+        /// </summary>
+        public IAccountBalanceCalculator AccountBalanceCalculator => _accountBalanceCalculator;
+
         public AccountingModule(
             IOptionService optionService,
             IActivityStreamService activityStreamService,
@@ -48,11 +52,11 @@ namespace Sivar.Erp.Modules.Accounting
             IPerformanceContextProvider? contextProvider = null)
             : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
         {
-            FiscalPeriodService = fiscalPeriodService;
-            this.accountBalanceCalculator = accountBalanceCalculator;
+            _fiscalPeriodService = fiscalPeriodService ?? throw new ArgumentNullException(nameof(fiscalPeriodService));
+            _accountBalanceCalculator = accountBalanceCalculator ?? throw new ArgumentNullException(nameof(accountBalanceCalculator));
             _objectDb = objectDb;
-            _journalEntryService = journalEntryService;
-            _reportService = reportService;
+            _journalEntryService = journalEntryService ?? throw new ArgumentNullException(nameof(journalEntryService));
+            _reportService = reportService ?? throw new ArgumentNullException(nameof(reportService));
             _performanceLogger = new PerformanceLogger<AccountingModule>(logger, PerformanceLogMode.All, 100, 10_000_000, _objectDb, contextProvider);
         }
 
@@ -136,7 +140,7 @@ namespace Sivar.Erp.Modules.Accounting
                     return true; // Already posted
 
                 // Validate that transaction is in an open fiscal period
-                var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
+                var fiscalPeriod = await _fiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
 
                 if (fiscalPeriod == null)
                     throw new InvalidOperationException($"No fiscal period found for date {transaction.TransactionDate}");
@@ -209,7 +213,7 @@ namespace Sivar.Erp.Modules.Accounting
                     return true; // Already unposted
 
                 // Validate that transaction is in an open fiscal period
-                var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
+                var fiscalPeriod = await _fiscalPeriodService.GetFiscalPeriodForDateAsync(transaction.TransactionDate);
 
                 if (fiscalPeriod == null)
                     throw new InvalidOperationException($"No fiscal period found for date {transaction.TransactionDate}");
@@ -267,7 +271,7 @@ namespace Sivar.Erp.Modules.Accounting
                     throw new ArgumentException("Account code cannot be null or empty", nameof(accountCode));
 
                 // Use the account balance calculator to get the balance
-                return AccountBalanceCalculator.CalculateAccountBalance(accountCode, asOfDate);
+                return _accountBalanceCalculator.CalculateAccountBalance(accountCode, asOfDate);
             });
         }
 
@@ -290,13 +294,13 @@ namespace Sivar.Erp.Modules.Accounting
 
                 // We need to search all fiscal periods as the period could be in either state
                 // First try closed periods since that's what we're looking to open
-                var closedFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Closed);
+                var closedFiscalPeriods = await _fiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Closed);
                 var fiscalPeriod = closedFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
 
                 if (fiscalPeriod == null)
                 {
                     // If not found in closed periods, check open periods as well (maybe it's already open)
-                    var openFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Open);
+                    var openFiscalPeriods = await _fiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Open);
                     fiscalPeriod = openFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
                 }
 
@@ -335,13 +339,13 @@ namespace Sivar.Erp.Modules.Accounting
 
                 // We need to search all fiscal periods as the period could be in either state
                 // First try open periods since that's what we're looking to close
-                var openFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Open);
+                var openFiscalPeriods = await _fiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Open);
                 var fiscalPeriod = openFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
 
                 if (fiscalPeriod == null)
                 {
                     // If not found in open periods, check closed periods as well (maybe it's already closed)
-                    var closedFiscalPeriods = await FiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Closed);
+                    var closedFiscalPeriods = await _fiscalPeriodService.GetFiscalPeriodsByStatusAsync(FiscalPeriodStatus.Closed);
                     fiscalPeriod = closedFiscalPeriods.FirstOrDefault(fp => string.Equals(fp.Code, periodCode, StringComparison.OrdinalIgnoreCase));
                 }
 
@@ -370,14 +374,18 @@ namespace Sivar.Erp.Modules.Accounting
         {
             return await _performanceLogger.Track(nameof(IsDateInOpenFiscalPeriodAsync), async () =>
             {
-                var fiscalPeriod = await FiscalPeriodService.GetFiscalPeriodForDateAsync(date);
+                var fiscalPeriod = await _fiscalPeriodService.GetFiscalPeriodForDateAsync(date);
                 return fiscalPeriod != null && fiscalPeriod.Status == FiscalPeriodStatus.Open;
             });
         }
 
+        /// <summary>
+        /// Gets the fiscal period service for advanced operations
+        /// </summary>
+        /// <returns>The fiscal period service</returns>
         public IFiscalPeriodService GetFiscalPeriodService()
         {
-            return FiscalPeriodService;
+            return _fiscalPeriodService;
         }
 
         public override void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos)
