@@ -11,6 +11,7 @@ using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Modules.Payments.Models;
+using Sivar.Erp.Modules.Inventory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,9 +47,11 @@ namespace Sivar.Erp.Services
         /// <summary>
         /// Collection of all ledger entries in the system
         /// </summary>
-        IList<ILedgerEntry> LedgerEntries { get; set; }        /// <summary>
-                                                               /// Collection of all transaction batches in the system
-                                                               /// </summary>
+        IList<ILedgerEntry> LedgerEntries { get; set; }
+        
+        /// <summary>
+        /// Collection of all transaction batches in the system
+        /// </summary>
         IList<ITransactionBatch> TransactionBatches { get; set; }
 
         /// <summary>
@@ -75,5 +78,25 @@ namespace Sivar.Erp.Services
         /// Collection of security events and audit logs
         /// </summary>
         IList<SecurityEvent> SecurityEvents { get; set; }
+        
+        /// <summary>
+        /// Collection of inventory items in the system
+        /// </summary>
+        IList<IInventoryItem> InventoryItems { get; set; }
+        
+        /// <summary>
+        /// Collection of stock levels for inventory items
+        /// </summary>
+        IList<IStockLevel> StockLevels { get; set; }
+        
+        /// <summary>
+        /// Collection of inventory transactions (stock movements)
+        /// </summary>
+        IList<IInventoryTransaction> InventoryTransactions { get; set; }
+        
+        /// <summary>
+        /// Collection of inventory reservations
+        /// </summary>
+        IList<IInventoryReservation> InventoryReservations { get; set; }
     }
 }

@@ -11,6 +11,7 @@ using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Modules.Payments.Models;
+using Sivar.Erp.Modules.Inventory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,9 @@ namespace Sivar.Erp.Services
         /// <summary>
         /// Collection of all transaction batches in the system
         /// </summary>
-        public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>(); public IList<ITaxRule> TaxRules { get; set; } = new List<ITaxRule>();
+        public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>();
+
+        public IList<ITaxRule> TaxRules { get; set; } = new List<ITaxRule>();
         public IList<PerformanceLog> PerformanceLogs { get; set; } = new List<PerformanceLog>();
         public IList<IDocumentAccountingProfile> DocumentAccountingProfiles { get; set; } = new List<IDocumentAccountingProfile>();
 
@@ -74,10 +77,28 @@ namespace Sivar.Erp.Services
         /// </summary>
         public IList<SecurityEvent> SecurityEvents { get; set; } = new List<SecurityEvent>();
 
+        /// <summary>
+        /// Collection of inventory items in the system
+        /// </summary>
+        public IList<IInventoryItem> InventoryItems { get; set; } = new List<IInventoryItem>();
+
+        /// <summary>
+        /// Collection of stock levels for inventory items
+        /// </summary>
+        public IList<IStockLevel> StockLevels { get; set; } = new List<IStockLevel>();
+
+        /// <summary>
+        /// Collection of inventory transactions (stock movements)
+        /// </summary>
+        public IList<IInventoryTransaction> InventoryTransactions { get; set; } = new List<IInventoryTransaction>();
+
+        /// <summary>
+        /// Collection of inventory reservations
+        /// </summary>
+        public IList<IInventoryReservation> InventoryReservations { get; set; } = new List<IInventoryReservation>();
+
         public ObjectDb()
         {
         }
-
-
     }
 }
