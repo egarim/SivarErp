@@ -1,4 +1,5 @@
 using System;
+using Sivar.Erp.Modules.Inventory;
 
 namespace Sivar.Erp.Documents
 {
@@ -37,5 +38,10 @@ namespace Sivar.Erp.Documents
         /// Gets or sets the warehouse location
         /// </summary>
         string Location { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the inventory valuation method (AverageCost, FIFO, LIFO)
+        /// </summary>
+        InventoryValuationMethod ValuationMethod { get; set; }
     }
 }

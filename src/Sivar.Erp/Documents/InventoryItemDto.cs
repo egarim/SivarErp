@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Sivar.Erp.Modules.Inventory;
 
 namespace Sivar.Erp.Documents
 {
@@ -15,6 +16,7 @@ namespace Sivar.Erp.Documents
         private decimal _reorderQuantity;
         private decimal _averageCost;
         private string _location;
+        private InventoryValuationMethod _valuationMethod;
 
         public bool IsInventoryTracked
         {
@@ -96,6 +98,20 @@ namespace Sivar.Erp.Documents
                     var oldValue = _location;
                     _location = value;
                     OnPropertyChanged(nameof(Location), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+        
+        public InventoryValuationMethod ValuationMethod
+        {
+            get => _valuationMethod;
+            set
+            {
+                if (_valuationMethod != value)
+                {
+                    var oldValue = _valuationMethod;
+                    _valuationMethod = value;
+                    OnPropertyChanged(nameof(ValuationMethod), ChangeType.PropertyChanged, oldValue, value);
                 }
             }
         }

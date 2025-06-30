@@ -98,5 +98,10 @@ namespace Sivar.Erp.Services
         /// Collection of inventory reservations
         /// </summary>
         IList<IInventoryReservation> InventoryReservations { get; set; }
+
+        /// <summary>
+        /// Collection of inventory layers/batches for FIFO and LIFO costing
+        /// </summary>
+        IList<InventoryLayerDto> InventoryLayers { get; set; }
     }
 }

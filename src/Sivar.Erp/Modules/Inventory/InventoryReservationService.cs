@@ -71,7 +71,7 @@ namespace Sivar.Erp.Modules.Inventory
                 }
 
                 // Check if sufficient stock is available
-                var isAvailable = await _inventoryService.IsStockAvailableAsync(item.Code, quantity, warehouseCode);
+                var isAvailable = await _inventoryService.IsStockAvailableAsync(item.Code, warehouseCode, quantity);
                 if (!isAvailable)
                 {
                     _logger.LogWarning("Insufficient stock for item {ItemCode} in warehouse {WarehouseCode}", item.Code, warehouseCode);
@@ -144,7 +144,7 @@ namespace Sivar.Erp.Modules.Inventory
                     {
                         var additionalQuantity = newQuantity.Value - reservation.Quantity;
                         var isAvailable = await _inventoryService.IsStockAvailableAsync(
-                            reservation.Item.Code, additionalQuantity, reservation.WarehouseCode);
+                            reservation.WarehouseCode, reservation.Item.Code, additionalQuantity);
                         
                         if (!isAvailable)
                         {
