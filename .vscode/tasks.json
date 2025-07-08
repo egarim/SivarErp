@@ -1,0 +1,23 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run EfCore Accounting Workflow Test",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"src/Tests/Tests.csproj",
+				"--filter",
+				"FullyQualifiedName~CompleteAccountingWorkflowEfCoreTest.ExecuteCompleteWorkflowEfCoreTest",
+				"--logger",
+				"console;verbosity=detailed"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		}
+	]
+}

@@ -1,9 +1,9 @@
 Oid,Code,Name,IsEnabled,DocumentOperation
-a1e0e85a-2eb0-4803-a56d-d94dd8349b57,"FCF","Factura de Consumidor Final",true,SalesInvoice
-644d32ba-ca5f-41ca-8e01-98c9d8592de7,"CCF","Comprobante de Crédito Fiscal",true,SalesInvoice
-894d333b-cd59-441b-844b-8bf348ee83f7,"NC","Nota de Crédito",true,SalesCreditNote
-95f0c9ea-35d4-406a-ab03-946870b08297,"ND","Nota de Débito",true,SalesDebitNote
-c7611cc0-5e37-4d7a-894f-499389dab381,"FEX","Factura de Exportación",true,SalesInvoice
-5c2c3335-73c1-42cd-bef9-e8e1c44e1c4f,"COM","Compra",true,PurchaseInvoice
-2f92bb8d-fd2c-43f8-ad5e-28e8a4473643,"NCC","Nota de Crédito de Compra",true,PurchaseCreditNote
-1e12cbf5-4070-4197-9543-a0544390fbbb,"NDC","Nota de Débito de Compra",true,PurchaseDebitNote
+12f60979-423e-4212-85d8-bf2b7b680c2f,"FCF","Factura de Consumidor Final",true,SalesInvoice
+72b2b6e4-a413-487b-8e33-d1a0c922a8b8,"CCF","Comprobante de Crédito Fiscal",true,SalesInvoice
+603ec9e3-bf66-4b44-b61a-1db7216dcbcb,"NC","Nota de Crédito",true,SalesCreditNote
+f05ce671-19f0-49ad-807b-9776baace499,"ND","Nota de Débito",true,SalesDebitNote
+1c3cacb7-ba38-4e84-83d1-d4e7e6eb3653,"FEX","Factura de Exportación",true,SalesInvoice
+6fe7822e-74ad-4e01-9fa7-d9e7112b9b58,"COM","Compra",true,PurchaseInvoice
+80a28ecf-0db6-4b5f-a32d-667b27ac2fbe,"NCC","Nota de Crédito de Compra",true,PurchaseCreditNote
+a82bba0f-2ab2-4b5a-881e-2b79eeff3ded,"NDC","Nota de Débito de Compra",true,PurchaseDebitNote
