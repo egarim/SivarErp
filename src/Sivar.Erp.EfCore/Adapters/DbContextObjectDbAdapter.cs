@@ -1,3 +1,9 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Sivar.Erp.Services;
 using Sivar.Erp.EfCore.Context;
 using Sivar.Erp.EfCore.UnitOfWork;
@@ -15,6 +21,8 @@ using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.Modules.Security.Core;
 using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Inventory;
+using ActivityRecord = Sivar.Erp.ErpSystem.ActivityStream.ActivityRecord;
+using EfActivityRecord = Sivar.Erp.EfCore.Entities.System.ActivityRecord;
 
 namespace Sivar.Erp.EfCore.Adapters
 {
@@ -152,7 +160,7 @@ namespace Sivar.Erp.EfCore.Adapters
         // System entities
         public IList<ActivityRecord> ActivityRecords
         {
-            get => new EntityFrameworkCollection<ActivityRecord>(_dbContext.ActivityRecords.Cast<Sivar.Erp.ErpSystem.ActivityStream.ActivityRecord>().AsQueryable());
+            get => new EntityFrameworkActivityRecordCollection(_dbContext.ActivityRecords, _dbContext);
             set => throw new NotSupportedException("Setting collections is not supported in EF Core adapter");
         }
 
@@ -180,7 +188,9 @@ namespace Sivar.Erp.EfCore.Adapters
 
         public IList<SequenceDto> Sequences
         {
-            get => new EntityFrameworkCollection<SequenceDto>(_dbContext.Sequences.AsQueryable());
+            get => new EntityFrameworkCollection<SequenceDto>(
+                _dbContext.Sequences.AsQueryable(),
+                sequence => _dbContext.Sequences.Add(sequence));
             set => throw new NotSupportedException("Setting collections is not supported in EF Core adapter");
         }
 
@@ -457,5 +467,168 @@ namespace Sivar.Erp.EfCore.Adapters
         public bool Remove(T item) => GetList().Remove(item);
         public void RemoveAt(int index) => GetList().RemoveAt(index);
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    /// <summary>
+    /// Collection adapter for ActivityRecord that handles mapping between EF Core entities and domain objects
+    /// </summary>
+    public class EntityFrameworkActivityRecordCollection : IList<ActivityRecord>
+    {
+        private readonly DbSet<EfActivityRecord> _dbSet;
+        private readonly ErpDbContext _dbContext;
+        private List<ActivityRecord>? _cachedList;
+
+        public EntityFrameworkActivityRecordCollection(DbSet<EfActivityRecord> dbSet, ErpDbContext dbContext)
+        {
+            _dbSet = dbSet;
+            _dbContext = dbContext;
+        }
+
+        private List<ActivityRecord> GetList()
+        {
+            if (_cachedList == null)
+            {
+                _cachedList = _dbSet.ToList().Select(MapFromEfEntity).ToList();
+            }
+            return _cachedList;
+        }
+
+        private ActivityRecord MapFromEfEntity(EfActivityRecord efEntity)
+        {
+            var domainEntity = new ActivityRecord
+            {
+                Id = efEntity.Oid,
+                Verb = efEntity.Verb,
+                Description = string.Empty,
+                Details = string.Empty,
+                Date = DateOnly.FromDateTime(efEntity.Timestamp),
+                Time = TimeOnly.FromDateTime(efEntity.Timestamp),
+                TimeZoneId = efEntity.TimeZoneId ?? "UTC",
+                Actor = new SimpleStreamObject
+                {
+                    ObjectKey = efEntity.Actor,
+                    ObjectType = "User",
+                    DisplayName = efEntity.Actor,
+                    DisplayImage = string.Empty
+                },
+                Target = new SimpleStreamObject
+                {
+                    ObjectKey = efEntity.Target,
+                    ObjectType = "Transaction",
+                    DisplayName = efEntity.Target,
+                    DisplayImage = string.Empty
+                }
+            };
+
+            // Try to deserialize the full activity if available
+            if (!string.IsNullOrEmpty(efEntity.SerializedActivity))
+            {
+                try
+                {
+                    var deserializedActivity = JsonSerializer.Deserialize<ActivityRecord>(efEntity.SerializedActivity);
+                    if (deserializedActivity != null)
+                    {
+                        return deserializedActivity;
+                    }
+                }
+                catch
+                {
+                    // If deserialization fails, use the basic mapping above
+                }
+            }
+
+            return domainEntity;
+        }
+
+        private EfActivityRecord MapToEfEntity(ActivityRecord domainEntity)
+        {
+            return new EfActivityRecord
+            {
+                Oid = domainEntity.Id,
+                Actor = domainEntity.Actor?.ObjectKey ?? string.Empty,
+                Verb = domainEntity.Verb ?? string.Empty,
+                Target = domainEntity.Target?.ObjectKey ?? string.Empty,
+                TimeZoneId = domainEntity.TimeZoneId,
+                Timestamp = domainEntity.Date.ToDateTime(domainEntity.Time, DateTimeKind.Utc),
+                SerializedActivity = JsonSerializer.Serialize(domainEntity)
+            };
+        }
+
+        public ActivityRecord this[int index]
+        {
+            get => GetList()[index];
+            set => GetList()[index] = value;
+        }
+
+        public int Count => GetList().Count;
+        public bool IsReadOnly => false;
+
+        public void Add(ActivityRecord item)
+        {
+            var efEntity = MapToEfEntity(item);
+            _dbSet.Add(efEntity);
+            _cachedList = null; // Invalidate cache
+        }
+
+        public void Clear()
+        {
+            GetList().Clear();
+            _cachedList = null;
+        }
+
+        public bool Contains(ActivityRecord item)
+        {
+            return GetList().Contains(item);
+        }
+
+        public void CopyTo(ActivityRecord[] array, int arrayIndex)
+        {
+            GetList().CopyTo(array, arrayIndex);
+        }
+
+        public IEnumerator<ActivityRecord> GetEnumerator()
+        {
+            return GetList().GetEnumerator();
+        }
+
+        public int IndexOf(ActivityRecord item)
+        {
+            return GetList().IndexOf(item);
+        }
+
+        public void Insert(int index, ActivityRecord item)
+        {
+            GetList().Insert(index, item);
+            _cachedList = null;
+        }
+
+        public bool Remove(ActivityRecord item)
+        {
+            var result = GetList().Remove(item);
+            _cachedList = null;
+            return result;
+        }
+
+        public void RemoveAt(int index)
+        {
+            GetList().RemoveAt(index);
+            _cachedList = null;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
+
+    /// <summary>
+    /// Simple implementation of IStreamObject for basic ActivityRecord mapping
+    /// </summary>
+    public class SimpleStreamObject : IStreamObject
+    {
+        public string ObjectType { get; set; } = "Unknown";
+        public string ObjectKey { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string DisplayImage { get; set; } = string.Empty;
     }
 }
