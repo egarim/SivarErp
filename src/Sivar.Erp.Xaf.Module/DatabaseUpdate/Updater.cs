@@ -89,7 +89,7 @@ public class Updater : ModuleUpdater {
         if (tenant == null) {
             tenant = ObjectSpace.CreateObject<Tenant>();
             tenant.Name = tenantName;
-            tenant.ConnectionString = $"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog={databaseName}";
+            tenant.ConnectionString = $"XpoProvider=Postgres;Server=127.0.0.1;User ID=postgres;Password=1234567890;Database={databaseName};Encoding=UNICODE";
         }
         return tenant;
     }

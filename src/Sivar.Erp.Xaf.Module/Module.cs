@@ -33,6 +33,11 @@ public sealed class XafModule : ModuleBase {
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.Event));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.Resource));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.HCategory));
+        
+        // Add ERP Business Objects - Phase 1.1
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.BusinessEntity));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.DocumentType));
+        
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Security.SecurityModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.AuditTrail.AuditTrailModule));
