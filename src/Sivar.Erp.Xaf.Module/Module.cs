@@ -38,6 +38,13 @@ public sealed class XafModule : ModuleBase {
         AdditionalExportedTypes.Add(typeof(BusinessObjects.BusinessEntity));
         AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.DocumentType));
         
+        // Add ERP Business Objects - Phase 2.1 (Document System)
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.Document));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.DocumentLine));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.Item));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.Total));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Taxes.Tax));
+        
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Security.SecurityModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.AuditTrail.AuditTrailModule));
