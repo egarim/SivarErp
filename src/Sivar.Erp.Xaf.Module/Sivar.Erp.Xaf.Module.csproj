@@ -48,7 +48,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Sivar.Erp\Sivar.Erp.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Documents\" />
-  </ItemGroup>
 </Project>
