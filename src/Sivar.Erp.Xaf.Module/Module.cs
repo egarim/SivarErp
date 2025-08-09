@@ -55,6 +55,13 @@ public sealed class XafModule : ModuleBase {
         AdditionalExportedTypes.Add(typeof(BusinessObjects.Accounting.LedgerEntry));
         AdditionalExportedTypes.Add(typeof(BusinessObjects.Accounting.TransactionBatch));
         
+        // Add ERP Business Objects - Phase 4.1 & 4.2 (Inventory Module Integration)
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Inventory.InventoryItem));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Inventory.StockLevel));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Inventory.InventoryTransaction));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Inventory.InventoryReservation));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Inventory.InventoryLayer));
+        
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Security.SecurityModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.AuditTrail.AuditTrailModule));
