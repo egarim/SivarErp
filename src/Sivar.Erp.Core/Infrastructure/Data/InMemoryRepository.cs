@@ -29,6 +29,15 @@ namespace Sivar.Erp.Core.Infrastructure.Data
             {
                 var obj = new T();
                 _newObjects.Add(obj);
+                
+                // Initialize IEntity properties if applicable
+                if (obj is IEntity entity)
+                {
+                    entity.Id = Guid.NewGuid();
+                    entity.CreatedAt = DateTime.UtcNow;
+                    entity.UpdatedAt = DateTime.UtcNow;
+                }
+                
                 GetCollection<T>().Add(obj);
                 return obj;
             }
@@ -42,13 +51,22 @@ namespace Sivar.Erp.Core.Infrastructure.Data
         /// <returns>The object with the specified key, or null if not found</returns>
         public T? GetObjectByKey<T>(object key) where T : class
         {
-            // Assume entities have an Id property
-            var idProperty = typeof(T).GetProperty("Id");
-            if (idProperty == null)
-                throw new InvalidOperationException($"Type {typeof(T).Name} does not have an Id property");
+            lock (_lock)
+            {
+                // Try to find by Id if it's an IEntity
+                if (typeof(IEntity).IsAssignableFrom(typeof(T)) && key is Guid guidKey)
+                {
+                    return GetObjects<T>().FirstOrDefault(e => ((IEntity)e).Id == guidKey);
+                }
                 
-            return GetObjects<T>().FirstOrDefault(e => 
-                object.Equals(idProperty.GetValue(e), key));
+                // Fallback to using Id property
+                var idProperty = typeof(T).GetProperty("Id");
+                if (idProperty == null)
+                    throw new InvalidOperationException($"Type {typeof(T).Name} does not have an Id property");
+                    
+                return GetObjects<T>().FirstOrDefault(e => 
+                    object.Equals(idProperty.GetValue(e), key));
+            }
         }
         
         /// <summary>
@@ -58,7 +76,10 @@ namespace Sivar.Erp.Core.Infrastructure.Data
         /// <returns>A queryable collection of objects</returns>
         public IQueryable<T> GetObjects<T>() where T : class
         {
-            return GetCollection<T>().AsQueryable();
+            lock (_lock)
+            {
+                return GetCollection<T>().AsQueryable();
+            }
         }
         
         /// <summary>
@@ -69,7 +90,10 @@ namespace Sivar.Erp.Core.Infrastructure.Data
         /// <returns>The first object matching the criteria, or null if none found</returns>
         public T? FindObject<T>(Expression<Func<T, bool>> criteria) where T : class
         {
-            return GetObjects<T>().FirstOrDefault(criteria);
+            lock (_lock)
+            {
+                return GetObjects<T>().FirstOrDefault(criteria);
+            }
         }
         
         /// <summary>
@@ -107,12 +131,20 @@ namespace Sivar.Erp.Core.Infrastructure.Data
                 foreach (var newObj in _newObjects)
                 {
                     var type = newObj.GetType();
-                    var collectionType = typeof(List<>).MakeGenericType(type);
                     
-                    if (_collections.TryGetValue(type, out var collection))
+                    // Find all collections that this object could be in (including interfaces/base classes)
+                    var possibleCollectionTypes = GetAllAssignableTypes(type);
+                    
+                    foreach (var collectionType in possibleCollectionTypes)
                     {
-                        var removeMethod = collection.GetType().GetMethod("Remove");
-                        removeMethod?.Invoke(collection, new[] { newObj });
+                        if (_collections.TryGetValue(collectionType, out var collection))
+                        {
+                            var removeMethod = collection.GetType().GetMethod("Remove");
+                            if (removeMethod != null)
+                            {
+                                removeMethod.Invoke(collection, new[] { newObj });
+                            }
+                        }
                     }
                 }
                 
@@ -127,6 +159,44 @@ namespace Sivar.Erp.Core.Infrastructure.Data
         public bool IsModified => _newObjects.Count > 0 || _modifiedObjects.Count > 0;
         
         /// <summary>
+        /// Marks an object as modified
+        /// </summary>
+        /// <param name="obj">The object to mark as modified</param>
+        public void MarkAsModified(object obj)
+        {
+            lock (_lock)
+            {
+                if (!_newObjects.Contains(obj))
+                {
+                    _modifiedObjects.Add(obj);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Gets all types that a given type can be assigned to
+        /// </summary>
+        private IEnumerable<Type> GetAllAssignableTypes(Type type)
+        {
+            // Add the type itself
+            yield return type;
+            
+            // Add all interfaces
+            foreach (var interfaceType in type.GetInterfaces())
+            {
+                yield return interfaceType;
+            }
+            
+            // Add all base types
+            var baseType = type.BaseType;
+            while (baseType != null)
+            {
+                yield return baseType;
+                baseType = baseType.BaseType;
+            }
+        }
+        
+        /// <summary>
         /// Gets or creates a collection for the specified type
         /// </summary>
         private IList<T> GetCollection<T>() where T : class
@@ -137,13 +207,24 @@ namespace Sivar.Erp.Core.Infrastructure.Data
         }
         
         /// <summary>
+        /// Clears all data from the repository
+        /// </summary>
+        public void Clear()
+        {
+            lock (_lock)
+            {
+                _collections.Clear();
+                _newObjects.Clear();
+                _modifiedObjects.Clear();
+            }
+        }
+        
+        /// <summary>
         /// Disposes resources
         /// </summary>
         public void Dispose()
         {
-            _collections.Clear();
-            _newObjects.Clear();
-            _modifiedObjects.Clear();
+            Clear();
             GC.SuppressFinalize(this);
         }
     }
