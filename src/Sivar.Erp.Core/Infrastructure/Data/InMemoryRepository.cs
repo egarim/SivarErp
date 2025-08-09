@@ -174,6 +174,29 @@ namespace Sivar.Erp.Core.Infrastructure.Data
         }
         
         /// <summary>
+        /// Gets statistics about the repository contents
+        /// </summary>
+        /// <returns>Dictionary containing collection names and their counts</returns>
+        [Description("Gets statistics about the repository contents")]
+        public Dictionary<string, int> GetStatistics()
+        {
+            lock (_lock)
+            {
+                var stats = new Dictionary<string, int>();
+                
+                foreach (var kvp in _collections)
+                {
+                    stats[kvp.Key.Name] = kvp.Value.Count;
+                }
+                
+                stats["New Objects"] = _newObjects.Count;
+                stats["Modified Objects"] = _modifiedObjects.Count;
+                
+                return stats;
+            }
+        }
+
+        /// <summary>
         /// Gets all types that a given type can be assigned to
         /// </summary>
         private IEnumerable<Type> GetAllAssignableTypes(Type type)
@@ -201,11 +224,9 @@ namespace Sivar.Erp.Core.Infrastructure.Data
         /// </summary>
         private IList<T> GetCollection<T>() where T : class
         {
-            return (IList<T>)_collections.GetOrAdd(typeof(T), _ => 
-                Activator.CreateInstance(typeof(List<>).MakeGenericType(typeof(T))) as IList 
-                ?? new List<T>());
+            return (IList<T>)_collections.GetOrAdd(typeof(T), _ => new List<T>());
         }
-        
+
         /// <summary>
         /// Clears all data from the repository
         /// </summary>
