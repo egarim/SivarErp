@@ -1,0 +1,7 @@
+TaxCode,DocumentOperation,DebitAccountCode,CreditAccountCode,AccountDescription,IncludeInTransaction
+IVA,SalesInvoice,,21060101,IVA DEBITO FISCAL - CONTRIBUYENTES,true
+IVA,PurchaseInvoice,11070101,,CREDITO FISCAL- COMPRA LOCAL,true
+IVA,SalesCreditNote,21060101,,IVA DEBITO FISCAL - CONTRIBUYENTES,true
+IVA,PurchaseCreditNote,,11070101,CREDITO FISCAL- COMPRA LOCAL,true
+RENTA,SalesInvoice,,210608,PAGO A CUENTA RETENIDO A PROVEEDORES 1.5%,true
+RENTA,PurchaseInvoice,11070204,,IMPUESTO RETENIDO - RENTA,true

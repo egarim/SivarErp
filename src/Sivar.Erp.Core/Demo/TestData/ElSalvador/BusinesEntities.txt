@@ -1,0 +1,14 @@
+Code,Name,EntityType,TaxId,IsActive
+CL001,Customer 1,Customer,1234-123456-123-1,true
+CL002,Customer 2,Customer,1234-123456-123-2,true
+CL003,Customer 3,Customer,1234-123456-123-3,true
+CL004,International Customer 1,Customer,,true
+CL005,International Customer 2,Customer,,true
+PR001,Supplier 1,Vendor,1234-123456-123-4,true
+PR002,Supplier 2,Vendor,1234-123456-123-5,true
+PR003,Supplier 3,Vendor,1234-123456-123-6,true
+PR004,Supplier 4,Vendor,1234-123456-123-7,true
+PR005,International Supplier,Vendor,,true
+EM001,Employee 1,Employee,1234-123456-123-8,true
+EM002,Employee 2,Employee,1234-123456-123-9,true
+OT001,Other Entity,Other,1234-123456-123-0,true

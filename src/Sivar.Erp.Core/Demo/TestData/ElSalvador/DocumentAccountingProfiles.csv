@@ -1,0 +1,5 @@
+DocumentOperation,SalesAccountCode,AccountsReceivableCode,CostOfGoodsSoldAccountCode,InventoryAccountCode,CostRatio
+SalesInvoice,51010101,11030101,41010111,1105010201,0.6
+PurchaseInvoice,,21020101,,1105010201,0
+SalesCreditNote,51010101,11030101,41010111,1105010201,0.6
+PurchaseCreditNote,,21020101,,1105010201,0

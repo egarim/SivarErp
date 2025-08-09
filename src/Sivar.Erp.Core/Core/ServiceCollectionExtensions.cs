@@ -7,6 +7,7 @@ using Sivar.Erp.Core.Demo;
 using Sivar.Erp.Core.Infrastructure.Data;
 using Sivar.Erp.Core.Modules.Accounting;
 using Sivar.Erp.Core.Modules.DataImport;
+using Sivar.Erp.Core.Modules.DataImport.Importers;
 using Sivar.Erp.Core.Modules.Documents;
 using Sivar.Erp.Core.Modules.Taxes;
 
@@ -32,11 +33,14 @@ namespace Sivar.Erp.Core.Core
             // Register core services
             services.AddScoped<IRepository, InMemoryRepository>();
             
-            // Register services (will be implemented later)
+            // Register data import services
+            services.AddScoped<ICsvImportService, CsvImportService>();
+            services.AddScoped<IEntityImporter<IAccount>, AccountImporter>();
+            
+            // Register main services
             services.AddScoped<IAccountingService, AccountingService>();
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<ITaxService, TaxService>();
-            services.AddScoped<ICsvImportService, CsvImportService>();
             
             // Register logging
             services.AddLogging(builder => builder.AddConsole());
@@ -57,8 +61,11 @@ namespace Sivar.Erp.Core.Core
         {
             services.AddSivarErpCore();
             
+            // Register demo services
+            services.AddScoped<TestDataImportService>();
             services.AddScoped<ISampleDataGenerator, SampleDataGenerator>();
             
+            // Configure demo options
             services.AddOptions();
             services.Configure<DemoOptions>(options => 
             {

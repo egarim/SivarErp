@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sivar.Erp.Core.Core;
 
 namespace Sivar.Erp.Core.Demo
@@ -9,34 +10,40 @@ namespace Sivar.Erp.Core.Demo
     public class SampleDataGenerator : ISampleDataGenerator
     {
         private readonly ILogger<SampleDataGenerator> _logger;
+        private readonly TestDataImportService _testDataImportService;
+        private readonly DemoOptions _options;
         
         /// <summary>
         /// Initializes a new instance of the SampleDataGenerator class
         /// </summary>
         /// <param name="logger">The logger for diagnostic information</param>
-        public SampleDataGenerator(ILogger<SampleDataGenerator> logger)
+        /// <param name="testDataImportService">The service for importing test data</param>
+        /// <param name="options">The demo options</param>
+        public SampleDataGenerator(
+            ILogger<SampleDataGenerator> logger,
+            TestDataImportService testDataImportService,
+            IOptions<DemoOptions> options)
         {
             _logger = logger;
+            _testDataImportService = testDataImportService;
+            _options = options.Value;
         }
         
         /// <inheritdoc/>
         public async Task GenerateSampleDataAsync(IRepository repository)
         {
-            _logger.LogInformation("Generating sample data");
+            _logger.LogInformation("Generating sample data for dataset: {DataSet}", _options.TestDataSet);
             
             try
             {
-                // Import chart of accounts
-                await ImportChartOfAccountsAsync(repository);
+                // Use the test data import service to import all data
+                var results = await _testDataImportService.ImportAllTestDataAsync("SampleDataGenerator");
                 
-                // Import tax data
-                await ImportTaxDataAsync(repository);
-                
-                // Import business entities
-                await ImportBusinessEntitiesAsync(repository);
-                
-                // Import items
-                await ImportItemsAsync(repository);
+                // Log results
+                foreach (var result in results)
+                {
+                    _logger.LogInformation("Import of {Type}: {Result}", result.Key, result.Value);
+                }
                 
                 // Commit all changes
                 await repository.CommitChanges();
@@ -49,38 +56,6 @@ namespace Sivar.Erp.Core.Demo
                 repository.Rollback();
                 throw;
             }
-        }
-        
-        private async Task ImportChartOfAccountsAsync(IRepository repository)
-        {
-            _logger.LogInformation("Importing chart of accounts");
-            
-            // Will be implemented later
-            await Task.CompletedTask;
-        }
-        
-        private async Task ImportTaxDataAsync(IRepository repository)
-        {
-            _logger.LogInformation("Importing tax data");
-            
-            // Will be implemented later
-            await Task.CompletedTask;
-        }
-        
-        private async Task ImportBusinessEntitiesAsync(IRepository repository)
-        {
-            _logger.LogInformation("Importing business entities");
-            
-            // Will be implemented later
-            await Task.CompletedTask;
-        }
-        
-        private async Task ImportItemsAsync(IRepository repository)
-        {
-            _logger.LogInformation("Importing items");
-            
-            // Will be implemented later
-            await Task.CompletedTask;
         }
     }
 }
