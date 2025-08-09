@@ -4,8 +4,7 @@ using Sivar.Erp.Core.Modules.Accounting;
 using Sivar.Erp.Core.Modules.DataImport;
 using Sivar.Erp.Core.Modules.DataImport.Importers;
 using Sivar.Erp.Core.Modules.Documents;
-using Sivar.Erp.Core.Modules.Documents.Models;
-using Sivar.Erp.Core.Modules.Taxes.Models;
+using Sivar.Erp.Core.Modules.Domain.Models;
 using System.ComponentModel;
 
 namespace Sivar.Erp.Core.Demo
@@ -128,7 +127,7 @@ namespace Sivar.Erp.Core.Demo
             try
             {
                 string csvContent = await TestDataResourceManager.LoadCsvAsync("ElSalvadorTaxes.txt");
-                var result = await _csvImportService.ImportFromCsvAsync<TaxDto>(csvContent, userName);
+                var result = await _csvImportService.ImportFromCsvAsync<Sivar.Erp.Core.Modules.Domain.Models.TaxDto>(csvContent, userName);
                 
                 _logger.LogInformation("Imported {Count} taxes with {ErrorCount} errors", 
                     result.ImportedEntities.Count, result.Errors.Count);
@@ -157,7 +156,7 @@ namespace Sivar.Erp.Core.Demo
             try
             {
                 string csvContent = await TestDataResourceManager.LoadCsvAsync("BusinesEntities.txt");
-                var result = await _csvImportService.ImportFromCsvAsync<BusinessEntityDto>(csvContent, userName);
+                var result = await _csvImportService.ImportFromCsvAsync<Sivar.Erp.Core.Modules.Domain.Models.BusinessEntityDto>(csvContent, userName);
                 
                 _logger.LogInformation("Imported {Count} business entities with {ErrorCount} errors", 
                     result.ImportedEntities.Count, result.Errors.Count);
@@ -215,7 +214,7 @@ namespace Sivar.Erp.Core.Demo
             try
             {
                 string csvContent = await TestDataResourceManager.LoadCsvAsync("DocumentTypes.csv");
-                var result = await _csvImportService.ImportFromCsvAsync<DocumentTypeDto>(csvContent, userName);
+                var result = await _csvImportService.ImportFromCsvAsync<Sivar.Erp.Core.Modules.Domain.Models.DocumentTypeDto>(csvContent, userName);
                 
                 _logger.LogInformation("Imported {Count} document types with {ErrorCount} errors", 
                     result.ImportedEntities.Count, result.Errors.Count);

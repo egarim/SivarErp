@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Core.Core;
-using Sivar.Erp.Core.Modules.Accounting;
-using Sivar.Erp.Core.Modules.Accounting.Models;
-using Sivar.Erp.Core.Modules.DataImport.Importers;
+using Sivar.Erp.Core.Modules.Domain.Models;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -12,7 +10,7 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
     /// Specialized importer for chart of accounts
     /// </summary>
     [Description("Specialized importer for chart of accounts")]
-    public class AccountImporter : IEntityImporter<IAccount>
+    public class AccountImporter : IEntityImporter<AccountDto>
     {
         private readonly ILogger<AccountImporter>? _logger;
 
@@ -26,14 +24,14 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
         }
 
         /// <inheritdoc/>
-        public async Task<EntityImportResult<IAccount>> ImportAsync(
+        public async Task<EntityImportResult<AccountDto>> ImportAsync(
             IRepository repository,
             string csvContent,
             string userName)
         {
             _logger?.LogInformation("Starting account import");
             
-            var result = new EntityImportResult<IAccount>();
+            var result = new EntityImportResult<AccountDto>();
             
             try
             {
@@ -70,7 +68,7 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
                     
                     try
                     {
-                        var account = new AccountDto();
+                        var account = repository.CreateObject<AccountDto>();
                         
                         // Map fields to properties
                         for (int j = 0; j < headers.Length; j++)
@@ -90,8 +88,6 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
                         }
                         
                         // Set additional properties
-                        account.CreatedAt = DateTime.UtcNow;
-                        account.UpdatedAt = DateTime.UtcNow;
                         account.IsActive = true;
                         
                         // Add to result
@@ -108,26 +104,6 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
                 
                 if (result.Success)
                 {
-                    // Store in repository
-                    foreach (var account in result.ImportedEntities)
-                    {
-                        // No need to create new objects, they're already created
-                        var accountEntity = repository.GetObjects<AccountDto>()
-                            .FirstOrDefault(a => a.OfficialCode == account.OfficialCode);
-                            
-                        if (accountEntity == null)
-                        {
-                            // Create new account if it doesn't exist
-                            accountEntity = repository.CreateObject<AccountDto>();
-                            accountEntity.OfficialCode = account.OfficialCode;
-                            accountEntity.AccountName = account.AccountName;
-                            accountEntity.Description = account.Description;
-                            accountEntity.AccountType = account.AccountType;
-                            accountEntity.ParentAccountCode = account.ParentAccountCode;
-                            accountEntity.IsActive = account.IsActive;
-                        }
-                    }
-                    
                     await repository.CommitChanges();
                     _logger?.LogInformation("Imported {Count} accounts successfully", result.ImportedEntities.Count);
                 }
@@ -198,7 +174,7 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
                     account.OfficialCode = value;
                     break;
                 case "accounttype":
-                    if (Enum.TryParse<AccountType>(value, true, out var accountType))
+                    if (Enum.TryParse<Sivar.Erp.Core.Modules.Domain.Models.AccountType>(value, true, out var accountType))
                     {
                         account.AccountType = accountType;
                     }

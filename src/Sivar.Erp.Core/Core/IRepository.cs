@@ -44,6 +44,26 @@ namespace Sivar.Erp.Core.Core
         T? FindObject<T>(Expression<Func<T, bool>> criteria) where T : class;
         
         /// <summary>
+        /// Marks an object as modified for change tracking
+        /// </summary>
+        /// <param name="obj">The object to mark as modified</param>
+        [Description("Marks an object as modified for change tracking")]
+        void MarkAsModified(object obj);
+        
+        /// <summary>
+        /// Gets statistics about the repository contents
+        /// </summary>
+        /// <returns>Dictionary with entity type names and counts</returns>
+        [Description("Gets statistics about the repository contents")]
+        Dictionary<string, int> GetStatistics();
+        
+        /// <summary>
+        /// Clears all data from the repository
+        /// </summary>
+        [Description("Clears all data from the repository")]
+        void Clear();
+        
+        /// <summary>
         /// Commits all pending changes
         /// </summary>
         /// <returns>A task representing the asynchronous operation</returns>
