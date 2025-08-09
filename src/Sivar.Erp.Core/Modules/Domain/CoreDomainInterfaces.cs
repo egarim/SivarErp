@@ -422,29 +422,4 @@ namespace Sivar.Erp.Core.Modules.Domain
         [Description("Return operation")]
         Return = 3
     }
-
-    /// <summary>
-    /// Validation result for document operations
-    /// </summary>
-    [Description("Validation result for document operations")]
-    public class ValidationResult
-    {
-        /// <summary>
-        /// Indicates if validation was successful
-        /// </summary>
-        [Description("Indicates if validation was successful")]
-        public bool IsValid { get; set; }
-
-        /// <summary>
-        /// Collection of validation errors
-        /// </summary>
-        [Description("Collection of validation errors")]
-        public IList<string> Errors { get; set; } = new List<string>();
-
-        /// <summary>
-        /// Collection of validation warnings
-        /// </summary>
-        [Description("Collection of validation warnings")]
-        public IList<string> Warnings { get; set; } = new List<string>();
-    }
 }

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Core.Core;
 using Sivar.Erp.Core.Modules.Domain.Models;
+using Sivar.Erp.Core.Modules.Accounting;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -10,7 +11,7 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
     /// Specialized importer for chart of accounts
     /// </summary>
     [Description("Specialized importer for chart of accounts")]
-    public class AccountImporter : IEntityImporter<AccountDto>
+    public class AccountImporter : IEntityImporter<IAccount>
     {
         private readonly ILogger<AccountImporter>? _logger;
 
@@ -24,14 +25,14 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
         }
 
         /// <inheritdoc/>
-        public async Task<EntityImportResult<AccountDto>> ImportAsync(
+        public async Task<EntityImportResult<IAccount>> ImportAsync(
             IRepository repository,
             string csvContent,
             string userName)
         {
             _logger?.LogInformation("Starting account import");
             
-            var result = new EntityImportResult<AccountDto>();
+            var result = new EntityImportResult<IAccount>();
             
             try
             {
@@ -90,7 +91,7 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
                         // Set additional properties
                         account.IsActive = true;
                         
-                        // Add to result
+                        // Add to result as IAccount
                         result.ImportedEntities.Add(account);
                     }
                     catch (Exception ex)
@@ -174,7 +175,7 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
                     account.OfficialCode = value;
                     break;
                 case "accounttype":
-                    if (Enum.TryParse<Sivar.Erp.Core.Modules.Domain.Models.AccountType>(value, true, out var accountType))
+                    if (Enum.TryParse<Sivar.Erp.Core.Modules.Accounting.AccountType>(value, true, out var accountType))
                     {
                         account.AccountType = accountType;
                     }

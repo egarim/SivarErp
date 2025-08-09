@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Sivar.Erp.Core.Core;
 using Sivar.Erp.Core.Modules.Domain;
+using Sivar.Erp.Core.Modules.Accounting;
 
 namespace Sivar.Erp.Core.Modules.Domain.Models
 {
@@ -486,7 +487,7 @@ namespace Sivar.Erp.Core.Modules.Domain.Models
     /// Data transfer object implementation for Account
     /// </summary>
     [Description("Data transfer object implementation for Account")]
-    public class AccountDto : IEntity
+    public class AccountDto : IEntity, IAccount
     {
         /// <summary>
         /// Unique identifier for the entity
@@ -528,7 +529,7 @@ namespace Sivar.Erp.Core.Modules.Domain.Models
         /// Type of account
         /// </summary>
         [Description("Type of account")]
-        public AccountType AccountType { get; set; }
+        public Sivar.Erp.Core.Modules.Accounting.AccountType AccountType { get; set; }
 
         /// <summary>
         /// Parent account code for hierarchical structure

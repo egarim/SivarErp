@@ -30,7 +30,6 @@ namespace Sivar.Erp.Core.Modules.Domain
         /// Creates a successful validation result
         /// </summary>
         /// <returns>A validation result indicating success</returns>
-        [Description("Creates a successful validation result")]
         public static ValidationResult Success()
         {
             return new ValidationResult { IsValid = true };
@@ -41,7 +40,6 @@ namespace Sivar.Erp.Core.Modules.Domain
         /// </summary>
         /// <param name="error">The validation error</param>
         /// <returns>A validation result indicating failure</returns>
-        [Description("Creates a failed validation result with the specified error")]
         public static ValidationResult Failure(string error)
         {
             return new ValidationResult 
@@ -56,7 +54,6 @@ namespace Sivar.Erp.Core.Modules.Domain
         /// </summary>
         /// <param name="errors">The validation errors</param>
         /// <returns>A validation result indicating failure</returns>
-        [Description("Creates a failed validation result with multiple errors")]
         public static ValidationResult Failure(IEnumerable<string> errors)
         {
             return new ValidationResult 
