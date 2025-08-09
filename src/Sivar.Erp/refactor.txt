@@ -1,0 +1,37 @@
+﻿Refactor Plan for Sivar.ERP → Sivar.ERP.Core
+The current Sivar.ERP project fulfills its functional requirements but suffers from architectural and maintainability issues.
+To improve its structure, scalability, and performance, it will be rewritten as Sivar.ERP.Core with the following objectives:
+
+1. Architectural Principles
+Implement Dependency Injection (DI) to ensure loose coupling and improve testability.
+
+All services must be defined as interfaces to allow easy replacement, extension, or mocking.
+
+Adopt SOLID design principles to promote maintainability and extensibility.
+
+Minimize dependencies between modules to ensure modularity and flexibility.
+
+Ensure each module can be used independently without requiring other modules.
+
+2. Performance and Resource Management
+Optimize for low memory usage and fast data loading across all components.
+
+Use a data warehouse architecture as the foundation for ERP data organization.
+
+3. Localization and Internationalization
+Design the system with multi-language localization in mind to support global deployment.
+
+4. Development Standards
+Use PascalCase for naming conventions.
+
+Apply System.ComponentModel.Description attributes to classes, methods, and method parameters.
+
+Provide comprehensive documentation for all classes and public members.
+
+5. Testing and Demonstration
+Create a simple in-memory demo implementation for testing and demonstration purposes.
+
+Ensure each module has integration tests to validate functionality in isolation and in combination.
+
+6. AI Integration
+Allow modules to expose functionality for AI agents, enabling automation, intelligent assistance, and advanced analytics.
