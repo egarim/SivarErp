@@ -45,6 +45,16 @@ public sealed class XafModule : ModuleBase {
         AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.Total));
         AdditionalExportedTypes.Add(typeof(BusinessObjects.Taxes.Tax));
         
+        // Add ERP Business Objects - Phase 2.2 (Document Services Integration)
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Documents.DocumentAccountingProfile));
+        
+        // Add ERP Business Objects - Phase 3.1 (Accounting Module Integration)
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Accounting.Account));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Accounting.FiscalPeriod));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Accounting.Transaction));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Accounting.LedgerEntry));
+        AdditionalExportedTypes.Add(typeof(BusinessObjects.Accounting.TransactionBatch));
+        
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Security.SecurityModule));
         RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.AuditTrail.AuditTrailModule));
