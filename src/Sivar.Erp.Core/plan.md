@@ -13,6 +13,7 @@ This implementation plan breaks down the refactor from the legacy system `Sivar.
 
 ## 🎯 REMEMBER
 - ✅ **DOUBLE CHECK IF A CLASS, ENUM , INTERFACE OR SERVICE ALREADY EXIST BEFORE YOU CREATE IT** 
+- ✅ **ONCE IS TIME TO IMPLEMENT THE LOGIC OF THE SERVICE YOU CAN TAKE A LOOK TO THE Sivar.Erp project or the test project** 
 ---
 
 ## 🚀 Phase 1: Core Infrastructure (Week 1)
