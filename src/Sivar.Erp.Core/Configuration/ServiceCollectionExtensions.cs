@@ -8,6 +8,9 @@ using Sivar.Erp.Core.Modules.Accounting;
 using Sivar.Erp.Core.Modules.Documents;
 using Sivar.Erp.Core.Modules.Taxes;
 using Sivar.Erp.Core.Modules.DataImport;
+using Sivar.Erp.Core.Modules.DataImport.Importers;
+using Sivar.Erp.Core.Modules.Domain;
+using Sivar.Erp.Core.Modules.Domain.Models;
 using Sivar.Erp.Core.Demo;
 
 namespace Sivar.Erp.Core.Configuration
@@ -62,6 +65,14 @@ namespace Sivar.Erp.Core.Configuration
             services.AddScoped<ITaxService, TaxService>();
             services.AddScoped<IDataImportService, DataImportService>();
             services.AddScoped<ICsvImportService, CsvImportService>();
+            services.AddScoped<CsvValidationService>();
+
+            // Register specialized entity importers
+            services.AddScoped<IEntityImporter<IAccount>, AccountImporter>();
+            services.AddScoped<IEntityImporter<IBusinessEntity>, BusinessEntityImporter>();
+            services.AddScoped<IEntityImporter<ITax>, TaxImporter>();
+            services.AddScoped<IEntityImporter<ItemDto>, ItemImporter>();
+            services.AddScoped<IEntityImporter<IDocumentType>, DocumentTypeImporter>();
 
             // Register logging services
             services.AddLogging(builder =>

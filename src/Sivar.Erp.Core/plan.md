@@ -10,6 +10,9 @@ This implementation plan breaks down the refactor from the legacy system `Sivar.
 - ✅ **Embedded test data resources (no external file dependencies)**
 - ✅ **Modern architecture with dependency injection**
 
+
+## 🎯 REMEMBER
+- ✅ **DOUBLE CHECK IF A CLASS, ENUM , INTERFACE OR SERVICE ALREADY EXIST BEFORE YOU CREATE IT** 
 ---
 
 ## 🚀 Phase 1: Core Infrastructure (Week 1)

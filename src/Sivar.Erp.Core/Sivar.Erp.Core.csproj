@@ -20,4 +20,9 @@
     <EmbeddedResource Include="Demo\TestData\ElSalvador\*.txt" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Modules\Inventory\" />
+    <Folder Include="Modules\Payments\" />
+  </ItemGroup>
+
 </Project>
