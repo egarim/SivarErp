@@ -96,6 +96,55 @@ namespace Sivar.Erp.Core.Modules.Domain
     }
 
     /// <summary>
+    /// Represents an account in the chart of accounts
+    /// </summary>
+    [Description("Represents an account in the chart of accounts")]
+    public interface IAccount : IEntity
+    {
+        /// <summary>
+        /// Official account code
+        /// </summary>
+        [Description("Official account code")]
+        string OfficialCode { get; set; }
+
+        /// <summary>
+        /// Account name
+        /// </summary>
+        [Description("Account name")]
+        string AccountName { get; set; }
+
+        /// <summary>
+        /// Account description
+        /// </summary>
+        [Description("Account description")]
+        string? Description { get; set; }
+
+        /// <summary>
+        /// Type of account
+        /// </summary>
+        [Description("Type of account")]
+        AccountType AccountType { get; set; }
+
+        /// <summary>
+        /// Parent account code for hierarchical structure
+        /// </summary>
+        [Description("Parent account code for hierarchical structure")]
+        string? ParentAccountCode { get; set; }
+
+        /// <summary>
+        /// Indicates if the account is currently active
+        /// </summary>
+        [Description("Indicates if the account is currently active")]
+        bool IsActive { get; set; }
+
+        /// <summary>
+        /// Current balance of the account
+        /// </summary>
+        [Description("Current balance of the account")]
+        decimal Balance { get; set; }
+    }
+
+    /// <summary>
     /// Represents a document in the system
     /// </summary>
     [Description("Represents a document in the system")]
@@ -297,6 +346,43 @@ namespace Sivar.Erp.Core.Modules.Domain
         /// </summary>
         [Description("Credit entry")]
         Credit = 2
+    }
+
+    /// <summary>
+    /// Types of accounts in the chart of accounts
+    /// </summary>
+    [Description("Types of accounts in the chart of accounts")]
+    public enum AccountType
+    {
+        /// <summary>
+        /// Asset account
+        /// </summary>
+        [Description("Asset account")]
+        Asset = 1,
+
+        /// <summary>
+        /// Liability account
+        /// </summary>
+        [Description("Liability account")]
+        Liability = 2,
+
+        /// <summary>
+        /// Equity account
+        /// </summary>
+        [Description("Equity account")]
+        Equity = 3,
+
+        /// <summary>
+        /// Revenue account
+        /// </summary>
+        [Description("Revenue account")]
+        Revenue = 4,
+
+        /// <summary>
+        /// Expense account
+        /// </summary>
+        [Description("Expense account")]
+        Expense = 5
     }
 
     /// <summary>

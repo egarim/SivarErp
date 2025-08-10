@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using Sivar.Erp.Core.Core;
 using Sivar.Erp.Core.Modules.Domain;
-using Sivar.Erp.Core.Modules.Accounting;
 
 namespace Sivar.Erp.Core.Modules.Domain.Models
 {
@@ -529,7 +528,7 @@ namespace Sivar.Erp.Core.Modules.Domain.Models
         /// Type of account
         /// </summary>
         [Description("Type of account")]
-        public Sivar.Erp.Core.Modules.Accounting.AccountType AccountType { get; set; }
+        public AccountType AccountType { get; set; }
 
         /// <summary>
         /// Parent account code for hierarchical structure
@@ -548,43 +547,6 @@ namespace Sivar.Erp.Core.Modules.Domain.Models
         /// </summary>
         [Description("Current balance of the account")]
         public decimal Balance { get; set; }
-    }
-
-    /// <summary>
-    /// Types of accounts in the chart of accounts
-    /// </summary>
-    [Description("Types of accounts in the chart of accounts")]
-    public enum AccountType
-    {
-        /// <summary>
-        /// Asset account
-        /// </summary>
-        [Description("Asset account")]
-        Asset = 1,
-
-        /// <summary>
-        /// Liability account
-        /// </summary>
-        [Description("Liability account")]
-        Liability = 2,
-
-        /// <summary>
-        /// Equity account
-        /// </summary>
-        [Description("Equity account")]
-        Equity = 3,
-
-        /// <summary>
-        /// Revenue account
-        /// </summary>
-        [Description("Revenue account")]
-        Revenue = 4,
-
-        /// <summary>
-        /// Expense account
-        /// </summary>
-        [Description("Expense account")]
-        Expense = 5
     }
 
     /// <summary>

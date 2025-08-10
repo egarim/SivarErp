@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Sivar.Erp.Core.Modules.Domain;
+using Sivar.Erp.Core.Modules.Domain.Models;
 
 namespace Sivar.Erp.Core.Modules.Accounting
 {
@@ -89,48 +90,5 @@ namespace Sivar.Erp.Core.Modules.Accounting
         /// <returns>The created transaction</returns>
         [Description("Creates a journal entry manually")]
         Task<ITransaction> CreateJournalEntryAsync(string description, IEnumerable<ILedgerEntry> entries, DateOnly transactionDate);
-    }
-
-    /// <summary>
-    /// Represents an account balance at a specific point in time
-    /// </summary>
-    [Description("Represents an account balance at a specific point in time")]
-    public class AccountBalance
-    {
-        /// <summary>
-        /// Account code
-        /// </summary>
-        [Description("Account code")]
-        public string AccountCode { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Account name
-        /// </summary>
-        [Description("Account name")]
-        public string AccountName { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Debit balance amount
-        /// </summary>
-        [Description("Debit balance amount")]
-        public decimal DebitBalance { get; set; }
-
-        /// <summary>
-        /// Credit balance amount
-        /// </summary>
-        [Description("Credit balance amount")]
-        public decimal CreditBalance { get; set; }
-
-        /// <summary>
-        /// Net balance (debit - credit)
-        /// </summary>
-        [Description("Net balance (debit - credit)")]
-        public decimal NetBalance => DebitBalance - CreditBalance;
-
-        /// <summary>
-        /// Date as of which this balance was calculated
-        /// </summary>
-        [Description("Date as of which this balance was calculated")]
-        public DateOnly AsOfDate { get; set; }
     }
 }

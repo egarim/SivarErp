@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Core.Core;
 using Sivar.Erp.Core.Modules.Domain.Models;
-using Sivar.Erp.Core.Modules.Accounting;
+using Sivar.Erp.Core.Modules.Domain;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -175,7 +175,7 @@ namespace Sivar.Erp.Core.Modules.DataImport.Importers
                     account.OfficialCode = value;
                     break;
                 case "accounttype":
-                    if (Enum.TryParse<Sivar.Erp.Core.Modules.Accounting.AccountType>(value, true, out var accountType))
+                    if (Enum.TryParse<AccountType>(value, true, out var accountType))
                     {
                         account.AccountType = accountType;
                     }
