@@ -53,14 +53,14 @@ namespace Sivar.Erp.Core.Tests.Integration
             var userName = "TestUser";
 
             // Act - Test embedded resource loading
-            var availableResources = TestDataResourceManager.GetAvailableResources();
+            var availableResources = Sivar.Erp.Core.Modules.DataImport.TestDataResourceManager.GetAvailableResources();
             Assert.NotEmpty(availableResources);
 
             // Test loading a specific resource (if available)
             var firstResource = availableResources.FirstOrDefault();
             if (!string.IsNullOrEmpty(firstResource))
             {
-                var csvContent = await TestDataResourceManager.LoadCsvAsync(firstResource);
+                var csvContent = await Sivar.Erp.Core.Modules.DataImport.TestDataResourceManager.LoadCsvAsync(firstResource);
                 Assert.NotNull(csvContent);
                 Assert.NotEmpty(csvContent);
             }

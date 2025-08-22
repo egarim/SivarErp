@@ -145,7 +145,7 @@ namespace Sivar.Erp.Core.Modules.DataImport
             try
             {
                 // Load available resources for the data set
-                var availableFiles = Demo.TestDataResourceManager.GetAvailableResources()
+                var availableFiles = TestDataResourceManager.GetAvailableResources()
                     .Where(r => !string.IsNullOrEmpty(r))
                     .OrderBy(GetImportOrder) // Order by dependency
                     .ToList();
@@ -158,7 +158,7 @@ namespace Sivar.Erp.Core.Modules.DataImport
                     try
                     {
                         _logger.LogDebug("Loading file: {FileName}", fileName);
-                        var csvContent = await Demo.TestDataResourceManager.LoadCsvAsync(fileName);
+                        var csvContent = await TestDataResourceManager.LoadCsvAsync(fileName);
                         
                         if (string.IsNullOrWhiteSpace(csvContent))
                         {

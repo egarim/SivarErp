@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using Sivar.Erp.Core.Core;
-using Sivar.Erp.Core.Modules.DataImport.Models;
 
 namespace Sivar.Erp.Core.Modules.DataImport
 {
