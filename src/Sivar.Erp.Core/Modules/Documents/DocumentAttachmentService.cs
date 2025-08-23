@@ -289,6 +289,23 @@ namespace Sivar.Erp.Core.Modules.Documents
             await Task.CompletedTask;
         }
 
+        // Interface implementations
+        public async Task<DocumentAttachment> AttachFileAsync(Guid documentId, string fileName, byte[] fileContent, string contentType, string attachedBy)
+        {
+            using var stream = new MemoryStream(fileContent);
+            return await AttachFileAsync(documentId, stream, fileName, contentType, attachedBy);
+        }
+
+        public async Task<IEnumerable<DocumentAttachment>> GetDocumentAttachmentsAsync(Guid documentId)
+        {
+            return await GetAttachmentsAsync(documentId);
+        }
+
+        public async Task RemoveAttachmentAsync(Guid attachmentId, string removedBy)
+        {
+            await DeleteAttachmentAsync(attachmentId, removedBy);
+        }
+
         private static string ComputeChecksum(byte[] data)
         {
             using var sha256 = SHA256.Create();

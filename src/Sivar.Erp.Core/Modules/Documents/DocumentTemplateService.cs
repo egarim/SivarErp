@@ -3,6 +3,9 @@ using Sivar.Erp.Core.Infrastructure.Logging;
 using System.ComponentModel;
 using Sivar.Erp.Core.Infrastructure.Repository;
 using System.Text.Json;
+using Sivar.Erp.Core.Core;
+using Sivar.Erp.Core.Modules.BusinessEntities;
+using Sivar.Erp.Core.Modules.Domain;
 
 namespace Sivar.Erp.Core.Modules.Documents
 {
@@ -420,6 +423,25 @@ namespace Sivar.Erp.Core.Modules.Documents
         {
             // In a real implementation, this would update template in database
             await Task.CompletedTask;
+        }
+
+        // Missing interface methods
+        public async Task<IDocument> CreateFromTemplateAsync(Guid templateId, Sivar.Erp.Core.Modules.BusinessEntities.IBusinessEntity businessEntity, IDictionary<string, object>? parameters = null)
+        {
+            // TODO: Implement template creation logic
+            return new Document(); // Stub implementation
+        }
+
+        public async Task<IEnumerable<DocumentTemplate>> GetTemplatesForDocumentTypeAsync(string documentType)
+        {
+            // TODO: Implement get templates logic
+            return new List<DocumentTemplate>();
+        }
+
+        public async Task<DocumentTemplate> SaveTemplateAsync(DocumentTemplate template, string savedBy)
+        {
+            // TODO: Implement save template logic
+            return template;
         }
     }
 }

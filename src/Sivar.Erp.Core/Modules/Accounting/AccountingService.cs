@@ -274,7 +274,7 @@ namespace Sivar.Erp.Core.Modules.Accounting
         /// <param name="transaction">Transaction to validate</param>
         /// <returns>Validation result</returns>
         [Description("Validates a transaction before posting")]
-        public async Task<Sivar.Erp.Core.Modules.Domain.ValidationResult> ValidateTransactionAsync(ITransaction transaction)
+        public async Task<ValidationResult> ValidateTransactionAsync(ITransaction transaction)
         {
             var result = new Sivar.Erp.Core.Modules.Domain.ValidationResult();
 
