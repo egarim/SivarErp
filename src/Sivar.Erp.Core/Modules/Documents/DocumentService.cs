@@ -287,6 +287,9 @@ namespace Sivar.Erp.Core.Modules.Documents
             _logger.LogInformation("Cancelling document {DocumentNumber} by user {UserName}: {Reason}", 
                 document.DocumentNumber, userName, reason);
 
+            // Store original status for audit
+            var originalStatus = document.Status;
+
             // Check if document can be cancelled
             if (document.Status == DocumentStatus.Cancelled)
             {
@@ -307,8 +310,12 @@ namespace Sivar.Erp.Core.Modules.Documents
                 _repository.MarkAsModified(documentDto);
             }
 
-            // TODO: In a full implementation, we would store the cancellation reason and user
-            // This could be done through an audit log or document history table
+            // Log cancellation audit trail (simplified approach)
+            _logger.LogInformation("Document cancellation audit: DocumentNumber={DocumentNumber}, " +
+                "PreviousStatus={PreviousStatus}, NewStatus={NewStatus}, " +
+                "CancelledBy={UserName}, Reason={Reason}, Timestamp={Timestamp}",
+                document.DocumentNumber, originalStatus, DocumentStatus.Cancelled, 
+                userName, reason, DateTime.UtcNow);
 
             await _repository.CommitChanges();
 

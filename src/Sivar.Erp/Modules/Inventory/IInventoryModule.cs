@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Modules.Inventory.Reports;
+using Sivar.Erp.Core.Modules.Inventory;
 
 namespace Sivar.Erp.Modules.Inventory
 {
     /// <summary>
-    /// Main interface for the inventory module
+    /// Main interface for the comprehensive inventory module
     /// </summary>
     public interface IInventoryModule
     {
@@ -26,6 +27,22 @@ namespace Sivar.Erp.Modules.Inventory
         /// Gets the kardex service
         /// </summary>
         IKardexService KardexService { get; }
+
+        // Advanced Services (NEW)
+        /// <summary>
+        /// Advanced inventory analytics service
+        /// </summary>
+        IInventoryAnalyticsService AnalyticsService { get; }
+
+        /// <summary>
+        /// Multi-location inventory transfer service
+        /// </summary>
+        IInventoryTransferService TransferService { get; }
+
+        /// <summary>
+        /// Automated cycle counting service
+        /// </summary>
+        ICycleCountingService CycleCountingService { get; }
         
         /// <summary>
         /// Initializes the inventory module and creates necessary sequences
@@ -164,5 +181,128 @@ namespace Sivar.Erp.Modules.Inventory
         Task<InventoryValuationReportDto> GetInventoryValuationAsync(
             DateOnly asOfDate,
             string warehouseCode = null);
+
+        // Advanced Analytics Operations (NEW)
+        /// <summary>
+        /// Gets comprehensive inventory turnover analysis
+        /// </summary>
+        Task<InventoryTurnoverReport> GetTurnoverAnalysisAsync(TurnoverAnalysisParameters parameters);
+
+        /// <summary>
+        /// Gets ABC classification analysis
+        /// </summary>
+        Task<ABCClassificationReport> GetABCClassificationAsync(ABCClassificationParameters parameters);
+
+        /// <summary>
+        /// Gets slow-moving inventory analysis
+        /// </summary>
+        Task<SlowMovingInventoryReport> GetSlowMovingAnalysisAsync(SlowMovingAnalysisParameters parameters);
+
+        /// <summary>
+        /// Gets inventory aging analysis
+        /// </summary>
+        Task<InventoryAgingReport> GetAgingAnalysisAsync(AgingAnalysisParameters parameters);
+
+        /// <summary>
+        /// Gets demand forecasting analysis
+        /// </summary>
+        Task<InventoryForecastReport> GetDemandForecastAsync(DemandForecastParameters parameters);
+
+        /// <summary>
+        /// Gets stock optimization recommendations
+        /// </summary>
+        Task<StockOptimizationReport> GetStockOptimizationAsync(StockOptimizationParameters parameters);
+
+        /// <summary>
+        /// Gets comprehensive performance metrics
+        /// </summary>
+        Task<InventoryPerformanceMetrics> GetPerformanceMetricsAsync(PerformanceMetricsParameters parameters);
+
+        /// <summary>
+        /// Gets real-time inventory dashboard
+        /// </summary>
+        Task<InventoryDashboard> GetInventoryDashboardAsync(DashboardParameters parameters);
+
+        // Multi-Location Transfer Operations (NEW)
+        /// <summary>
+        /// Creates a new transfer request between locations
+        /// </summary>
+        Task<TransferRequest> CreateTransferRequestAsync(CreateTransferRequestData request);
+
+        /// <summary>
+        /// Approves a pending transfer request
+        /// </summary>
+        Task<TransferApprovalResult> ApproveTransferAsync(string transferId, TransferApprovalData approval);
+
+        /// <summary>
+        /// Executes an approved transfer
+        /// </summary>
+        Task<TransferExecutionResult> ExecuteTransferAsync(string transferId, TransferExecutionData execution);
+
+        /// <summary>
+        /// Cancels a pending transfer
+        /// </summary>
+        Task<TransferCancellationResult> CancelTransferAsync(string transferId, TransferCancellationData cancellation);
+
+        /// <summary>
+        /// Gets transfer status for multiple transfers
+        /// </summary>
+        Task<List<TransferStatusUpdate>> GetTransferStatusAsync(List<string> transferIds);
+
+        /// <summary>
+        /// Gets transfer history with filtering options
+        /// </summary>
+        Task<List<TransferHistoryRecord>> GetTransferHistoryAsync(TransferHistoryQuery query);
+
+        /// <summary>
+        /// Gets pending transfers requiring action
+        /// </summary>
+        Task<List<PendingTransfer>> GetPendingTransfersAsync(PendingTransfersQuery query);
+
+        /// <summary>
+        /// Processes multiple transfers in bulk
+        /// </summary>
+        Task<BulkTransferResult> ProcessBulkTransferAsync(BulkTransferRequest request);
+
+        // Cycle Counting Operations (NEW)
+        /// <summary>
+        /// Creates a new cycle count schedule
+        /// </summary>
+        Task<CycleCountSchedule> CreateCycleCountScheduleAsync(CycleCountScheduleRequest request);
+
+        /// <summary>
+        /// Generates cycle count tasks for a schedule
+        /// </summary>
+        Task<List<CycleCountTask>> GenerateCycleCountTasksAsync(string scheduleId, DateTime countDate);
+
+        /// <summary>
+        /// Records the results of a cycle count
+        /// </summary>
+        Task<CycleCountResult> RecordCycleCountAsync(string taskId, CycleCountData countData);
+
+        /// <summary>
+        /// Processes discrepancies found during counting
+        /// </summary>
+        Task<DiscrepancyResolution> ProcessDiscrepancyAsync(string countId, DiscrepancyResolutionData resolution);
+
+        /// <summary>
+        /// Gets cycle count accuracy metrics
+        /// </summary>
+        Task<CycleCountAccuracyMetrics> GetAccuracyMetricsAsync(AccuracyMetricsParameters parameters);
+
+        /// <summary>
+        /// Gets outstanding cycle counts requiring completion
+        /// </summary>
+        Task<List<OutstandingCycleCount>> GetOutstandingCountsAsync(OutstandingCountsQuery query);
+
+        /// <summary>
+        /// Gets variance analysis report
+        /// </summary>
+        Task<CycleCountVarianceReport> GetVarianceReportAsync(VarianceReportParameters parameters);
+
+        /// <summary>
+        /// Automatically adjusts inventory based on count results
+        /// </summary>
+        Task<InventoryAdjustmentResult> AutoAdjustInventoryAsync(string countId, AutoAdjustmentRules rules);
     }
 }

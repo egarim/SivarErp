@@ -248,5 +248,262 @@ namespace Sivar.Erp.Core.Infrastructure.Data
             Clear();
             GC.SuppressFinalize(this);
         }
+
+        // Additional methods for enhanced Repository pattern support
+
+        /// <summary>
+        /// Gets an object by its primary key asynchronously
+        /// </summary>
+        /// <typeparam name="T">The type of object to retrieve</typeparam>
+        /// <param name="key">The primary key value</param>
+        /// <returns>The object if found, null otherwise</returns>
+        public async Task<T?> GetByKeyAsync<T>(object key) where T : class
+        {
+            // Simulate async operation
+            await Task.Yield();
+            return GetObjectByKey<T>(key);
+        }
+
+        /// <summary>
+        /// Gets objects matching the specified predicate
+        /// </summary>
+        /// <typeparam name="T">The type of objects to retrieve</typeparam>
+        /// <param name="predicate">The filtering predicate</param>
+        /// <returns>A queryable collection of matching objects</returns>
+        public IQueryable<T> GetObjects<T>(Expression<Func<T, bool>> predicate) where T : class
+        {
+            lock (_lock)
+            {
+                return GetCollection<T>().AsQueryable().Where(predicate);
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing object
+        /// </summary>
+        /// <typeparam name="T">The type of object to update</typeparam>
+        /// <param name="obj">The object to update</param>
+        public void UpdateObject<T>(T obj) where T : class
+        {
+            MarkAsModified(obj);
+        }
+
+        /// <summary>
+        /// Deletes an object
+        /// </summary>
+        /// <typeparam name="T">The type of object to delete</typeparam>
+        /// <param name="obj">The object to delete</param>
+        public void DeleteObject<T>(T obj) where T : class
+        {
+            lock (_lock)
+            {
+                var collection = GetCollection<T>();
+                collection.Remove(obj);
+                _newObjects.Remove(obj);
+                _modifiedObjects.Remove(obj);
+            }
+        }
+
+        /// <summary>
+        /// Gets multiple objects by their keys in a single operation
+        /// </summary>
+        /// <typeparam name="T">The type of objects to retrieve</typeparam>
+        /// <param name="keys">The collection of primary keys</param>
+        /// <returns>A collection of objects matching the keys</returns>
+        public async Task<IEnumerable<T>> GetBatchAsync<T>(IEnumerable<object> keys) where T : class
+        {
+            await Task.Yield();
+            
+            lock (_lock)
+            {
+                var results = new List<T>();
+                foreach (var key in keys)
+                {
+                    var obj = GetObjectByKey<T>(key);
+                    if (obj != null)
+                        results.Add(obj);
+                }
+                return results;
+            }
+        }
+
+        /// <summary>
+        /// Inserts multiple objects in a single operation
+        /// </summary>
+        /// <typeparam name="T">The type of objects to insert</typeparam>
+        /// <param name="objects">The objects to insert</param>
+        public async Task BulkInsertAsync<T>(IEnumerable<T> objects) where T : class
+        {
+            await Task.Yield();
+            
+            lock (_lock)
+            {
+                var collection = GetCollection<T>();
+                foreach (var obj in objects)
+                {
+                    // Initialize IEntity properties if applicable
+                    if (obj is IEntity entity)
+                    {
+                        entity.Id = Guid.NewGuid();
+                        entity.CreatedAt = DateTime.UtcNow;
+                        entity.UpdatedAt = DateTime.UtcNow;
+                    }
+                    
+                    collection.Add(obj);
+                    _newObjects.Add(obj);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates multiple objects in a single operation
+        /// </summary>
+        /// <typeparam name="T">The type of objects to update</typeparam>
+        /// <param name="objects">The objects to update</param>
+        public async Task BulkUpdateAsync<T>(IEnumerable<T> objects) where T : class
+        {
+            await Task.Yield();
+            
+            lock (_lock)
+            {
+                foreach (var obj in objects)
+                {
+                    MarkAsModified(obj);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Saves all pending changes to the repository
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation</returns>
+        public async Task SaveChangesAsync()
+        {
+            await CommitChanges();
+        }
+
+        /// <summary>
+        /// Begins a new transaction for data consistency
+        /// </summary>
+        /// <returns>A repository transaction</returns>
+        public IRepositoryTransaction BeginTransaction()
+        {
+            return new InMemoryRepositoryTransaction(this);
+        }
+
+        /// <summary>
+        /// Gets the total count of objects of the specified type
+        /// </summary>
+        /// <typeparam name="T">The type of objects to count</typeparam>
+        /// <returns>The total count of objects</returns>
+        public async Task<int> GetCountAsync<T>() where T : class
+        {
+            await Task.Yield();
+            
+            lock (_lock)
+            {
+                return GetCollection<T>().Count;
+            }
+        }
+
+        /// <summary>
+        /// Checks if any objects of the specified type exist matching the predicate
+        /// </summary>
+        /// <typeparam name="T">The type of objects to check</typeparam>
+        /// <param name="predicate">The filtering predicate</param>
+        /// <returns>True if any objects exist, false otherwise</returns>
+        public async Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class
+        {
+            await Task.Yield();
+            
+            lock (_lock)
+            {
+                return GetCollection<T>().AsQueryable().Any(predicate);
+            }
+        }
+
+        /// <summary>
+        /// Clears the cache for the specified type
+        /// </summary>
+        /// <typeparam name="T">The type to clear cache for</typeparam>
+        public void ClearCache<T>() where T : class
+        {
+            lock (_lock)
+            {
+                if (_collections.ContainsKey(typeof(T)))
+                {
+                    _collections[typeof(T)].Clear();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clears all caches
+        /// </summary>
+        public void ClearAllCaches()
+        {
+            Clear();
+        }
+    }
+
+    /// <summary>
+    /// In-memory implementation of repository transaction
+    /// </summary>
+    internal class InMemoryRepositoryTransaction : IRepositoryTransaction
+    {
+        private readonly InMemoryRepository _repository;
+        private bool _isCompleted;
+        private bool _disposed;
+
+        public InMemoryRepositoryTransaction(InMemoryRepository repository)
+        {
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the transaction has been completed
+        /// </summary>
+        public bool IsCompleted => _isCompleted;
+
+        /// <summary>
+        /// Commits the transaction asynchronously
+        /// </summary>
+        public async Task CommitAsync()
+        {
+            if (_isCompleted || _disposed)
+                throw new InvalidOperationException("Transaction has already been completed or disposed");
+
+            await _repository.CommitChanges();
+            _isCompleted = true;
+        }
+
+        /// <summary>
+        /// Rolls back the transaction asynchronously
+        /// </summary>
+        public async Task RollbackAsync()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(InMemoryRepositoryTransaction));
+
+            await Task.Run(() => _repository.Rollback());
+            _isCompleted = true;
+        }
+
+        /// <summary>
+        /// Disposes the transaction
+        /// </summary>
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                if (!_isCompleted)
+                {
+                    // Auto-rollback if not committed
+                    _repository.Rollback();
+                }
+                _disposed = true;
+            }
+            GC.SuppressFinalize(this);
+        }
     }
 }

@@ -1,0 +1,47 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Development": "Debug",
+      "Production": "Warning",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information",
+      "System": "Warning",
+      "Sivar.Erp": "Information"
+    },
+    "FilePath": "logs/sivar-erp-.log",
+    "Seq": {
+      "ServerUrl": "http://localhost:5341",
+      "ApiKey": "",
+      "Enabled": true
+    }
+  },
+  "SerilogSettings": {
+    "Console": {
+      "Enabled": true,
+      "OutputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
+    },
+    "File": {
+      "Enabled": true,
+      "RollingInterval": "Day",
+      "RetainedFileCountLimit": 30,
+      "OutputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+    },
+    "StructuredFile": {
+      "Enabled": true,
+      "Format": "CompactJson",
+      "RollingInterval": "Day",
+      "RetainedFileCountLimit": 30
+    },
+    "Debug": {
+      "Enabled": true,
+      "EnabledInProduction": false
+    },
+    "Seq": {
+      "Enabled": true,
+      "BufferBaseFilename": "logs/seq-buffer",
+      "BatchingPeriod": "00:00:02",
+      "QueueSizeLimit": 1000
+    }
+  }
+}

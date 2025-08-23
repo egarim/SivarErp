@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Sivar.Erp.Core.Core;
 using Sivar.Erp.Core.Modules.Domain;
 using Sivar.Erp.Core.Modules.Domain.Models;
+using System.Diagnostics;
 
 namespace Sivar.Erp.Core.Modules.Accounting
 {
@@ -34,7 +35,7 @@ namespace Sivar.Erp.Core.Modules.Accounting
         /// <returns>A transaction ready for posting</returns>
         [Description("Creates a transaction from a document")]
         public async Task<ITransaction> CreateTransactionAsync(IDocument document, string? description = null)
-        {
+        {            
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
 

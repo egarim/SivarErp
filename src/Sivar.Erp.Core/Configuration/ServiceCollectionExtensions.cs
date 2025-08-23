@@ -74,6 +74,9 @@ namespace Sivar.Erp.Core.Configuration
             services.AddScoped<IEntityImporter<ItemDto>, ItemImporter>();
             services.AddScoped<IEntityImporter<IDocumentType>, DocumentTypeImporter>();
 
+            // Phase 3 services will be registered in a separate extension method
+            // TODO: Add Phase 3 service registration after namespace issues are resolved
+
             // Register logging services
             services.AddLogging(builder =>
             {
