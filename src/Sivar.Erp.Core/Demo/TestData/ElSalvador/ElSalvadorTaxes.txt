@@ -1,5 +1,0 @@
-Code,Name,Description,Rate,Type,ApplicationLevel,IsActive
-IVA,IVA,Impuesto al Valor Agregado,0.13,VAT,Line,true
-RENTA,Retención de Renta,Retención del 10% de ISR,0.10,WithholdingTax,Document,true
-IVA_EXPORTACION,IVA Exportación,IVA para exportaciones,0.00,VAT,Line,true
-PERCEPCION,Percepción IVA,Percepción del 1% de IVA,0.01,WithholdingTax,Document,true

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sivar.Erp.Core.Domain\Sivar.Erp.Core.Domain.csproj" />
+    <ProjectReference Include="..\Sivar.Erp.Core.Shared\Sivar.Erp.Core.Shared.csproj" />
+    <ProjectReference Include="..\Sivar.Erp.Core.Infrastructure\Sivar.Erp.Core.Infrastructure.csproj" />
+    <ProjectReference Include="..\Sivar.Erp.Core.Application\Sivar.Erp.Core.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

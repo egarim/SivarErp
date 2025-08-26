@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Events;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Sivar.Erp.Core.Infrastructure.Logging

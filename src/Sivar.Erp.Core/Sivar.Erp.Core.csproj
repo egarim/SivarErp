@@ -24,6 +24,8 @@
     <PackageReference Include="Serilog.Sinks.Seq" Version="6.0.0" />
     <PackageReference Include="Serilog.Formatting.Compact" Version="2.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     
     <!-- OpenTelemetry Dependencies -->
     <PackageReference Include="OpenTelemetry" Version="1.9.0" />
@@ -44,11 +46,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Demo\TestData\ElSalvador\*.csv" />
     <EmbeddedResource Include="Demo\TestData\ElSalvador\*.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Modules\Inventory\" />
-    <Folder Include="Modules\Payments\" />
   </ItemGroup>
 
 </Project>

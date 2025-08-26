@@ -1,9 +1,0 @@
-Code,Name,IsEnabled,DocumentOperation
-FCF,Factura de Consumidor Final,true,SalesInvoice
-CCF,Comprobante de Crédito Fiscal,true,SalesInvoice
-NC,Nota de Crédito,true,SalesCreditNote
-ND,Nota de Débito,true,SalesDebitNote
-FEX,Factura de Exportación,true,SalesInvoice
-PIF,Purchase Invoice,true,PurchaseInvoice
-PNC,Purchase Credit Note,true,PurchaseCreditNote
-PND,Purchase Debit Note,true,PurchaseDebitNote

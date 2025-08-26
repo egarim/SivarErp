@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sivar.Erp.Core.Domain\Sivar.Erp.Core.Domain.csproj" />
+    <ProjectReference Include="..\Sivar.Erp.Core.Infrastructure\Sivar.Erp.Core.Infrastructure.csproj" />
+    <ProjectReference Include="..\Sivar.Erp.Core.Shared\Sivar.Erp.Core.Shared.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
