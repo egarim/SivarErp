@@ -112,8 +112,7 @@ namespace Sivar.Erp.Tests.Infrastructure
             services.AddTransient<IDocumentTypeImportExportService, DocumentTypeImportExportService>();
             services.AddTransient<IBusinessEntityImportExportService, BusinessEntityImportExportService>();
 
-            services.AddTransient<IItemImportExportService>(provider =>
-                new ItemImportExportService(provider.GetRequiredService<ItemValidator>()));
+            services.AddTransient<IItemImportExportService, ItemImportExportService>();
 
             services.AddTransient<IGroupMembershipImportExportService>(provider =>
                 new GroupMembershipImportExportService(provider.GetRequiredService<GroupMembershipValidator>())); services.AddTransient<IDocumentTotalsService>(sp =>
