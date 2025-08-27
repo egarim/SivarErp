@@ -1,4 +1,5 @@
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.ErpSystem.TimeService;
 using System;
 using System.Collections.Generic;

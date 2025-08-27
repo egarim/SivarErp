@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 
 namespace Sivar.Erp.Services.Documents
 {

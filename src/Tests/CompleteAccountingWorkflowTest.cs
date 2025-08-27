@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Modules.Security;
@@ -16,6 +15,7 @@ using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
 using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Services;
 using Sivar.Erp.Modules.Inventory;
 using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Payments.Services;
@@ -24,12 +24,6 @@ using Sivar.Erp.Services.Accounting.BalanceCalculators;
 using Sivar.Erp.Services.Accounting.FiscalPeriods;
 using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Services.Documents;
-
-// Type aliases to resolve conflicts between old and new namespaces
-using NewLineDto = Sivar.Erp.Modules.Documents.Application.DTOs.LineDto;
-using NewTotalDto = Sivar.Erp.Modules.Documents.Application.DTOs.TotalDto;
-using NewDocumentTypeDto = Sivar.Erp.Modules.Documents.Application.DTOs.DocumentTypeDto;
-using NewDocumentAccountingProfileDto = Sivar.Erp.Modules.Documents.Application.DTOs.DocumentAccountingProfileDto;
 using Sivar.Erp.Services.ImportExport;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
@@ -190,7 +184,7 @@ namespace Sivar.Erp.Tests
                 results.Add($"✓ Purchase document has {purchaseDocument.DocumentTotals.Count} totals:");
                 foreach (var total in purchaseDocument.DocumentTotals)
                 {
-                    var totalDto = total as NewTotalDto;
+                    var totalDto = total as TotalDto;
                     var concept = total?.Concept ?? "NULL";
                     var totalAmount = total?.Total.ToString("F2") ?? "NULL";
                     results.Add($"   - {concept}: ${totalAmount} " +
@@ -246,7 +240,7 @@ namespace Sivar.Erp.Tests
                 results.Add($"✓ Sales document has {salesDocument.DocumentTotals.Count} totals:");
                 foreach (var total in salesDocument.DocumentTotals)
                 {
-                    var totalDto = total as NewTotalDto;
+                    var totalDto = total as TotalDto;
                     results.Add($"   - {total.Concept}: ${total.Total:F2} " +
                         $"(Debit: {totalDto?.DebitAccountCode ?? "N/A"}, " +
                         $"Credit: {totalDto?.CreditAccountCode ?? "N/A"}, " +
@@ -471,7 +465,7 @@ namespace Sivar.Erp.Tests
             foreach (var profile in importedProfiles)
             {
                 // Convert old DTO to new DTO
-                var newProfile = new NewDocumentAccountingProfileDto
+                var newProfile = new DocumentAccountingProfileDto
                 {
                     DocumentOperation = profile.DocumentOperation,
                     SalesAccountCode = profile.SalesAccountCode,
@@ -573,7 +567,7 @@ namespace Sivar.Erp.Tests
             _documentTotalsService = new DocumentTotalsService(_objectDb, dateTimeService, loggerDocumentTotals);
 
             // Create a default sales invoice accounting profile
-            var salesInvoiceProfile = new NewDocumentAccountingProfileDto
+            var salesInvoiceProfile = new DocumentAccountingProfileDto
             {
                 DocumentOperation = "SalesInvoice",
                 SalesAccountCode = "SALES_PRODUCT_1",
@@ -690,7 +684,7 @@ namespace Sivar.Erp.Tests
 
             if (item1 != null)
             {
-                var line1 = new NewLineDto
+                var line1 = new LineDto
                 {
                     LineNumber = 1,
                     Item = item1 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
@@ -703,7 +697,7 @@ namespace Sivar.Erp.Tests
 
             if (item2 != null)
             {
-                var line2 = new NewLineDto
+                var line2 = new LineDto
                 {
                     LineNumber = 2,
                     Item = item2 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
@@ -744,7 +738,7 @@ namespace Sivar.Erp.Tests
             if (documentType == null)
             {
                 // If no PIF document type found, create a generic purchase type
-                documentType = new NewDocumentTypeDto { Code = "PIF", Name = "Purchase Invoice" };
+                documentType = new DocumentTypeDto { Code = "PIF", Name = "Purchase Invoice" };
             }
 
             // For now, we'll bypass the casting issue by creating a simple mock document type
@@ -775,7 +769,7 @@ namespace Sivar.Erp.Tests
 
             if (item1 != null)
             {
-                var line1 = new NewLineDto
+                var line1 = new LineDto
                 {
                     LineNumber = 1,
                     Item = item1 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
@@ -788,7 +782,7 @@ namespace Sivar.Erp.Tests
 
             if (item2 != null)
             {
-                var line2 = new NewLineDto
+                var line2 = new LineDto
                 {
                     LineNumber = 2,
                     Item = item2 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
@@ -825,7 +819,7 @@ namespace Sivar.Erp.Tests
                 _taxAccountingService!);
 
             // Calculate line taxes first
-            foreach (var line in document.Lines.OfType<NewLineDto>())
+            foreach (var line in document.Lines.OfType<LineDto>())
             {
                 _taxCalculator.CalculateLineTaxes(line);
             }
@@ -1222,7 +1216,7 @@ namespace Sivar.Erp.Tests
                 var itemsProcessed = new HashSet<string>();
                 
                 // Process purchase document items
-                foreach (var line in purchaseDocument.Lines.OfType<NewLineDto>())
+                foreach (var line in purchaseDocument.Lines.OfType<LineDto>())
                 {
                     if (line.Item != null && !itemsProcessed.Contains(line.Item.Code))
                     {
@@ -1264,9 +1258,9 @@ namespace Sivar.Erp.Tests
 
                 foreach (var itemCode in itemsProcessed)
                 {
-                    var purchaseLine = purchaseDocument.Lines.OfType<NewLineDto>()
+                    var purchaseLine = purchaseDocument.Lines.OfType<LineDto>()
                         .FirstOrDefault(l => l.Item?.Code == itemCode);
-                    var salesLine = salesDocument.Lines.OfType<NewLineDto>()
+                    var salesLine = salesDocument.Lines.OfType<LineDto>()
                         .FirstOrDefault(l => l.Item?.Code == itemCode);
 
                     if (purchaseLine != null && salesLine != null)
@@ -1331,9 +1325,9 @@ namespace Sivar.Erp.Tests
             results.Add("Date       | Ref Document | Description           | In Qty | In Value | Out Qty | Out Value | Balance Qty | Balance Value | Avg Cost");
             results.Add(new string('-', 80));
 
-            var purchaseLine = purchaseDocument.Lines.OfType<NewLineDto>()
+            var purchaseLine = purchaseDocument.Lines.OfType<LineDto>()
                 .FirstOrDefault(l => l.Item?.Code == item.Code);
-            var salesLine = salesDocument.Lines.OfType<NewLineDto>()
+            var salesLine = salesDocument.Lines.OfType<LineDto>()
                 .FirstOrDefault(l => l.Item?.Code == item.Code);
 
             decimal runningQty = 0;

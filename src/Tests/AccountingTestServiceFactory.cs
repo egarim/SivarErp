@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;

@@ -1,13 +1,13 @@
 
 using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Modules.Documents.Core.Entities;
-using NewTotalDto = Sivar.Erp.Modules.Documents.Application.DTOs.TotalDto;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Modules.Documents.Services
 {
     /// <summary>
     /// Generates transactions directly from document totals with accounting information
@@ -45,11 +45,11 @@ namespace Sivar.Erp.Documents
             var entries = new List<LedgerEntryDto>();
 
             // Process all totals that have accounting information
-            foreach (var total in document.DocumentTotals.Where(t => t is NewTotalDto dto &&
+            foreach (var total in document.DocumentTotals.Where(t => t is TotalDto dto &&
                 (dto.IncludeInTransaction ||
                 (!string.IsNullOrEmpty(dto.DebitAccountCode) || !string.IsNullOrEmpty(dto.CreditAccountCode)))))
             {
-                var totalDto = total as NewTotalDto;
+                var totalDto = total as TotalDto;
                 if (totalDto == null) continue;
 
                 // Create debit entry if account code is specified

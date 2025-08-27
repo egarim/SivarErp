@@ -1,4 +1,4 @@
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
