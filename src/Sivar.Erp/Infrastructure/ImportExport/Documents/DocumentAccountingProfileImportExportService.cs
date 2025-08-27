@@ -6,13 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
+using Sivar.Erp.Core.Contracts.ImportExport;
+using Sivar.Erp.Core.Contracts;
 
 namespace Sivar.Erp.Infrastructure.ImportExport.Documents
 {
     /// <summary>
-    /// Service for importing and exporting document accounting profiles from/to CSV format
+    /// Infrastructure implementation of document accounting profile import/export service using Core.Contracts interface
     /// </summary>
-    public class DocumentAccountingProfileImportExportService : IDocumentAccountingProfileImportExportService
+    public class DocumentAccountingProfileImportExportService : Core.Contracts.ImportExport.IDocumentAccountingProfileImportExportService
     {
         private readonly ILogger<DocumentAccountingProfileImportExportService> _logger;
 
@@ -27,7 +29,7 @@ namespace Sivar.Erp.Infrastructure.ImportExport.Documents
         /// <param name="csvContent">Content of the CSV file as a string</param>
         /// <param name="userName">User performing the operation</param>
         /// <returns>Collection of imported profiles and any validation errors</returns>
-        public async Task<(IEnumerable<DocumentAccountingProfileDto> ImportedProfiles, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        public async Task<(IList<IDocumentAccountingProfile> ImportedProfiles, IList<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
             var profiles = new List<DocumentAccountingProfileDto>();
             var errors = new List<string>();
@@ -40,7 +42,7 @@ namespace Sivar.Erp.Infrastructure.ImportExport.Documents
                 if (header == null)
                 {
                     errors.Add("CSV file is empty or invalid.");
-                    return (profiles, errors);
+                    return (profiles.Cast<IDocumentAccountingProfile>().ToList(), errors);
                 }
 
                 // Validate header
@@ -60,7 +62,7 @@ namespace Sivar.Erp.Infrastructure.ImportExport.Documents
 
                 if (errors.Any())
                 {
-                    return (profiles, errors);
+                    return (profiles.Cast<IDocumentAccountingProfile>().ToList(), errors);
                 }
 
                 // Process rows
@@ -139,7 +141,7 @@ namespace Sivar.Erp.Infrastructure.ImportExport.Documents
                 _logger.LogError(ex, "Error importing document accounting profiles from CSV");
             }
 
-            return (profiles, errors);
+            return (profiles.Cast<IDocumentAccountingProfile>().ToList(), errors);
         }
 
         /// <summary>
@@ -147,7 +149,7 @@ namespace Sivar.Erp.Infrastructure.ImportExport.Documents
         /// </summary>
         /// <param name="profiles">Profiles to export</param>
         /// <returns>CSV content as a string</returns>
-        public async Task<string> ExportToCsvAsync(IEnumerable<DocumentAccountingProfileDto> profiles)
+        public async Task<string> ExportToCsvAsync(IList<IDocumentAccountingProfile> profiles)
         {
             // Use TaskCompletionSource to make this method truly async
             var tcs = new TaskCompletionSource<string>();

@@ -1,8 +1,10 @@
 using NUnit.Framework;
 using Sivar.Erp.Infrastructure.ImportExport.Documents;
+using Sivar.Erp.Infrastructure.ImportExport.Inventory;
 using Sivar.Erp.Modules;
 using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using Sivar.Erp.Modules.ImportExport;
+using Sivar.Erp.Core.Contracts.ImportExport;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +19,7 @@ namespace Tests.Modules
         private ITaxImportExportService _taxImportService;
         private ITaxGroupImportExportService _taxGroupImportService;
         private IBusinessEntityImportExportService _businessEntityImportService;
-        private IItemImportExportService _itemImportService;
+        private Sivar.Erp.Core.Contracts.ImportExport.IItemImportExportService _itemImportService;
         private IDocumentTypeImportExportService _documentTypeImportService;
         private ITaxRuleImportExportService _taxRuleImportService;
         private IGroupMembershipImportExportService _groupMembershipImportService;
@@ -128,6 +130,29 @@ namespace Tests.Modules
                 await _dataImportHelper.ImportAllDataAsync(_objectDb, string.Empty));
             
             Assert.That(ex.ParamName, Is.EqualTo("dataDirectory"));
+        }
+    }
+
+    /// <summary>
+    /// Adapter to bridge between Infrastructure and Modules item import interfaces
+    /// </summary>
+    public class ItemImportExportServiceAdapter : Sivar.Erp.Modules.ImportExport.IItemImportExportService
+    {
+        private readonly Sivar.Erp.Infrastructure.ImportExport.IItemImportExportService _infrastructureService;
+
+        public ItemImportExportServiceAdapter(Sivar.Erp.Infrastructure.ImportExport.IItemImportExportService infrastructureService)
+        {
+            _infrastructureService = infrastructureService;
+        }
+
+        public Task<(IEnumerable<Sivar.Erp.Modules.Inventory.Core.Interfaces.IItem> ImportedItems, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        {
+            return _infrastructureService.ImportFromCsvAsync(csvContent, userName);
+        }
+
+        public Task<string> ExportToCsvAsync(IEnumerable<Sivar.Erp.Modules.Inventory.Core.Interfaces.IItem> items)
+        {
+            return _infrastructureService.ExportToCsvAsync(items);
         }
     }
 }

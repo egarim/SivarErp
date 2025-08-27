@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Sivar.Erp.Core.Contracts.ImportExport;
 
 namespace Sivar.Erp.Modules
 {
@@ -15,7 +16,7 @@ namespace Sivar.Erp.Modules
         private readonly ImportExport.ITaxGroupImportExportService _taxGroupImportService;
         private readonly Infrastructure.ImportExport.Documents.IDocumentTypeImportExportService _documentTypeImportService;
         private readonly ImportExport.IBusinessEntityImportExportService _businessEntityImportService;
-        private readonly ImportExport.IItemImportExportService _itemImportService;
+        private readonly IItemImportExportService _itemImportService;
         private readonly ImportExport.IGroupMembershipImportExportService _groupMembershipImportService;
         private readonly ImportExport.ITaxRuleImportExportService _taxRuleImportService;
         private readonly string _username;
@@ -37,9 +38,9 @@ namespace Sivar.Erp.Modules
            ImportExport.ITaxGroupImportExportService taxGroupImportService,
            Infrastructure.ImportExport.Documents.IDocumentTypeImportExportService documentTypeImportService,
            ImportExport.IBusinessEntityImportExportService businessEntityImportService,
-           ImportExport.IItemImportExportService itemImportService,
+           IItemImportExportService itemImportService,
            ImportExport.IGroupMembershipImportExportService groupMembershipImportService,
-           ImportExport.ITaxRuleImportExportService taxRuleImportService, // ? ADD THIS
+           ImportExport.ITaxRuleImportExportService taxRuleImportService,
            string username = "SystemInit")
         {
             _accountImportService = accountImportService ?? throw new ArgumentNullException(nameof(accountImportService));
@@ -324,7 +325,7 @@ namespace Sivar.Erp.Modules
                     // Add items to ObjectDb
                     foreach (var item in importedItems)
                     {
-                        objectDb.Items.Add(item);
+                        objectDb.Items.Add((Sivar.Erp.Modules.Inventory.Core.Interfaces.IItem)item);
                     }
 
                     AddResult(results, fileName, $"Successfully imported {importedItems.Count()} items");
@@ -456,13 +457,13 @@ namespace Sivar.Erp.Modules
             
             // Common document types for El Salvador
             csv.AppendLine($"{Guid.NewGuid()},\"FCF\",\"Factura de Consumidor Final\",true,SalesInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"CCF\",\"Comprobante de Crédito Fiscal\",true,SalesInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"NC\",\"Nota de Crédito\",true,SalesCreditNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"ND\",\"Nota de Débito\",true,SalesDebitNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"FEX\",\"Factura de Exportación\",true,SalesInvoice");
+            csv.AppendLine($"{Guid.NewGuid()},\"CCF\",\"Comprobante de Crï¿½dito Fiscal\",true,SalesInvoice");
+            csv.AppendLine($"{Guid.NewGuid()},\"NC\",\"Nota de Crï¿½dito\",true,SalesCreditNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"ND\",\"Nota de Dï¿½bito\",true,SalesDebitNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"FEX\",\"Factura de Exportaciï¿½n\",true,SalesInvoice");
             csv.AppendLine($"{Guid.NewGuid()},\"COM\",\"Compra\",true,PurchaseInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"NCC\",\"Nota de Crédito de Compra\",true,PurchaseCreditNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"NDC\",\"Nota de Débito de Compra\",true,PurchaseDebitNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"NCC\",\"Nota de Crï¿½dito de Compra\",true,PurchaseCreditNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"NDC\",\"Nota de Dï¿½bito de Compra\",true,PurchaseDebitNote");
 
             return csv.ToString();
         }

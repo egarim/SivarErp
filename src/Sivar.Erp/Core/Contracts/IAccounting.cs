@@ -62,19 +62,6 @@ namespace Sivar.Erp.Core.Contracts
     }
 
     /// <summary>
-    /// Interface for document accounting profiles
-    /// </summary>
-    public interface IDocumentAccountingProfile
-    {
-        string DocumentOperation { get; set; }
-        string? SalesAccountCode { get; set; }
-        string? AccountsReceivableCode { get; set; }
-        string? CostOfGoodsSoldAccountCode { get; set; }
-        string? InventoryAccountCode { get; set; }
-        decimal? CostRatio { get; set; }
-    }
-
-    /// <summary>
     /// Interface for account balance calculator
     /// </summary>
     public interface IAccountBalanceCalculator

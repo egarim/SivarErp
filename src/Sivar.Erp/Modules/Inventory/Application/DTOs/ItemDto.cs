@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
+using Sivar.Erp.Core.Contracts;
 using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Modules.Documents.Core.ValueObjects;
 
@@ -10,7 +11,7 @@ namespace Sivar.Erp.Modules.Inventory.Application.DTOs
     /// <summary>
     /// Data Transfer Object implementation for IItem with change notification
     /// </summary>
-    public class ItemDto : IItem, INotifyPropertyChanged
+    public class ItemDto : Modules.Inventory.Core.Interfaces.IItem, Sivar.Erp.Core.Contracts.IItem, INotifyPropertyChanged
     {
         Guid oid;
         private string _code = string.Empty;
@@ -97,6 +98,79 @@ namespace Sivar.Erp.Modules.Inventory.Application.DTOs
                     var oldValue = _basePrice;
                     _basePrice = value;
                     OnPropertyChanged(nameof(BasePrice), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+
+        private string? _category;
+        private bool _isActive = true;
+        private DateTime _createdDate = DateTime.UtcNow;
+        private string _createdBy = string.Empty;
+
+        /// <summary>
+        /// Category of the item
+        /// </summary>
+        public string? Category
+        {
+            get => _category;
+            set
+            {
+                if (_category != value)
+                {
+                    var oldValue = _category;
+                    _category = value;
+                    OnPropertyChanged(nameof(Category), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Whether the item is active
+        /// </summary>
+        public bool IsActive
+        {
+            get => _isActive;
+            set
+            {
+                if (_isActive != value)
+                {
+                    var oldValue = _isActive;
+                    _isActive = value;
+                    OnPropertyChanged(nameof(IsActive), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Date when the item was created
+        /// </summary>
+        public DateTime CreatedDate
+        {
+            get => _createdDate;
+            set
+            {
+                if (_createdDate != value)
+                {
+                    var oldValue = _createdDate;
+                    _createdDate = value;
+                    OnPropertyChanged(nameof(CreatedDate), ChangeType.PropertyChanged, oldValue, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// User who created the item
+        /// </summary>
+        public string CreatedBy
+        {
+            get => _createdBy;
+            set
+            {
+                if (_createdBy != value)
+                {
+                    var oldValue = _createdBy;
+                    _createdBy = value ?? string.Empty;
+                    OnPropertyChanged(nameof(CreatedBy), ChangeType.PropertyChanged, oldValue, value);
                 }
             }
         }

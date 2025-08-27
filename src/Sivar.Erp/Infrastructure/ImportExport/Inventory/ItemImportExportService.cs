@@ -1,6 +1,6 @@
-using Sivar.Erp.Modules.Inventory.Core.Interfaces;
+using Sivar.Erp.Core.Contracts;
 using Sivar.Erp.Modules.Inventory.Application.DTOs;
-using Sivar.Erp.Infrastructure.ImportExport;
+using Sivar.Erp.Core.Contracts.ImportExport;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace Sivar.Erp.Infrastructure.ImportExport.Inventory
 {
     /// <summary>
-    /// Implementation of item import/export service
+    /// Infrastructure implementation of item import/export service using Core.Contracts interface
     /// </summary>
-    public class ItemImportExportService : IItemImportExportService
+    public class ItemImportExportService : Core.Contracts.ImportExport.IItemImportExportService
     {
         /// <summary>
         /// Imports items from a CSV file
