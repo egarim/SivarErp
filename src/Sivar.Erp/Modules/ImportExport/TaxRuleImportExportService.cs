@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Services.Taxes.TaxRule;
 
 namespace Sivar.Erp.Services.ImportExport

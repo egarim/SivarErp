@@ -1,6 +1,6 @@
 ﻿using Sivar.Erp.Modules.BusinessEntities.Application.DTOs;
 using Sivar.Erp.Core.Interfaces;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;

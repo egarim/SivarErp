@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Services;

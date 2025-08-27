@@ -1,4 +1,4 @@
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Services.Taxes;
 using System;
 using System.Collections.Generic;

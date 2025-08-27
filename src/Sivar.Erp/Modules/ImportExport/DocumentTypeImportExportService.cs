@@ -1,4 +1,7 @@
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Core.Enums;
+using NewDocumentTypeDto = Sivar.Erp.Modules.Documents.Application.DTOs.DocumentTypeDto;
+using OldDocumentTypeDto = Sivar.Erp.Documents.DocumentTypeDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,15 +28,15 @@ namespace Sivar.Erp.Services.ImportExport
         /// <param name="csvContent">Content of the CSV file as a string</param>
         /// <param name="userName">User performing the operation</param>
         /// <returns>Collection of imported document types and any validation errors</returns>
-        public Task<(IEnumerable<IDocumentType> ImportedDocumentTypes, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        public Task<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType> ImportedDocumentTypes, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
-            List<DocumentTypeDto> importedDocumentTypes = new List<DocumentTypeDto>();
+            List<NewDocumentTypeDto> importedDocumentTypes = new List<NewDocumentTypeDto>();
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(csvContent))
             {
                 errors.Add("CSV content is empty");
-                return Task.FromResult<(IEnumerable<IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
+                return Task.FromResult<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType>, IEnumerable<string>)>((importedDocumentTypes, errors));
             }
 
             try
@@ -173,7 +176,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// </summary>
         /// <param name="documentType">Document type to validate</param>
         /// <returns>True if valid, false otherwise</returns>
-        private bool ValidateDocumentType(DocumentTypeDto documentType)
+        private bool ValidateDocumentType(NewDocumentTypeDto documentType)
         {
             if (string.IsNullOrWhiteSpace(documentType.Code))
                 return false;
@@ -190,9 +193,9 @@ namespace Sivar.Erp.Services.ImportExport
         /// <param name="headers">CSV header fields</param>
         /// <param name="fields">CSV data fields</param>
         /// <returns>New document type with populated properties</returns>
-        private DocumentTypeDto CreateDocumentTypeFromCsvFields(string[] headers, string[] fields)
+        private NewDocumentTypeDto CreateDocumentTypeFromCsvFields(string[] headers, string[] fields)
         {
-            var documentType = new DocumentTypeDto
+            var documentType = new NewDocumentTypeDto
             {
                 Oid = Guid.NewGuid(),
                 IsEnabled = true
@@ -219,12 +222,12 @@ namespace Sivar.Erp.Services.ImportExport
                     case "documentoperation":
                         if (Enum.TryParse<DocumentOperation>(value, true, out var documentOperation))
                         {
-                            documentType.DocumentOperation = documentOperation;
+                            documentType.DocumentOperation = documentOperation.ToString();
                         }
                         else
                         {
                             // Default to PurchaseOrder if invalid
-                            documentType.DocumentOperation = DocumentOperation.PurchaseOrder;
+                            documentType.DocumentOperation = DocumentOperation.PurchaseOrder.ToString();
                         }
                         break;
                 }

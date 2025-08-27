@@ -1,5 +1,5 @@
 using System;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 
 namespace Sivar.Erp.Modules.Inventory
 {

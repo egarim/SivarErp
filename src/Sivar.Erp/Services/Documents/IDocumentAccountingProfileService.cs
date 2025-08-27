@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 
 namespace Sivar.Erp.Services.Documents
 {
@@ -15,7 +15,7 @@ namespace Sivar.Erp.Services.Documents
         /// </summary>
         /// <param name="documentOperation">The document operation</param>
         /// <returns>The document accounting profile</returns>
-        Task<DocumentAccountingProfileDto> GetProfileByOperationAsync(string documentOperation);
+        Task<DocumentAccountingProfileDto?> GetProfileByOperationAsync(string documentOperation);
 
         /// <summary>
         /// Get all document accounting profiles

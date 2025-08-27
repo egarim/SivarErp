@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sivar.Erp.Documents;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
+using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 
@@ -112,7 +113,7 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
 
             // Get rules that match our criteria, ordered by priority (lower number = higher priority)
             var matchingRules = _taxRules
-                .Where(rule => rule.DocumentOperation == documentOperation)
+                .Where(rule => rule.DocumentOperation.HasValue && rule.DocumentOperation.Value == documentOperation)
                 .Where(rule =>
                     string.IsNullOrEmpty(rule.BusinessEntityGroupId) ||
                     entityGroupIds.Contains(rule.BusinessEntityGroupId))

@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
-using Sivar.Erp.Documents;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
+using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Core.Enums;
 
 namespace Sivar.Erp.Services.Taxes
 {

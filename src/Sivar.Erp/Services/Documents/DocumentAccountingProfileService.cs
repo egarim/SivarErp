@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace Sivar.Erp.Services.Documents
         /// </summary>
         /// <param name="documentOperation">The document operation</param>
         /// <returns>The document accounting profile</returns>
-        public async Task<DocumentAccountingProfileDto> GetProfileByOperationAsync(string documentOperation)
+        public async Task<DocumentAccountingProfileDto?> GetProfileByOperationAsync(string documentOperation)
         {
             var profile = _objectDb.DocumentAccountingProfiles?.FirstOrDefault(p => p.DocumentOperation == documentOperation);
             return await Task.FromResult(profile as DocumentAccountingProfileDto);
@@ -42,8 +43,7 @@ namespace Sivar.Erp.Services.Documents
         public async Task<List<DocumentAccountingProfileDto>> GetAllProfilesAsync()
         {
             var profiles = _objectDb.DocumentAccountingProfiles?
-                .Select(p => p as DocumentAccountingProfileDto)
-                .Where(p => p != null)
+                .OfType<DocumentAccountingProfileDto>()
                 .ToList() ?? new List<DocumentAccountingProfileDto>();
 
             return await Task.FromResult(profiles);

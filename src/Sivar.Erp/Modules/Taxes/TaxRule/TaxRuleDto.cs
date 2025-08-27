@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Enums;
 
 namespace Sivar.Erp.Services.Taxes.TaxRule
 {

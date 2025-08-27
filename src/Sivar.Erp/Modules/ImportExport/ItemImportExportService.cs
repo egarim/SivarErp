@@ -1,4 +1,7 @@
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
+using NewItemDto = Sivar.Erp.Modules.Documents.Application.DTOs.ItemDto;
+using OldItemDto = Sivar.Erp.Documents.ItemDto;
+using Sivar.Erp.Documents; // For ItemValidator
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,15 +40,15 @@ namespace Sivar.Erp.Services.ImportExport
         /// <param name="csvContent">Content of the CSV file as a string</param>
         /// <param name="userName">User performing the operation</param>
         /// <returns>Collection of imported items and any validation errors</returns>
-        public Task<(IEnumerable<IItem> ImportedItems, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
+        public Task<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem> ImportedItems, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
-            List<ItemDto> importedItems = new List<ItemDto>();
+            List<NewItemDto> importedItems = new List<NewItemDto>();
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(csvContent))
             {
                 errors.Add("CSV content is empty");
-                return Task.FromResult<(IEnumerable<IItem>, IEnumerable<string>)>((importedItems, errors));
+                return Task.FromResult<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem>, IEnumerable<string>)>((importedItems, errors));
             }
 
             try
@@ -56,7 +59,7 @@ namespace Sivar.Erp.Services.ImportExport
                 if (lines.Length <= 1)
                 {
                     errors.Add("CSV file contains no data rows");
-                    return Task.FromResult<(IEnumerable<IItem>, IEnumerable<string>)>((importedItems, errors));
+                    return Task.FromResult<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem>, IEnumerable<string>)>((importedItems, errors));
                 }
 
                 // Assume first line is header
@@ -65,7 +68,7 @@ namespace Sivar.Erp.Services.ImportExport
                 // Validate headers
                 if (!ValidateHeaders(headers, errors))
                 {
-                    return Task.FromResult<(IEnumerable<IItem>, IEnumerable<string>)>((importedItems, errors));
+                    return Task.FromResult<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem>, IEnumerable<string>)>((importedItems, errors));
                 }
 
                 // Process data rows
@@ -82,22 +85,28 @@ namespace Sivar.Erp.Services.ImportExport
 
                     var item = CreateItemFromCsvFields(headers, fields);
 
-                    // Validate item
-                    if (!_itemValidator.ValidateItem(item))
+                    // Validate item using individual validation methods
+                    if (!_itemValidator.ValidateItemCode(item.Code))
                     {
-                        errors.Add($"Line {i + 1}: Item validation failed for item {item.Code}");
+                        errors.Add($"Line {i + 1}: Invalid item code for item {item.Code}");
+                        continue;
+                    }
+
+                    if (!_itemValidator.ValidateItemPrice(item.BasePrice))
+                    {
+                        errors.Add($"Line {i + 1}: Invalid price for item {item.Code}");
                         continue;
                     }
 
                     importedItems.Add(item);
                 }
 
-                return Task.FromResult<(IEnumerable<IItem>, IEnumerable<string>)>((importedItems, errors));
+                return Task.FromResult<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem>, IEnumerable<string>)>((importedItems, errors));
             }
             catch (Exception ex)
             {
                 errors.Add($"Error importing CSV: {ex.Message}");
-                return Task.FromResult<(IEnumerable<IItem>, IEnumerable<string>)>((importedItems, errors));
+                return Task.FromResult<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem>, IEnumerable<string>)>((importedItems, errors));
             }
         }
 
@@ -106,7 +115,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// </summary>
         /// <param name="items">Items to export</param>
         /// <returns>CSV content as a string</returns>
-        public Task<string> ExportToCsvAsync(IEnumerable<IItem> items)
+        public Task<string> ExportToCsvAsync(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem> items)
         {
             if (items == null || !items.Any())
             {
@@ -186,9 +195,9 @@ namespace Sivar.Erp.Services.ImportExport
         /// <param name="headers">CSV header fields</param>
         /// <param name="fields">CSV data fields</param>
         /// <returns>New item with populated properties</returns>
-        private ItemDto CreateItemFromCsvFields(string[] headers, string[] fields)
+        private NewItemDto CreateItemFromCsvFields(string[] headers, string[] fields)
         {
-            var item = new ItemDto
+            var item = new NewItemDto
             {
                 Oid = Guid.NewGuid()
             };
@@ -239,7 +248,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// </summary>
         /// <param name="item">Item to convert to CSV</param>
         /// <returns>CSV row as a string</returns>
-        private string GetCsvRow(IItem item)
+        private string GetCsvRow(Sivar.Erp.Modules.Documents.Core.Entities.IItem item)
         {
             // Add quotes around fields that might contain commas
             return $"\"{item.Code}\",\"{item.Type}\",\"{item.Description}\",{item.BasePrice}";
