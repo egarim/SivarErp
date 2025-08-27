@@ -1,5 +1,6 @@
 using System;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.Documents.Application.DTOs
 {

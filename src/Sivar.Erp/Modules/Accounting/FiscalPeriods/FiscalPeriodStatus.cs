@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.Services.Accounting.FiscalPeriods
+namespace Sivar.Erp.Modules.Accounting.FiscalPeriods
 {
     /// <summary>
     /// Enumeration for fiscal period status

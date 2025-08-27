@@ -1,14 +1,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Accounting;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
-using Sivar.Erp.Services;
-using Sivar.Erp.Services.Accounting.Transactions;
+using Sivar.Erp.Modules.Accounting.Transactions;
 using NUnit.Framework;
-using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Modules;
 
-namespace Sivar.Erp.Tests
+namespace Tests
 {
     [TestFixture]
     /// <summary>

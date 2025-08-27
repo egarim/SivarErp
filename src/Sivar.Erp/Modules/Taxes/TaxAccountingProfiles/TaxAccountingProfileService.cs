@@ -1,9 +1,8 @@
 using Sivar.Erp.Modules.Documents.Core.Enums;
-using Sivar.Erp.Services.Taxes;
 using System;
 using System.Collections.Generic;
 
-namespace Sivar.Erp.Services.Taxes.TaxAccountingProfiles
+namespace Sivar.Erp.Modules.Taxes.TaxAccountingProfiles
 {
     /// <summary>
     /// Implementation of the tax accounting profile service

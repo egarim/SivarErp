@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Modules.Inventory.Reports;
 

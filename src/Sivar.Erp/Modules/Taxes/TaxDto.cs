@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Sivar.Erp.Services.Taxes
+namespace Sivar.Erp.Modules.Taxes
 {
     /// <summary>
     /// Represents a tax item that can be applied to document lines

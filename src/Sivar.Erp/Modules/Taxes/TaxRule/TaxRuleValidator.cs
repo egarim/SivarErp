@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.Services.Taxes.TaxRule
+namespace Sivar.Erp.Modules.Taxes.TaxRule
 {
     /// <summary>
     /// Validates tax rules before import or update

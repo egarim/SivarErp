@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Service for importing and exporting test account mappings

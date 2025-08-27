@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.Services.Taxes.TaxGroup
+namespace Sivar.Erp.Modules.Taxes.TaxGroup
 {
     /// <summary>
     /// Validator for group membership entities

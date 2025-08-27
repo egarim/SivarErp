@@ -1,4 +1,4 @@
-namespace Sivar.Erp.Services.Accounting.Transactions
+namespace Sivar.Erp.Modules.Accounting.Transactions
 {
     /// <summary>
     /// Status of transaction batch

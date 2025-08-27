@@ -1,4 +1,4 @@
-﻿namespace Sivar.Erp.Services.Accounting.BalanceCalculators
+namespace Sivar.Erp.Modules.Accounting.BalanceCalculators
 {
     public interface IAccountBalanceCalculator
     {

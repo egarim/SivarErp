@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Enums;
-using Sivar.Erp.Services.Taxes;
-using Sivar.Erp.Services.Taxes.TaxGroup;
+using Sivar.Erp.Modules.Taxes.TaxGroup;
 
-namespace Sivar.Erp.Services.Taxes.TaxRule
+namespace Sivar.Erp.Modules.Taxes.TaxRule
 {
     /// <summary>
     /// Evaluates tax rules against documents to determine applicable taxes

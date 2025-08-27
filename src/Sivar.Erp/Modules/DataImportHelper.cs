@@ -1,5 +1,3 @@
-﻿using Sivar.Erp.Services;
-using Sivar.Erp.Services.ImportExport;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,14 +10,14 @@ namespace Sivar.Erp.Modules
     /// </summary>
     public class DataImportHelper
     {
-        private readonly IAccountImportExportService _accountImportService;
-        private readonly ITaxImportExportService _taxImportService;
-        private readonly ITaxGroupImportExportService _taxGroupImportService;
-        private readonly IDocumentTypeImportExportService _documentTypeImportService;
-        private readonly IBusinessEntityImportExportService _businessEntityImportService;
-        private readonly IItemImportExportService _itemImportService;
-        private readonly IGroupMembershipImportExportService _groupMembershipImportService;
-        private readonly ITaxRuleImportExportService _taxRuleImportService;
+        private readonly ImportExport.IAccountImportExportService _accountImportService;
+        private readonly ImportExport.ITaxImportExportService _taxImportService;
+        private readonly ImportExport.ITaxGroupImportExportService _taxGroupImportService;
+        private readonly Infrastructure.ImportExport.Documents.IDocumentTypeImportExportService _documentTypeImportService;
+        private readonly ImportExport.IBusinessEntityImportExportService _businessEntityImportService;
+        private readonly ImportExport.IItemImportExportService _itemImportService;
+        private readonly ImportExport.IGroupMembershipImportExportService _groupMembershipImportService;
+        private readonly ImportExport.ITaxRuleImportExportService _taxRuleImportService;
         private readonly string _username;
 
         /// <summary>
@@ -34,14 +32,14 @@ namespace Sivar.Erp.Modules
         /// <param name="groupMembershipImportService">Service for importing group memberships</param>
         /// <param name="username">Username to use for import operations</param>
         public DataImportHelper(
-           IAccountImportExportService accountImportService,
-           ITaxImportExportService taxImportService,
-           ITaxGroupImportExportService taxGroupImportService,
-           IDocumentTypeImportExportService documentTypeImportService,
-           IBusinessEntityImportExportService businessEntityImportService,
-           IItemImportExportService itemImportService,
-           IGroupMembershipImportExportService groupMembershipImportService,
-           ITaxRuleImportExportService taxRuleImportService, // ✅ ADD THIS
+           ImportExport.IAccountImportExportService accountImportService,
+           ImportExport.ITaxImportExportService taxImportService,
+           ImportExport.ITaxGroupImportExportService taxGroupImportService,
+           Infrastructure.ImportExport.Documents.IDocumentTypeImportExportService documentTypeImportService,
+           ImportExport.IBusinessEntityImportExportService businessEntityImportService,
+           ImportExport.IItemImportExportService itemImportService,
+           ImportExport.IGroupMembershipImportExportService groupMembershipImportService,
+           ImportExport.ITaxRuleImportExportService taxRuleImportService, // ? ADD THIS
            string username = "SystemInit")
         {
             _accountImportService = accountImportService ?? throw new ArgumentNullException(nameof(accountImportService));
@@ -51,7 +49,7 @@ namespace Sivar.Erp.Modules
             _businessEntityImportService = businessEntityImportService ?? throw new ArgumentNullException(nameof(businessEntityImportService));
             _itemImportService = itemImportService ?? throw new ArgumentNullException(nameof(itemImportService));
             _groupMembershipImportService = groupMembershipImportService ?? throw new ArgumentNullException(nameof(groupMembershipImportService));
-            _taxRuleImportService = taxRuleImportService ?? throw new ArgumentNullException(nameof(taxRuleImportService)); // ✅ ADD THIS
+            _taxRuleImportService = taxRuleImportService ?? throw new ArgumentNullException(nameof(taxRuleImportService)); // ? ADD THIS
             _username = username;
         }
 
@@ -73,7 +71,7 @@ namespace Sivar.Erp.Modules
             await ImportAccounts(objectDb, dataDirectory, results);
             await ImportTaxGroups(objectDb, dataDirectory, results);
             await ImportTaxes(objectDb, dataDirectory, results);
-            await ImportTaxRules(objectDb, dataDirectory, results); // ✅ ADD THIS
+            await ImportTaxRules(objectDb, dataDirectory, results); // ? ADD THIS
             await ImportBusinessEntities(objectDb, dataDirectory, results);
             await ImportItems(objectDb, dataDirectory, results);
             await ImportGroupMemberships(objectDb, dataDirectory, results);
@@ -82,7 +80,7 @@ namespace Sivar.Erp.Modules
             return results;
         }
         /// <summary>
-        /// ✅ NEW METHOD: Import tax rules from ElSalvadorTaxRules.txt
+        /// ? NEW METHOD: Import tax rules from ElSalvadorTaxRules.txt
         /// </summary>
         private async Task ImportTaxRules(IObjectDb objectDb, string dataDirectory, Dictionary<string, List<string>> results)
         {
@@ -112,7 +110,7 @@ namespace Sivar.Erp.Modules
                     // Add tax rules to ObjectDb
                     foreach (var taxRule in importedTaxRules)
                     {
-                        objectDb.TaxRules.Add(taxRule); // ✅ Assuming ObjectDb has a TaxRules collection
+                        objectDb.TaxRules.Add(taxRule); // ? Assuming ObjectDb has a TaxRules collection
                     }
 
                     AddResult(results, fileName, $"Successfully imported {importedTaxRules.Count()} tax rules");
@@ -458,13 +456,13 @@ namespace Sivar.Erp.Modules
             
             // Common document types for El Salvador
             csv.AppendLine($"{Guid.NewGuid()},\"FCF\",\"Factura de Consumidor Final\",true,SalesInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"CCF\",\"Comprobante de Crédito Fiscal\",true,SalesInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"NC\",\"Nota de Crédito\",true,SalesCreditNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"ND\",\"Nota de Débito\",true,SalesDebitNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"FEX\",\"Factura de Exportación\",true,SalesInvoice");
+            csv.AppendLine($"{Guid.NewGuid()},\"CCF\",\"Comprobante de Cr�dito Fiscal\",true,SalesInvoice");
+            csv.AppendLine($"{Guid.NewGuid()},\"NC\",\"Nota de Cr�dito\",true,SalesCreditNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"ND\",\"Nota de D�bito\",true,SalesDebitNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"FEX\",\"Factura de Exportaci�n\",true,SalesInvoice");
             csv.AppendLine($"{Guid.NewGuid()},\"COM\",\"Compra\",true,PurchaseInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"NCC\",\"Nota de Crédito de Compra\",true,PurchaseCreditNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"NDC\",\"Nota de Débito de Compra\",true,PurchaseDebitNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"NCC\",\"Nota de Cr�dito de Compra\",true,PurchaseCreditNote");
+            csv.AppendLine($"{Guid.NewGuid()},\"NDC\",\"Nota de D�bito de Compra\",true,PurchaseDebitNote");
 
             return csv.ToString();
         }

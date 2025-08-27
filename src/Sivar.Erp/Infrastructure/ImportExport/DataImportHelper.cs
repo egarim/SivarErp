@@ -4,7 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Core.Contracts;
+
+using Sivar.Erp.Modules;
 
 namespace Sivar.Erp.Infrastructure.ImportExport
 {
@@ -101,7 +102,8 @@ namespace Sivar.Erp.Infrastructure.ImportExport
                 
                 foreach (var account in importedAccounts)
                 {
-                    objectDb.Accounts.Add(account);
+                    // Cast Core.Contracts.IAccount to module interface for ObjectDb
+                    objectDb.Accounts.Add((Sivar.Erp.Modules.Accounting.ChartOfAccounts.IAccount)account);
                     results[filename].Add($"? Imported account: {account.OfficialCode} - {account.AccountName}");
                 }
                 
@@ -139,7 +141,8 @@ namespace Sivar.Erp.Infrastructure.ImportExport
                 
                 foreach (var tax in importedTaxes)
                 {
-                    objectDb.Taxes.Add(tax);
+                    // Cast Core.Contracts.ITax to module interface for ObjectDb
+                    objectDb.Taxes.Add((Sivar.Erp.Modules.Taxes.ITax)tax);
                     results[filename].Add($"? Imported tax: {tax.Code} - {tax.Name}");
                 }
                 
@@ -177,7 +180,8 @@ namespace Sivar.Erp.Infrastructure.ImportExport
                 
                 foreach (var taxGroup in importedTaxGroups)
                 {
-                    objectDb.TaxGroups.Add(taxGroup);
+                    // Cast Core.Contracts.ITaxGroup to module interface for ObjectDb
+                    objectDb.TaxGroups.Add((Sivar.Erp.Modules.Taxes.TaxGroup.ITaxGroup)taxGroup);
                     results[filename].Add($"? Imported tax group: {taxGroup.Code} - {taxGroup.Name}");
                 }
                 
@@ -215,7 +219,8 @@ namespace Sivar.Erp.Infrastructure.ImportExport
                 
                 foreach (var documentType in importedDocumentTypes)
                 {
-                    objectDb.DocumentTypes.Add(documentType);
+                    // Cast Core.Contracts.IDocumentType to module interface for ObjectDb
+                    objectDb.DocumentTypes.Add((Sivar.Erp.Modules.Documents.Core.Interfaces.IDocumentType)documentType);
                     results[filename].Add($"? Imported document type: {documentType.Code} - {documentType.Name}");
                 }
                 
@@ -253,7 +258,8 @@ namespace Sivar.Erp.Infrastructure.ImportExport
                 
                 foreach (var businessEntity in importedBusinessEntities)
                 {
-                    objectDb.BusinessEntities.Add(businessEntity);
+                    // Cast Core.Contracts.IBusinessEntity to module interface for ObjectDb
+                    objectDb.BusinessEntities.Add((Sivar.Erp.Core.Interfaces.IBusinessEntity)businessEntity);
                     results[filename].Add($"? Imported business entity: {businessEntity.Code} - {businessEntity.Name}");
                 }
                 
@@ -329,7 +335,8 @@ namespace Sivar.Erp.Infrastructure.ImportExport
                 
                 foreach (var groupMembership in importedGroupMemberships)
                 {
-                    objectDb.GroupMemberships.Add(groupMembership);
+                    // Cast Core.Contracts.IGroupMembership to module interface for ObjectDb
+                    objectDb.GroupMemberships.Add((Sivar.Erp.Modules.Taxes.TaxGroup.GroupMembershipDto)groupMembership);
                     results[filename].Add($"? Imported group membership");
                 }
                 
@@ -367,7 +374,8 @@ namespace Sivar.Erp.Infrastructure.ImportExport
                 
                 foreach (var taxRule in importedTaxRules)
                 {
-                    objectDb.TaxRules.Add(taxRule);
+                    // Cast Core.Contracts.ITaxRule to module interface for ObjectDb
+                    objectDb.TaxRules.Add((Sivar.Erp.Modules.Taxes.TaxRule.ITaxRule)taxRule);
                     results[filename].Add($"? Imported tax rule: {taxRule.Code} - {taxRule.Description}");
                 }
                 

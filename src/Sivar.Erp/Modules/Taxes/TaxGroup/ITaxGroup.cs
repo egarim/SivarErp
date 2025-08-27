@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 
-namespace Sivar.Erp.Services.Taxes.TaxGroup
+namespace Sivar.Erp.Modules.Taxes.TaxGroup
 {
     /// <summary>
     /// Interface for tax groups that can be used for tax rule targeting

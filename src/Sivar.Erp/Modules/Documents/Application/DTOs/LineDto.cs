@@ -4,8 +4,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Sivar.Erp.Modules.Documents.Core.Entities;
-using Sivar.Erp.Services.Taxes;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
+using Sivar.Erp.Modules.Taxes;
 
 namespace Sivar.Erp.Modules.Documents.Application.DTOs
 {

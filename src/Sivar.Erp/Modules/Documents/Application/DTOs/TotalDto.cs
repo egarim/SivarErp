@@ -1,7 +1,8 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Modules.Documents.Core.ValueObjects;
 

@@ -1,13 +1,10 @@
-﻿using Sivar.Erp.Documents;
-using Sivar.Erp.Services.Taxes;
-using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Interface for importing and exporting tax accounting profiles

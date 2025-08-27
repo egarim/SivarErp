@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Sivar.Erp.Services.Taxes.TaxGroup
+namespace Sivar.Erp.Modules.Taxes.TaxGroup
 {
     /// <summary>
     /// Represents membership of an entity or item in a tax group

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Implementation of business entity import/export service

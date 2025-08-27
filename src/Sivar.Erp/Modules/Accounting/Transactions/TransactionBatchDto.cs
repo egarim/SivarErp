@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sivar.Erp.Services.Accounting.Transactions
+namespace Sivar.Erp.Modules.Accounting.Transactions
 {
     /// <summary>
     /// Implementation of the transaction batch entity

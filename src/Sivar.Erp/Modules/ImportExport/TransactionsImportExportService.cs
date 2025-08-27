@@ -1,12 +1,12 @@
-using Sivar.Erp.Services.Accounting.ChartOfAccounts;
-using Sivar.Erp.Services.Accounting.Transactions;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
+using Sivar.Erp.Modules.Accounting.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Helper to import transactions and ledger entries from tabular text.

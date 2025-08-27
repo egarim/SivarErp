@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.Services.Taxes
+namespace Sivar.Erp.Modules.Taxes
 {
     /// <summary>
     /// Validator for tax data

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sivar.Erp.Services.Accounting.Transactions
+namespace Sivar.Erp.Modules.Accounting.Transactions
 {
     /// <summary>
     /// Interface for transaction batches
@@ -25,7 +25,7 @@ namespace Sivar.Erp.Services.Accounting.Transactions
         /// Description of the transaction batch
         /// </summary>
         string Description { get; set; }
-        
+
         /// <summary>
         /// Status of the batch
         /// </summary>

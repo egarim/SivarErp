@@ -1,7 +1,7 @@
-﻿using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using System.Text;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Implementation of account import/export service
@@ -26,7 +26,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// </summary>
         /// <param name="auditService">Audit service for setting audit information</param>
         /// <param name="accountValidator">Custom account validator</param>
-        public AccountImportExportService( AccountValidator accountValidator)
+        public AccountImportExportService(AccountValidator accountValidator)
         {
            
             _accountValidator = accountValidator ?? new AccountValidator();

@@ -1,5 +1,5 @@
 using System;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.Inventory
@@ -13,7 +13,7 @@ namespace Sivar.Erp.Modules.Inventory
         public string Id { get; set; }
         public string TransactionId { get; set; }
         public string TransactionNumber { get; set; }
-        public Sivar.Erp.Modules.Documents.Core.Entities.IInventoryItem Item { get; set; }
+        public IInventoryItem Item { get; set; }
         public InventoryTransactionType TransactionType { get; set; }
         public decimal Quantity { get; set; }
         public decimal UnitCost { get; set; }

@@ -1,22 +1,23 @@
-﻿using Sivar.Erp.Core.Interfaces;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Core.Interfaces;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
+using Sivar.Erp.Modules.Accounting.Transactions;
 using Sivar.Erp.ErpSystem.Modules.Security.Core;
-using Sivar.Erp.Services.Accounting.ChartOfAccounts;
-using Sivar.Erp.Services.Accounting.FiscalPeriods;
-using Sivar.Erp.Services.Accounting.Transactions;
-using Sivar.Erp.Services.Taxes;
-using Sivar.Erp.Services.Taxes.TaxGroup;
-using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Modules.Payments.Models;
+using Sivar.Erp.Modules.Taxes;
+using Sivar.Erp.Modules.Taxes.TaxGroup;
+using Sivar.Erp.Modules.Taxes.TaxRule;
 using Sivar.Erp.Modules.Inventory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sivar.Erp.Services
+namespace Sivar.Erp.Modules
 {
     public interface IObjectDb
     {

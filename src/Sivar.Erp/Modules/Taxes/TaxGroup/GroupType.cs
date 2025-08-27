@@ -1,4 +1,4 @@
-namespace Sivar.Erp.Services.Taxes.TaxGroup
+namespace Sivar.Erp.Modules.Taxes.TaxGroup
 {
     /// <summary>
     /// Defines the types of groups used for tax rules

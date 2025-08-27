@@ -1,6 +1,6 @@
-﻿using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Interface for chart of accounts import/export operations

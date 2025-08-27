@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Sivar.Erp.Modules.Accounting.Transactions;
 using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Payments.Services;
-using Sivar.Erp.Documents;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
-using Sivar.Erp.Services.Accounting.Transactions;
-using Sivar.Erp.Services;
 
 namespace Sivar.Erp.Modules.Payments.Services
 {

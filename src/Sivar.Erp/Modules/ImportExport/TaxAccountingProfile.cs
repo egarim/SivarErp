@@ -1,8 +1,8 @@
-﻿using Sivar.Erp.Modules.Documents.Core.Enums;
+using Sivar.Erp.Modules.Documents.Core.Enums;
 using System;
 using System.Linq;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Represents a tax accounting profile for import/export

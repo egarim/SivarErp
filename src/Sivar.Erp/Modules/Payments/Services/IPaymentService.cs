@@ -1,9 +1,8 @@
+using Sivar.Erp.Modules.Accounting.Transactions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sivar.Erp.Modules.Payments.Models;
-using Sivar.Erp.Documents;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
-using Sivar.Erp.Services.Accounting.Transactions;
 
 namespace Sivar.Erp.Modules.Payments.Services
 {

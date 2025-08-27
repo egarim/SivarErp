@@ -1,4 +1,4 @@
-﻿namespace Sivar.Erp
+namespace Sivar.Erp
 {
     /// <summary>
     /// Interface defining core entity properties

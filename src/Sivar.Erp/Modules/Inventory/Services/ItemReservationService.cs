@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using Sivar.Erp.Modules.Inventory.Models;
-using Sivar.Erp.Services;
 using ModelsReservationStatus = Sivar.Erp.Modules.Inventory.Models.ReservationStatus;
 using InventoryReservationStatus = Sivar.Erp.Modules.Inventory.ReservationStatus;
 

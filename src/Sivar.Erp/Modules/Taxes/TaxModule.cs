@@ -1,7 +1,7 @@
-﻿using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.ActivityStream;
+using Sivar.Erp.ErpSystem.Modules;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
-using Sivar.Erp.ErpSystem.Services;
 using Sivar.Erp.ErpSystem.TimeService;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.Taxes
+namespace Sivar.Erp.Modules.Taxes
 {
     public class TaxModule : ErpModuleBase
     {

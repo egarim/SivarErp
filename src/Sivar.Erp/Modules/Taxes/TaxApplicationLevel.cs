@@ -1,4 +1,4 @@
-namespace Sivar.Erp.Services.Taxes
+namespace Sivar.Erp.Modules.Taxes
 {
     /// <summary>
     /// Defines where the tax should be applied

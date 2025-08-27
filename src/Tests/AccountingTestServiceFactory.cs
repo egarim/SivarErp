@@ -1,26 +1,27 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Sivar.Erp.Modules.Documents.Core.Entities;
-using Sivar.Erp.Documents;
+
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
+using Sivar.Erp.Modules.ImportExport;
+using Sivar.Erp.Modules.Inventory.Application.Validators;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.TimeService;
+using Sivar.Erp.Infrastructure.ImportExport.Documents;
 using Sivar.Erp.Modules;
-using Sivar.Erp.Services;
-using Sivar.Erp.Services.Accounting.ChartOfAccounts;
-using Sivar.Erp.Services.Documents;
-using Sivar.Erp.Services.ImportExport;
-using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
-using Sivar.Erp.Services.Taxes.TaxGroup;
-using Sivar.Erp.Services.Taxes.TaxRule;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
+using Sivar.Erp.Modules.Documents.Application.Services;
 using Sivar.Erp.Modules.Payments.Services;
+using Sivar.Erp.Modules.Taxes.TaxAccountingProfiles;
+using Sivar.Erp.Modules.Taxes.TaxGroup;
+using Sivar.Erp.Modules.Taxes.TaxRule;
 using System;
 
-namespace Sivar.Erp.Tests.Infrastructure
+namespace Tests
 {
     /// <summary>
     /// Factory for creating and configuring services needed for accounting tests
@@ -132,7 +133,7 @@ namespace Sivar.Erp.Tests.Infrastructure
                 return new DocumentAccountingProfileService(objectDb, logger);
             });
 
-            services.AddTransient<Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService, Sivar.Erp.Services.Documents.DocumentAccountingProfileImportExportService>();
+            services.AddTransient<IDocumentAccountingProfileImportExportService, DocumentAccountingProfileImportExportService>();
 
             services.AddTransient<ITaxRuleImportExportService>(provider =>
                 new TaxRuleImportExportService(provider.GetRequiredService<TaxRuleValidator>()));

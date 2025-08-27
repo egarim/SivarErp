@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Modules.Documents.Infrastructure.Calculators
 {
     /// <summary>
     /// Common amount calculators for transaction entries

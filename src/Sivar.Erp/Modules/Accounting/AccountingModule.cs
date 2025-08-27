@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
-using Sivar.Erp.ErpSystem.Services;
 using Sivar.Erp.ErpSystem.TimeService;
+using Sivar.Erp.Modules.Accounting.BalanceCalculators;
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 using Sivar.Erp.ErpSystem.Diagnostics;
-using Sivar.Erp.Services;
-using Sivar.Erp.Services.Accounting.BalanceCalculators;
-using Sivar.Erp.Services.Accounting.FiscalPeriods;
-using Sivar.Erp.Services.Accounting.Transactions;
+using Sivar.Erp.ErpSystem.Modules;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
+using Sivar.Erp.Modules.Accounting.Transactions;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.Accounting
 {

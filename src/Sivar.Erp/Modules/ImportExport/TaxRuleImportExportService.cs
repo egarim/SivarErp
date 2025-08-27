@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Sivar.Erp.Modules.Documents.Core.Enums;
-using Sivar.Erp.Services.Taxes.TaxRule;
+using Sivar.Erp.Modules.Taxes.TaxRule;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Implementation of tax rule import/export service

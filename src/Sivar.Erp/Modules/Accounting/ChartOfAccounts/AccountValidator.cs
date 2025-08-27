@@ -1,4 +1,4 @@
-﻿namespace Sivar.Erp.Services.Accounting.ChartOfAccounts
+namespace Sivar.Erp.Modules.Accounting.ChartOfAccounts
 {
     /// <summary>
     /// Validator for account business rules

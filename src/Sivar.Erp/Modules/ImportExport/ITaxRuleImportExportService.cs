@@ -1,8 +1,8 @@
+using Sivar.Erp.Modules.Taxes.TaxRule;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sivar.Erp.Services.Taxes.TaxRule;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Interface for importing and exporting tax rules from/to external formats

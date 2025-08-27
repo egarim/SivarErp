@@ -1,4 +1,4 @@
-using Sivar.Erp.Services.Accounting.Transactions;
+using Sivar.Erp.Modules.Accounting.Transactions;
 
 namespace Sivar.Erp.Modules.Accounting.JournalEntries;
 

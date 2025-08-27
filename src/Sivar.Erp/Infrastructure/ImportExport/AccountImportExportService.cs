@@ -1,5 +1,5 @@
 using Sivar.Erp.Core.Contracts;
-using Sivar.Erp.Services.Accounting.ChartOfAccounts;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using System.Text;
 
 // Explicit import to resolve ambiguity

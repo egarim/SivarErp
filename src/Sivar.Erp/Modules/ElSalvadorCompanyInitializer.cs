@@ -1,8 +1,7 @@
-using Sivar.Erp.Services;
-using Sivar.Erp.Services.ImportExport;
+using Sivar.Erp.Infrastructure.ImportExport.Documents;
 using Sivar.Erp.Modules.Accounting;
-using Sivar.Erp.Services.Accounting.FiscalPeriods;
-using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
+using Sivar.Erp.Modules.ImportExport;
 using System;
 using System.Collections.Generic;
 using System.IO;

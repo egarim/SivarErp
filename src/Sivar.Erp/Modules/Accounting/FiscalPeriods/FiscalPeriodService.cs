@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.ErpSystem.Diagnostics;
-using Sivar.Erp.Services;
 
-namespace Sivar.Erp.Services.Accounting.FiscalPeriods
+namespace Sivar.Erp.Modules.Accounting.FiscalPeriods
 {
     /// <summary>
     /// Implementation of fiscal period service

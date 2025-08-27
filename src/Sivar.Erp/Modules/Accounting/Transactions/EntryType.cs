@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Linq;
 
-namespace Sivar.Erp.Services.Accounting.Transactions
+namespace Sivar.Erp.Modules.Accounting.Transactions
 {
     /// <summary>
     /// Enumeration of ledger entry types

@@ -1,4 +1,4 @@
-﻿namespace Sivar.Erp
+namespace Sivar.Erp
 {
     /// <summary>
     /// Base entity class implementing common interfaces

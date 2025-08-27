@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Payments.Models;
-using Sivar.Erp.Services;
 
 namespace Sivar.Erp.Modules.Payments.Services
 {

@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Sivar.Erp.ErpSystem.Diagnostics;
-using Sivar.Erp.Services;
+using Sivar.Erp.Modules;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -132,10 +132,10 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
                     methodName, elapsedMilliseconds, memoryDelta);
 
                 if (isSlow)
-                    _logger.LogWarning("⚠️ SLOW: {Method} took {Elapsed} ms", methodName, elapsedMilliseconds);
+                    _logger.LogWarning("?? SLOW: {Method} took {Elapsed} ms", methodName, elapsedMilliseconds);
 
                 if (isMemoryIntensive)
-                    _logger.LogWarning("⚠️ HIGH MEMORY: {Method} allocated {MemoryDelta} bytes", methodName, memoryDelta);
+                    _logger.LogWarning("?? HIGH MEMORY: {Method} allocated {MemoryDelta} bytes", methodName, memoryDelta);
             }
 
             if (_logMode.HasFlag(PerformanceLogMode.ExecutionTime))

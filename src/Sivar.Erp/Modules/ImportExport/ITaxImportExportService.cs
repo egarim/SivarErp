@@ -1,8 +1,8 @@
-using Sivar.Erp.Services.Taxes;
+using Sivar.Erp.Modules.Taxes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Interface for tax import/export operations

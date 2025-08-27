@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Core.Contracts;
-using Sivar.Erp.Core.Enums; // Add FiscalPeriodStatus enum
 using Sivar.Erp.ErpSystem.Diagnostics; // Use legacy PerformanceLogger for now
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
+using Sivar.Erp.Modules;
 
 // Explicit import to resolve ambiguity
 using LegacyIPerformanceContextProvider = Sivar.Erp.ErpSystem.Diagnostics.IPerformanceContextProvider;
@@ -53,8 +53,8 @@ namespace Sivar.Erp.Modules.Accounting.Services.FiscalPeriods
                     throw new InvalidOperationException("Fiscal period overlaps with existing period");
 
                 // Set creation info
-                fiscalPeriod.CreatedDate = DateTime.UtcNow;
-                fiscalPeriod.CreatedBy = userId;
+                fiscalPeriod.InsertedAt = DateTime.UtcNow;
+                fiscalPeriod.InsertedBy = userId;
 
                 // Store the fiscal period
                 _objectDb.fiscalPeriods.Add(fiscalPeriod);
@@ -124,6 +124,51 @@ namespace Sivar.Erp.Modules.Accounting.Services.FiscalPeriods
                     startDate <= fp.StartDate && endDate >= fp.EndDate);
 
                 return Task.FromResult(hasOverlap);
+            });
+        }
+
+        /// <summary>
+        /// Validates a fiscal period for creation or update
+        /// </summary>
+        /// <param name="fiscalPeriod">Fiscal period to validate</param>
+        /// <returns>True if valid, false otherwise</returns>
+        public Task<bool> ValidateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod)
+        {
+            return _performanceLogger.Track(nameof(ValidateFiscalPeriodAsync), () =>
+            {
+                // Basic validation logic
+                if (fiscalPeriod == null) return Task.FromResult(false);
+                if (string.IsNullOrWhiteSpace(fiscalPeriod.Code)) return Task.FromResult(false);
+                if (string.IsNullOrWhiteSpace(fiscalPeriod.Name)) return Task.FromResult(false);
+                if (fiscalPeriod.StartDate >= fiscalPeriod.EndDate) return Task.FromResult(false);
+
+                return Task.FromResult(true);
+            });
+        }
+
+        /// <summary>
+        /// Validates a fiscal period for creation or update including overlap check
+        /// </summary>
+        /// <param name="fiscalPeriod">Fiscal period to validate</param>
+        /// <param name="excludeId">Optional ID to exclude from overlap check (for updates)</param>
+        /// <returns>True if valid, false otherwise</returns>
+        public async Task<bool> ValidateFiscalPeriodWithOverlapAsync(IFiscalPeriod fiscalPeriod, string? excludeId = null)
+        {
+            var isValid = await ValidateFiscalPeriodAsync(fiscalPeriod);
+            if (!isValid) return false;
+
+            var hasOverlap = await HasOverlappingPeriodsAsync(fiscalPeriod.StartDate, fiscalPeriod.EndDate, excludeId);
+            return !hasOverlap;
+        }
+
+        /// <summary>
+        /// Clears all fiscal periods (for testing purposes)
+        /// </summary>
+        public void ClearAllFiscalPeriods()
+        {
+            _performanceLogger.Track(nameof(ClearAllFiscalPeriods), () =>
+            {
+                _objectDb.fiscalPeriods.Clear();
             });
         }
     }

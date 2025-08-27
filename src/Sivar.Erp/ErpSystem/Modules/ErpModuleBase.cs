@@ -5,7 +5,7 @@ using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.ErpSystem.Sequencers;
 
-namespace Sivar.Erp.ErpSystem.Services
+namespace Sivar.Erp.ErpSystem.Modules
 {
     /// <summary>
     /// Base class for services that provides common functionality related to options and activity recording

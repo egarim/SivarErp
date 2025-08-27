@@ -1,7 +1,7 @@
 using System;
 using Sivar.Erp.Modules.Documents.Core.Enums;
 
-namespace Sivar.Erp.Services.Taxes.TaxRule
+namespace Sivar.Erp.Modules.Taxes.TaxRule
 {
     /// <summary>
     /// Interface for tax rule entities that determine when and how taxes are applied

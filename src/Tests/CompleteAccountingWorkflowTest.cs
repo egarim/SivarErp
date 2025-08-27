@@ -11,30 +11,29 @@ using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Modules;
 using Sivar.Erp.Modules.Accounting;
+using Sivar.Erp.Modules.Accounting.BalanceCalculators;
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
+using Sivar.Erp.Modules.Accounting.Transactions;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
+using Sivar.Erp.Modules.Documents.Application.Services;
 using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Services;
+using Sivar.Erp.Modules.ImportExport;
 using Sivar.Erp.Modules.Inventory;
 using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Payments.Services;
-using Sivar.Erp.Services;
-using Sivar.Erp.Services.Accounting.BalanceCalculators;
-using Sivar.Erp.Services.Accounting.FiscalPeriods;
-using Sivar.Erp.Services.Accounting.Transactions;
-using Sivar.Erp.Services.Documents;
-using Sivar.Erp.Services.ImportExport;
-using Sivar.Erp.Services.Taxes;
-using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
-using Sivar.Erp.Services.Taxes.TaxGroup;
-using Sivar.Erp.Services.Taxes.TaxRule;
-using Sivar.Erp.Tests.Infrastructure;
+using Sivar.Erp.Modules.Taxes;
+using Sivar.Erp.Modules.Taxes.TaxAccountingProfiles;
+using Sivar.Erp.Modules.Taxes.TaxGroup;
+using Sivar.Erp.Modules.Taxes.TaxRule;
 using System;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Sivar.Erp.Tests
+namespace Tests
 {
     [TestFixture]
     /// <summary>
@@ -67,7 +66,7 @@ namespace Sivar.Erp.Tests
         private TaxRuleEvaluator? _taxRuleEvaluator;
         private ITaxAccountingProfileService? _taxAccountingService; private ITaxAccountingProfileImportExportService? _taxAccountingImportService;
         private IDocumentTotalsService? _documentTotalsService;
-        private Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
+        private IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
         private IDocumentAccountingProfileService? _documentAccountingProfileService; private ISecurityModule? _securityModule;
         private IPaymentService? _paymentService;
         private IPaymentMethodService? _paymentMethodService;
@@ -437,8 +436,8 @@ namespace Sivar.Erp.Tests
         private async Task SetupDocumentAccountingProfilesFromCsv()
         {
             // Get services from the service provider (configured by factory)
-            _documentAccountingProfileService = _serviceProvider.GetRequiredService<Sivar.Erp.Services.Documents.IDocumentAccountingProfileService>();
-            _documentAccountingProfileImportService = _serviceProvider.GetRequiredService<Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService>();
+            _documentAccountingProfileService = _serviceProvider.GetRequiredService<IDocumentAccountingProfileService>();
+            _documentAccountingProfileImportService = _serviceProvider.GetRequiredService<IDocumentAccountingProfileImportExportService>();
 
             // Read document accounting profiles from CSV file
             var dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
@@ -591,7 +590,7 @@ namespace Sivar.Erp.Tests
         private async Task ImportDocumentAccountingProfilesFromCsv()
         {
             // Get the service
-            var documentAccountingProfileService = _serviceProvider.GetRequiredService<Sivar.Erp.Services.Documents.IDocumentAccountingProfileImportExportService>();
+            var documentAccountingProfileService = _serviceProvider.GetRequiredService<Erp.Infrastructure.ImportExport.Documents.IDocumentAccountingProfileImportExportService>();
 
             // Read document accounting profiles from CSV file
             var dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
@@ -1057,7 +1056,7 @@ namespace Sivar.Erp.Tests
             // Find all debit entries
             var debitQueryOptions = new JournalEntryQueryOptions
             {
-                EntryType = Core.Enums.EntryType.Debit,
+                EntryType = EntryType.Debit,
                 OnlyPosted = true
             };
 

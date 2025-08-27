@@ -1,6 +1,6 @@
+using Sivar.Erp.Modules.Documents.Core.Enums;
 using System;
 using System.ComponentModel;
-using Sivar.Erp.Modules.Documents.Core.Enums;
 
 namespace Sivar.Erp.Modules.Documents.Core.ValueObjects
 {
@@ -22,12 +22,12 @@ namespace Sivar.Erp.Modules.Documents.Core.ValueObjects
         /// <summary>
         /// The old value of the property (if available)
         /// </summary>
-        public object? OldValue { get; }
+        public object OldValue { get; }
 
         /// <summary>
         /// The new value of the property (if available)
         /// </summary>
-        public object? NewValue { get; }
+        public object NewValue { get; }
 
         /// <summary>
         /// Path to the changed property for nested objects (e.g. "BusinessEntity.Name")
@@ -39,11 +39,11 @@ namespace Sivar.Erp.Modules.Documents.Core.ValueObjects
         /// </summary>
         public DocumentPropertyChangedEventArgs(
             string propertyName, 
-            object source, 
+            object source,
             ChangeType changeType,
-            object? oldValue = null,
-            object? newValue = null,
-            string? propertyPath = null) : base(propertyName)
+            object oldValue = null,
+            object newValue = null,
+            string propertyPath = null) : base(propertyName)
         {
             Source = source;
             ChangeType = changeType;

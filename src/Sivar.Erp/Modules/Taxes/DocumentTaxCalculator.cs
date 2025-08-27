@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sivar.Erp.Services.Taxes.TaxRule;
-using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Enums;
+using Sivar.Erp.Modules.Taxes.TaxAccountingProfiles;
+using Sivar.Erp.Modules.Taxes.TaxRule;
 
-namespace Sivar.Erp.Services.Taxes
+namespace Sivar.Erp.Modules.Taxes
 {
     /// <summary>
     /// Handles tax calculations at the document level
@@ -28,7 +29,7 @@ namespace Sivar.Erp.Services.Taxes
         /// <param name="taxAccountingService">Optional service for tax accounting profiles</param>
         public DocumentTaxCalculator(
             DocumentDto document, 
-            string documentTypeCode, 
+            string documentTypeCode,
             TaxRuleEvaluator taxRuleEvaluator,
             ITaxAccountingProfileService taxAccountingService = null)
         {

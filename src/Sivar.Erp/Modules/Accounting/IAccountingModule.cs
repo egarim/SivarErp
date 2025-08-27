@@ -1,11 +1,11 @@
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Sivar.Erp.Documents;
-using Sivar.Erp.Services.Accounting.FiscalPeriods;
-using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
+using Sivar.Erp.Modules.Accounting.Transactions;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.Accounting
 {

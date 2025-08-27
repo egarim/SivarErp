@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sivar.Erp.ErpSystem.TimeService;
-using Sivar.Erp.Services;
+using Sivar.Erp.Modules;
 
 namespace Sivar.Erp.ErpSystem.ActivityStream
 {

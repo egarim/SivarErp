@@ -1,3 +1,5 @@
+using System;
+
 namespace Sivar.Erp.Modules.Documents.Core.Enums
 {
     /// <summary>

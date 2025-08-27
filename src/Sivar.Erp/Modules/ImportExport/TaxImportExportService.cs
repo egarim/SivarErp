@@ -1,11 +1,11 @@
+using Sivar.Erp.Modules.Taxes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Sivar.Erp.Services.Taxes;
 
-namespace Sivar.Erp.Services.ImportExport
+namespace Sivar.Erp.Modules.ImportExport
 {
     /// <summary>
     /// Implementation of tax import/export service

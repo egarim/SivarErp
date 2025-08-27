@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Sivar.Erp.Modules.Documents.Core.Enums;
 
-namespace Sivar.Erp.Services.Taxes.TaxRule
+namespace Sivar.Erp.Modules.Taxes.TaxRule
 {
     /// <summary>
     /// Defines rules for when a tax should be applied based on document type and entity/item groups
