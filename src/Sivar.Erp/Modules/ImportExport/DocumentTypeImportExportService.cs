@@ -1,7 +1,6 @@
 using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 using Sivar.Erp.Modules.Documents.Core.Enums;
-using NewDocumentTypeDto = Sivar.Erp.Modules.Documents.Application.DTOs.DocumentTypeDto;
-using OldDocumentTypeDto = Sivar.Erp.Documents.DocumentTypeDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +29,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// <returns>Collection of imported document types and any validation errors</returns>
         public Task<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType> ImportedDocumentTypes, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
-            List<NewDocumentTypeDto> importedDocumentTypes = new List<NewDocumentTypeDto>();
+            List<DocumentTypeDto> importedDocumentTypes = new List<DocumentTypeDto>();
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(csvContent))
@@ -176,7 +175,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// </summary>
         /// <param name="documentType">Document type to validate</param>
         /// <returns>True if valid, false otherwise</returns>
-        private bool ValidateDocumentType(NewDocumentTypeDto documentType)
+        private bool ValidateDocumentType(DocumentTypeDto documentType)
         {
             if (string.IsNullOrWhiteSpace(documentType.Code))
                 return false;
@@ -193,9 +192,9 @@ namespace Sivar.Erp.Services.ImportExport
         /// <param name="headers">CSV header fields</param>
         /// <param name="fields">CSV data fields</param>
         /// <returns>New document type with populated properties</returns>
-        private NewDocumentTypeDto CreateDocumentTypeFromCsvFields(string[] headers, string[] fields)
+        private DocumentTypeDto CreateDocumentTypeFromCsvFields(string[] headers, string[] fields)
         {
-            var documentType = new NewDocumentTypeDto
+            var documentType = new DocumentTypeDto
             {
                 Oid = Guid.NewGuid(),
                 IsEnabled = true

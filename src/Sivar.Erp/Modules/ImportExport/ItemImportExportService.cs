@@ -1,7 +1,5 @@
 using Sivar.Erp.Modules.Documents.Core.Entities;
-using NewItemDto = Sivar.Erp.Modules.Documents.Application.DTOs.ItemDto;
-using OldItemDto = Sivar.Erp.Documents.ItemDto;
-using Sivar.Erp.Documents; // For ItemValidator
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,25 +13,6 @@ namespace Sivar.Erp.Services.ImportExport
     /// </summary>
     public class ItemImportExportService : IItemImportExportService
     {
-        private readonly ItemValidator _itemValidator;
-
-        /// <summary>
-        /// Initializes a new instance of the ItemImportExportService class
-        /// </summary>
-        public ItemImportExportService()
-        {
-            _itemValidator = new ItemValidator();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the ItemImportExportService class with a custom validator
-        /// </summary>
-        /// <param name="itemValidator">Custom item validator</param>
-        public ItemImportExportService(ItemValidator itemValidator)
-        {
-            _itemValidator = itemValidator ?? new ItemValidator();
-        }
-
         /// <summary>
         /// Imports items from a CSV file
         /// </summary>
@@ -42,7 +21,7 @@ namespace Sivar.Erp.Services.ImportExport
         /// <returns>Collection of imported items and any validation errors</returns>
         public Task<(IEnumerable<Sivar.Erp.Modules.Documents.Core.Entities.IItem> ImportedItems, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName)
         {
-            List<NewItemDto> importedItems = new List<NewItemDto>();
+            List<ItemDto> importedItems = new List<ItemDto>();
             List<string> errors = new List<string>();
 
             if (string.IsNullOrEmpty(csvContent))
@@ -85,14 +64,14 @@ namespace Sivar.Erp.Services.ImportExport
 
                     var item = CreateItemFromCsvFields(headers, fields);
 
-                    // Validate item using individual validation methods
-                    if (!_itemValidator.ValidateItemCode(item.Code))
+                    // Validate item using simple validation logic
+                    if (string.IsNullOrWhiteSpace(item.Code))
                     {
                         errors.Add($"Line {i + 1}: Invalid item code for item {item.Code}");
                         continue;
                     }
 
-                    if (!_itemValidator.ValidateItemPrice(item.BasePrice))
+                    if (item.BasePrice < 0)
                     {
                         errors.Add($"Line {i + 1}: Invalid price for item {item.Code}");
                         continue;
@@ -195,9 +174,9 @@ namespace Sivar.Erp.Services.ImportExport
         /// <param name="headers">CSV header fields</param>
         /// <param name="fields">CSV data fields</param>
         /// <returns>New item with populated properties</returns>
-        private NewItemDto CreateItemFromCsvFields(string[] headers, string[] fields)
+        private ItemDto CreateItemFromCsvFields(string[] headers, string[] fields)
         {
-            var item = new NewItemDto
+            var item = new ItemDto
             {
                 Oid = Guid.NewGuid()
             };
