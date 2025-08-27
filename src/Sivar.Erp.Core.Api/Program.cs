@@ -85,8 +85,8 @@ builder.Services.AddScoped<IUserInvitationService, UserInvitationService>();
 
 // Register accounting services
 builder.Services.AddScoped<IAccountService, AccountService>();
-// Journal Entry Service - Re-enabled for complete accounting module
-builder.Services.AddScoped<Sivar.Erp.Core.Application.Services.Accounting.IJournalEntryService, Sivar.Erp.Core.Application.Services.Accounting.JournalEntryServiceStub>();
+// Journal Entry Service - Minimal implementation for testing
+builder.Services.AddScoped<IJournalEntryService, MinimalJournalEntryService>();
 
 // Register Business Entity services (Phase 4)
 builder.Services.AddScoped<Sivar.Erp.Core.Application.Services.BusinessEntities.IBusinessEntityService, Sivar.Erp.Core.Application.Services.BusinessEntities.BusinessEntityService>();

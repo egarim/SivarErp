@@ -1,0 +1,33 @@
+@inject ILocalizedStringService LocalizationService
+
+<div class="loading-spinner @CssClass">
+    <div class="d-flex align-items-center">
+        <div class="spinner-border @SizeClass" role="status">
+            <span class="visually-hidden">@LocalizationService.GetString("Loading")</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <span class="ms-2">@Message</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Message { get; set; } = "";
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public SpinnerSize Size { get; set; } = SpinnerSize.Medium;
+
+    private string SizeClass => Size switch
+    {
+        SpinnerSize.Small => "spinner-border-sm",
+        SpinnerSize.Large => "spinner-border-lg",
+        _ => ""
+    };
+
+    public enum SpinnerSize
+    {
+        Small,
+        Medium,
+        Large
+    }
+}

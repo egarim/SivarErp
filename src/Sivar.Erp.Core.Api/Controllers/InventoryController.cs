@@ -1,0 +1,269 @@
+using Microsoft.AspNetCore.Mvc;
+using Sivar.Erp.Core.Application.Services.Inventory;
+using Sivar.Erp.Core.Shared.Dtos.Inventory;
+
+namespace Sivar.Erp.Core.Api.Controllers;
+
+/// <summary>
+/// API controller for inventory management
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class InventoryController : ControllerBase
+{
+    private readonly IInventoryService _inventoryService;
+    private readonly IStockLevelService _stockLevelService;
+    private readonly IInventoryTransactionService _transactionService;
+    private readonly ILogger<InventoryController> _logger;
+
+    public InventoryController(
+        IInventoryService inventoryService,
+        IStockLevelService stockLevelService,
+        IInventoryTransactionService transactionService,
+        ILogger<InventoryController> logger)
+    {
+        _inventoryService = inventoryService;
+        _stockLevelService = stockLevelService;
+        _transactionService = transactionService;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Get all inventory products
+    /// </summary>
+    [HttpGet("products")]
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] bool? isActive = null)
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var products = await _inventoryService.GetProductsAsync(companyId, page, pageSize, searchTerm, isActive);
+            return Ok(products);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving products");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get current stock levels for all products
+    /// </summary>
+    [HttpGet("stock-levels")]
+    public async Task<ActionResult<IEnumerable<StockLevelDto>>> GetStockLevels(
+        [FromQuery] Guid? warehouseId = null,
+        [FromQuery] Guid? productId = null)
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var stockLevels = await _stockLevelService.GetStockLevelsAsync(companyId, warehouseId, productId);
+            return Ok(stockLevels);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving stock levels");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get stock level for a specific product in a specific warehouse
+    /// </summary>
+    [HttpGet("stock-levels/{productId:guid}/{warehouseId:guid}")]
+    public async Task<ActionResult<StockLevelDto>> GetStockLevel(Guid productId, Guid warehouseId)
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var stockLevel = await _stockLevelService.GetStockLevelAsync(companyId, productId, warehouseId);
+            
+            if (stockLevel == null)
+                return NotFound();
+
+            return Ok(stockLevel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving stock level for product {ProductId} in warehouse {WarehouseId}", productId, warehouseId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get inventory transactions
+    /// </summary>
+    [HttpGet("transactions")]
+    public async Task<ActionResult<IEnumerable<InventoryTransactionDto>>> GetTransactions(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        [FromQuery] Guid? productId = null,
+        [FromQuery] Guid? warehouseId = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null)
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var transactions = await _transactionService.GetTransactionsAsync(
+                companyId, page, pageSize, productId, warehouseId, startDate, endDate);
+            return Ok(transactions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving inventory transactions");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Create a stock adjustment transaction
+    /// </summary>
+    [HttpPost("adjustments")]
+    public async Task<ActionResult<InventoryTransactionDto>> CreateStockAdjustment([FromBody] CreateStockAdjustmentDto adjustmentDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var companyId = GetCurrentCompanyId();
+            var userId = GetCurrentUserId();
+            
+            var transaction = await _transactionService.CreateStockAdjustmentAsync(adjustmentDto, companyId, userId);
+            return CreatedAtAction(nameof(GetTransaction), new { id = transaction.Id }, transaction);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating stock adjustment");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Create a stock transfer between warehouses
+    /// </summary>
+    [HttpPost("transfers")]
+    public async Task<ActionResult<IEnumerable<InventoryTransactionDto>>> CreateStockTransfer([FromBody] CreateStockTransferDto transferDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var companyId = GetCurrentCompanyId();
+            var userId = GetCurrentUserId();
+            
+            var transactions = await _transactionService.CreateStockTransferAsync(transferDto, companyId, userId);
+            return Ok(transactions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating stock transfer");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get a specific inventory transaction
+    /// </summary>
+    [HttpGet("transactions/{id:guid}")]
+    public async Task<ActionResult<InventoryTransactionDto>> GetTransaction(Guid id)
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var transaction = await _transactionService.GetTransactionByIdAsync(id, companyId);
+            
+            if (transaction == null)
+                return NotFound();
+
+            return Ok(transaction);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving inventory transaction {TransactionId}", id);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get low stock alerts
+    /// </summary>
+    [HttpGet("low-stock-alerts")]
+    public async Task<ActionResult<IEnumerable<LowStockAlertDto>>> GetLowStockAlerts()
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var alerts = await _stockLevelService.GetLowStockAlertsAsync(companyId);
+            return Ok(alerts);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving low stock alerts");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get inventory valuation report
+    /// </summary>
+    [HttpGet("valuation")]
+    public async Task<ActionResult<InventoryValuationDto>> GetInventoryValuation(
+        [FromQuery] DateTime? asOfDate = null,
+        [FromQuery] Guid? warehouseId = null)
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var valuation = await _inventoryService.GetInventoryValuationAsync(companyId, asOfDate, warehouseId);
+            return Ok(valuation);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving inventory valuation");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get inventory movement report (Kardex)
+    /// </summary>
+    [HttpGet("movement-report")]
+    public async Task<ActionResult<IEnumerable<InventoryMovementDto>>> GetInventoryMovementReport(
+        [FromQuery] Guid productId,
+        [FromQuery] Guid? warehouseId = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null)
+    {
+        try
+        {
+            var companyId = GetCurrentCompanyId();
+            var movements = await _inventoryService.GetInventoryMovementReportAsync(
+                companyId, productId, warehouseId, startDate, endDate);
+            return Ok(movements);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving inventory movement report for product {ProductId}", productId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    private Guid GetCurrentCompanyId()
+    {
+        var companyIdClaim = HttpContext.Request.Headers["X-Company-Id"].FirstOrDefault();
+        return Guid.TryParse(companyIdClaim, out var companyId) ? companyId : Guid.Empty;
+    }
+
+    private string GetCurrentUserId()
+    {
+        return User.FindFirst("sub")?.Value ?? "anonymous";
+    }
+}

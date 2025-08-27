@@ -117,6 +117,19 @@ public class PostJournalEntryDto
 }
 
 /// <summary>
+/// DTO for reversing journal entries
+/// </summary>
+public class ReverseJournalEntryDto
+{
+    /// <summary>
+    /// Reason for reversing the journal entry
+    /// </summary>
+    [Required]
+    [MaxLength(500)]
+    public string Reason { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// DTO for trial balance
 /// </summary>
 public class TrialBalanceDto

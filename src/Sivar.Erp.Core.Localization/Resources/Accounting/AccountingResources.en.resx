@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Accounting Module -->
+  <data name="Accounting" xml:space="preserve">
+    <value>Accounting</value>
+  </data>
+  <data name="ChartOfAccounts" xml:space="preserve">
+    <value>Chart of Accounts</value>
+  </data>
+  <data name="JournalEntries" xml:space="preserve">
+    <value>Journal Entries</value>
+  </data>
+  <data name="TrialBalance" xml:space="preserve">
+    <value>Trial Balance</value>
+  </data>
+  <data name="GeneralLedger" xml:space="preserve">
+    <value>General Ledger</value>
+  </data>
+  <data name="IncomeStatement" xml:space="preserve">
+    <value>Income Statement</value>
+  </data>
+  <data name="BalanceSheet" xml:space="preserve">
+    <value>Balance Sheet</value>
+  </data>
+  
+  <!-- Account Types -->
+  <data name="Asset" xml:space="preserve">
+    <value>Asset</value>
+  </data>
+  <data name="Liability" xml:space="preserve">
+    <value>Liability</value>
+  </data>
+  <data name="Equity" xml:space="preserve">
+    <value>Equity</value>
+  </data>
+  <data name="Income" xml:space="preserve">
+    <value>Income</value>
+  </data>
+  <data name="Expense" xml:space="preserve">
+    <value>Expense</value>
+  </data>
+  
+  <!-- Account Properties -->
+  <data name="AccountCode" xml:space="preserve">
+    <value>Account Code</value>
+  </data>
+  <data name="AccountName" xml:space="preserve">
+    <value>Account Name</value>
+  </data>
+  <data name="AccountType" xml:space="preserve">
+    <value>Account Type</value>
+  </data>
+  <data name="AccountLevel" xml:space="preserve">
+    <value>Account Level</value>
+  </data>
+  <data name="ParentAccount" xml:space="preserve">
+    <value>Parent Account</value>
+  </data>
+  <data name="IsActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  
+  <!-- Journal Entry -->
+  <data name="JournalEntry" xml:space="preserve">
+    <value>Journal Entry</value>
+  </data>
+  <data name="Reference" xml:space="preserve">
+    <value>Reference</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Debit" xml:space="preserve">
+    <value>Debit</value>
+  </data>
+  <data name="Credit" xml:space="preserve">
+    <value>Credit</value>
+  </data>
+  <data name="Balance" xml:space="preserve">
+    <value>Balance</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  
+  <!-- Journal Entry Status -->
+  <data name="Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="Posted" xml:space="preserve">
+    <value>Posted</value>
+  </data>
+  <data name="Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  
+  <!-- Actions -->
+  <data name="PostEntry" xml:space="preserve">
+    <value>Post Entry</value>
+  </data>
+  <data name="UnpostEntry" xml:space="preserve">
+    <value>Unpost Entry</value>
+  </data>
+  <data name="CreateEntry" xml:space="preserve">
+    <value>Create Entry</value>
+  </data>
+  <data name="EditEntry" xml:space="preserve">
+    <value>Edit Entry</value>
+  </data>
+  <data name="DeleteEntry" xml:space="preserve">
+    <value>Delete Entry</value>
+  </data>
+  
+  <!-- Validation Messages -->
+  <data name="EntryMustBalance" xml:space="preserve">
+    <value>Journal entry must be balanced (debits = credits)</value>
+  </data>
+  <data name="AccountRequired" xml:space="preserve">
+    <value>Account is required</value>
+  </data>
+  <data name="AmountRequired" xml:space="preserve">
+    <value>Amount is required</value>
+  </data>
+  <data name="AmountMustBePositive" xml:space="preserve">
+    <value>Amount must be positive</value>
+  </data>
+  <data name="DescriptionRequired" xml:space="preserve">
+    <value>Description is required</value>
+  </data>
+  <data name="AtLeastTwoLines" xml:space="preserve">
+    <value>Entry must have at least two lines</value>
+  </data>
+  
+  <!-- Success Messages -->
+  <data name="EntryPosted" xml:space="preserve">
+    <value>Entry posted successfully</value>
+  </data>
+  <data name="EntryUnposted" xml:space="preserve">
+    <value>Entry unposted successfully</value>
+  </data>
+  <data name="EntryCreated" xml:space="preserve">
+    <value>Entry created successfully</value>
+  </data>
+  <data name="EntryUpdated" xml:space="preserve">
+    <value>Entry updated successfully</value>
+  </data>
+  <data name="EntryDeleted" xml:space="preserve">
+    <value>Entry deleted successfully</value>
+  </data>
+</root>

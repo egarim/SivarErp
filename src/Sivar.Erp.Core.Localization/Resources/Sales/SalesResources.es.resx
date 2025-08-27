@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Sales Module -->
+  <data name="Sales" xml:space="preserve">
+    <value>Ventas</value>
+  </data>
+  <data name="SalesOrders" xml:space="preserve">
+    <value>Órdenes de Venta</value>
+  </data>
+  <data name="SalesOrder" xml:space="preserve">
+    <value>Orden de Venta</value>
+  </data>
+  <data name="Invoice" xml:space="preserve">
+    <value>Factura</value>
+  </data>
+  <data name="Invoices" xml:space="preserve">
+    <value>Facturas</value>
+  </data>
+  <data name="Customer" xml:space="preserve">
+    <value>Cliente</value>
+  </data>
+  <data name="Customers" xml:space="preserve">
+    <value>Clientes</value>
+  </data>
+  
+  <!-- Sales Order Fields -->
+  <data name="OrderNumber" xml:space="preserve">
+    <value>Número de Orden</value>
+  </data>
+  <data name="OrderDate" xml:space="preserve">
+    <value>Fecha de Orden</value>
+  </data>
+  <data name="DeliveryDate" xml:space="preserve">
+    <value>Fecha de Entrega</value>
+  </data>
+  <data name="OrderStatus" xml:space="preserve">
+    <value>Estado de Orden</value>
+  </data>
+  <data name="CustomerCode" xml:space="preserve">
+    <value>Código de Cliente</value>
+  </data>
+  <data name="CustomerName" xml:space="preserve">
+    <value>Nombre del Cliente</value>
+  </data>
+  
+  <!-- Invoice Fields -->
+  <data name="InvoiceNumber" xml:space="preserve">
+    <value>Número de Factura</value>
+  </data>
+  <data name="InvoiceDate" xml:space="preserve">
+    <value>Fecha de Factura</value>
+  </data>
+  <data name="DueDate" xml:space="preserve">
+    <value>Fecha de Vencimiento</value>
+  </data>
+  <data name="InvoiceStatus" xml:space="preserve">
+    <value>Estado de Factura</value>
+  </data>
+  <data name="TotalAmount" xml:space="preserve">
+    <value>Monto Total</value>
+  </data>
+  <data name="SubTotal" xml:space="preserve">
+    <value>Subtotal</value>
+  </data>
+  <data name="TaxAmount" xml:space="preserve">
+    <value>Monto de Impuesto</value>
+  </data>
+  <data name="DiscountAmount" xml:space="preserve">
+    <value>Monto de Descuento</value>
+  </data>
+  
+  <!-- Product Fields -->
+  <data name="Product" xml:space="preserve">
+    <value>Producto</value>
+  </data>
+  <data name="ProductCode" xml:space="preserve">
+    <value>Código de Producto</value>
+  </data>
+  <data name="ProductName" xml:space="preserve">
+    <value>Nombre del Producto</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Cantidad</value>
+  </data>
+  <data name="UnitPrice" xml:space="preserve">
+    <value>Precio Unitario</value>
+  </data>
+  <data name="LineTotal" xml:space="preserve">
+    <value>Total de Línea</value>
+  </data>
+  
+  <!-- Actions -->
+  <data name="CreateSalesOrder" xml:space="preserve">
+    <value>Crear Orden de Venta</value>
+  </data>
+  <data name="CreateInvoice" xml:space="preserve">
+    <value>Crear Factura</value>
+  </data>
+  <data name="ConvertToInvoice" xml:space="preserve">
+    <value>Convertir a Factura</value>
+  </data>
+  <data name="PostInvoice" xml:space="preserve">
+    <value>Contabilizar Factura</value>
+  </data>
+  <data name="CancelInvoice" xml:space="preserve">
+    <value>Cancelar Factura</value>
+  </data>
+  <data name="PrintInvoice" xml:space="preserve">
+    <value>Imprimir Factura</value>
+  </data>
+  <data name="EmailInvoice" xml:space="preserve">
+    <value>Enviar Factura por Email</value>
+  </data>
+  
+  <!-- Status Values -->
+  <data name="Draft" xml:space="preserve">
+    <value>Borrador</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pendiente</value>
+  </data>
+  <data name="Confirmed" xml:space="preserve">
+    <value>Confirmado</value>
+  </data>
+  <data name="Delivered" xml:space="preserve">
+    <value>Entregado</value>
+  </data>
+  <data name="Paid" xml:space="preserve">
+    <value>Pagado</value>
+  </data>
+  <data name="Overdue" xml:space="preserve">
+    <value>Vencido</value>
+  </data>
+  
+  <!-- Messages -->
+  <data name="SalesOrderCreated" xml:space="preserve">
+    <value>Orden de venta creada exitosamente</value>
+  </data>
+  <data name="InvoiceCreated" xml:space="preserve">
+    <value>Factura creada exitosamente</value>
+  </data>
+  <data name="InvoicePosted" xml:space="preserve">
+    <value>Factura contabilizada exitosamente</value>
+  </data>
+  <data name="OrderConvertedToInvoice" xml:space="preserve">
+    <value>Orden convertida a factura exitosamente</value>
+  </data>
+</root>

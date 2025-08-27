@@ -1,0 +1,64 @@
+@inject ILocalizedStringService LocalizationService
+
+<div class="alert alert-@AlertTypeClass @(IsVisible ? "" : "d-none") @CssClass" role="alert">
+    <div class="d-flex align-items-center">
+        @if (ShowIcon)
+        {
+            <i class="@IconClass me-2"></i>
+        }
+        <div class="flex-grow-1">
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <h6 class="alert-heading mb-1">@Title</h6>
+            }
+            @Message
+        </div>
+        @if (IsDismissible)
+        {
+            <button type="button" class="btn-close" @onclick="Dismiss" aria-label="@LocalizationService.GetString("Close")"></button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Message { get; set; } = "";
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public AlertType Type { get; set; } = AlertType.Info;
+    [Parameter] public bool IsVisible { get; set; } = true;
+    [Parameter] public bool IsDismissible { get; set; } = true;
+    [Parameter] public bool ShowIcon { get; set; } = true;
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public EventCallback OnDismiss { get; set; }
+
+    private string AlertTypeClass => Type switch
+    {
+        AlertType.Success => "success",
+        AlertType.Warning => "warning",
+        AlertType.Error => "danger",
+        AlertType.Info => "info",
+        _ => "info"
+    };
+
+    private string IconClass => Type switch
+    {
+        AlertType.Success => "fas fa-check-circle",
+        AlertType.Warning => "fas fa-exclamation-triangle",
+        AlertType.Error => "fas fa-exclamation-circle",
+        AlertType.Info => "fas fa-info-circle",
+        _ => "fas fa-info-circle"
+    };
+
+    private async Task Dismiss()
+    {
+        IsVisible = false;
+        await OnDismiss.InvokeAsync();
+    }
+
+    public enum AlertType
+    {
+        Success,
+        Warning,
+        Error,
+        Info
+    }
+}

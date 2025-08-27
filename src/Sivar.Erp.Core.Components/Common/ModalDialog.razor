@@ -1,0 +1,74 @@
+@inject ILocalizedStringService LocalizationService
+
+<div class="modal @(IsVisible ? "show" : "")" style="display: @(IsVisible ? "block" : "none")" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                @if (ShowCloseButton)
+                {
+                    <button type="button" class="btn-close" @onclick="OnClose" aria-label="@LocalizationService.GetString("Close")"></button>
+                }
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            @if (ShowFooter)
+            {
+                <div class="modal-footer">
+                    @if (FooterContent != null)
+                    {
+                        @FooterContent
+                    }
+                    else
+                    {
+                        @if (ShowCancelButton)
+                        {
+                            <button type="button" class="btn btn-secondary" @onclick="OnCancel">
+                                @LocalizationService.GetString("Cancel")
+                            </button>
+                        }
+                        @if (ShowSaveButton)
+                        {
+                            <button type="button" class="btn btn-primary" @onclick="OnSave" disabled="@IsSaving">
+                                @if (IsSaving)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                }
+                                @LocalizationService.GetString("Save")
+                            </button>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (IsVisible)
+{
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public bool ShowCloseButton { get; set; } = true;
+    [Parameter] public bool ShowFooter { get; set; } = true;
+    [Parameter] public bool ShowCancelButton { get; set; } = true;
+    [Parameter] public bool ShowSaveButton { get; set; } = true;
+    [Parameter] public bool IsSaving { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (IsVisible)
+        {
+            StateHasChanged();
+        }
+    }
+}

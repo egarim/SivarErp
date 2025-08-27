@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Sivar.Erp.Core.Application.Services.Accounting;
-using Sivar.Erp.Core.Application.DTOs.Accounting;
+using Sivar.Erp.Core.Shared.DTOs.Accounting;
 using Sivar.Erp.Core.Shared.Responses;
 using Sivar.Erp.Core.Domain.Enums;
 
@@ -57,19 +57,12 @@ public class JournalEntriesController : ControllerBase
     {
         try
         {
-            ApiResponse<IEnumerable<JournalEntryDto>> result;
+            ApiResponse<List<JournalEntryDto>> result;
             
-            if (fromDate.HasValue && toDate.HasValue)
-            {
-                result = await _journalEntryService.GetJournalEntriesByDateRangeAsync(fromDate.Value, toDate.Value, companyId, cancellationToken);
-            }
-            else
-            {
-                result = await _journalEntryService.GetJournalEntriesPagedAsync(pageNumber, pageSize, companyId, status, cancellationToken);
-            }
+            // Use the unified GetJournalEntriesAsync method
+            result = await _journalEntryService.GetJournalEntriesAsync(companyId, fromDate, toDate, status, cancellationToken);
             
-            var listResult = ApiResponse<List<JournalEntryDto>>.Success(result.Data?.ToList() ?? new List<JournalEntryDto>());
-            return result.IsSuccess ? Ok(listResult) : BadRequest(listResult);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
         catch (Exception ex)
         {
@@ -103,20 +96,21 @@ public class JournalEntriesController : ControllerBase
     /// Posts a journal entry to make it permanent
     /// </summary>
     [HttpPost("{id:guid}/post")]
-    public async Task<ActionResult<ApiResponse<JournalEntryDto>>> PostJournalEntry(
+    public async Task<ActionResult<ApiResponse<string>>> PostJournalEntry(
         Guid id,
+        [FromBody] PostJournalEntryDto postDto,
         [FromHeader] Guid companyId,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await _journalEntryService.PostJournalEntryAsync(id, companyId, cancellationToken);
+            var result = await _journalEntryService.PostJournalEntryAsync(id, postDto, companyId, cancellationToken);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error posting journal entry {Id}", id);
-            return StatusCode(500, ApiResponse<JournalEntryDto>.Failure("Internal server error"));
+            return StatusCode(500, ApiResponse<string>.Failure("Internal server error"));
         }
     }
 
@@ -126,7 +120,7 @@ public class JournalEntriesController : ControllerBase
     [HttpPost("{id:guid}/reverse")]
     public async Task<ActionResult<ApiResponse<JournalEntryDto>>> ReverseJournalEntry(
         Guid id,
-        [FromBody] PostJournalEntryDto dto,
+        [FromBody] ReverseJournalEntryDto dto,
         [FromHeader] Guid companyId,
         CancellationToken cancellationToken = default)
     {

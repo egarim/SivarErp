@@ -1,0 +1,106 @@
+@using Sivar.Erp.Core.Shared.Dtos.Accounting
+@inject ILocalizedStringService LocalizationService
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">@LocalizationService.GetString("JournalEntries")</h5>
+        <button class="btn btn-primary" @onclick="OnAddEntry">
+            <i class="fas fa-plus me-1"></i>
+            @LocalizationService.GetString("Add")
+        </button>
+    </div>
+    <div class="card-body">
+        @if (IsLoading)
+        {
+            <LoadingSpinner Message="@LocalizationService.GetString("Loading")" />
+        }
+        else if (JournalEntries?.Any() == true)
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>@LocalizationService.GetString("Date")</th>
+                            <th>@LocalizationService.GetString("Reference")</th>
+                            <th>@LocalizationService.GetString("Description")</th>
+                            <th>@LocalizationService.GetString("Amount")</th>
+                            <th>Status</th>
+                            <th>@LocalizationService.GetString("Actions")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in JournalEntries)
+                        {
+                            <tr>
+                                <td>@entry.Date.ToString("dd/MM/yyyy")</td>
+                                <td>@entry.Reference</td>
+                                <td>@entry.Description</td>
+                                <td class="text-end">@entry.TotalAmount.ToString("C")</td>
+                                <td>
+                                    <span class="badge bg-@GetStatusBadgeClass(entry.Status)">
+                                        @GetStatusText(entry.Status)
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-primary" @onclick="() => OnEditEntry(entry.Id)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        @if (entry.Status == JournalEntryStatus.Draft)
+                                        {
+                                            <button class="btn btn-outline-success" @onclick="() => OnPostEntry(entry.Id)">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        }
+                                        else if (entry.Status == JournalEntryStatus.Posted)
+                                        {
+                                            <button class="btn btn-outline-warning" @onclick="() => OnUnpostEntry(entry.Id)">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        }
+                                        <button class="btn btn-outline-danger" @onclick="() => OnDeleteEntry(entry.Id)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No journal entries found</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public IEnumerable<JournalEntryDto>? JournalEntries { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public EventCallback OnAddEntry { get; set; }
+    [Parameter] public EventCallback<int> OnEditEntry { get; set; }
+    [Parameter] public EventCallback<int> OnPostEntry { get; set; }
+    [Parameter] public EventCallback<int> OnUnpostEntry { get; set; }
+    [Parameter] public EventCallback<int> OnDeleteEntry { get; set; }
+
+    private string GetStatusBadgeClass(JournalEntryStatus status) => status switch
+    {
+        JournalEntryStatus.Draft => "secondary",
+        JournalEntryStatus.Posted => "success",
+        JournalEntryStatus.Cancelled => "danger",
+        _ => "secondary"
+    };
+
+    private string GetStatusText(JournalEntryStatus status) => status switch
+    {
+        JournalEntryStatus.Draft => LocalizationService.GetString("Draft"),
+        JournalEntryStatus.Posted => LocalizationService.GetString("Posted"),
+        JournalEntryStatus.Cancelled => LocalizationService.GetString("Cancelled"),
+        _ => status.ToString()
+    };
+}

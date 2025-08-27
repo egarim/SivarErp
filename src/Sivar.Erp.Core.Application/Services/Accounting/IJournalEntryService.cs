@@ -1,7 +1,6 @@
-using Sivar.Erp.Core.Application.DTOs.Accounting;
+using Sivar.Erp.Core.Shared.DTOs.Accounting;
 using Sivar.Erp.Core.Shared.Responses;
 using Sivar.Erp.Core.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace Sivar.Erp.Core.Application.Services.Accounting;
 
@@ -29,36 +28,28 @@ public interface IJournalEntryService
     /// <summary>
     /// Gets journal entries by date range
     /// </summary>
-    Task<ApiResponse<IEnumerable<JournalEntryDto>>> GetJournalEntriesByDateRangeAsync(
-        DateOnly startDate, 
-        DateOnly endDate, 
-        Guid companyId, 
+    Task<ApiResponse<List<JournalEntryDto>>> GetJournalEntriesAsync(
+        Guid companyId,
+        DateOnly? fromDate = null,
+        DateOnly? toDate = null,
+        JournalEntryStatus? status = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets journal entries with pagination
+    /// Posts a journal entry
     /// </summary>
-    Task<ApiResponse<IEnumerable<JournalEntryDto>>> GetJournalEntriesPagedAsync(
-        int pageNumber, 
-        int pageSize, 
-        Guid companyId, 
-        JournalEntryStatus? status = null, 
+    Task<ApiResponse<string>> PostJournalEntryAsync(
+        Guid id,
+        PostJournalEntryDto dto,
+        Guid companyId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a journal entry (only if not posted)
+    /// Unposts a journal entry
     /// </summary>
-    Task<ApiResponse<bool>> DeleteJournalEntryAsync(
-        Guid id, 
-        Guid companyId, 
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Posts a journal entry (makes it permanent and affects balances)
-    /// </summary>
-    Task<ApiResponse<JournalEntryDto>> PostJournalEntryAsync(
-        Guid id, 
-        Guid companyId, 
+    Task<ApiResponse<string>> UnpostJournalEntryAsync(
+        Guid id,
+        Guid companyId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -83,14 +74,6 @@ public interface IJournalEntryService
     /// </summary>
     Task<ApiResponse<TrialBalanceDto>> GetTrialBalanceAsync(
         DateTime asOfDate, 
-        Guid companyId, 
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Validates a journal entry before creation
-    /// </summary>
-    Task<ApiResponse<ValidationResult>> ValidateJournalEntryAsync(
-        CreateJournalEntryDto dto, 
         Guid companyId, 
         CancellationToken cancellationToken = default);
 }
