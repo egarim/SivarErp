@@ -1,4 +1,4 @@
-﻿using Sivar.Erp.BusinessEntities;
+﻿using Sivar.Erp.Core.Interfaces;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.ActivityStream;
 using Sivar.Erp.ErpSystem.Diagnostics;

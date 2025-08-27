@@ -224,15 +224,17 @@ namespace Sivar.Erp.Services.Documents
 
                 document.DocumentTotals.Add(inventoryDto);
 
-                // Calculate total amount including taxes
-                var totalAmount = document.DocumentTotals.Sum(t => t.Total);
+                // For purchase invoices, accounts payable should be the subtotal only
+                // Withholding taxes (like IVAR) are paid by the buyer to the government, not to the supplier
+                // So they should not be included in the amount owed to the supplier
+                var accountsPayableAmount = subtotal;
 
                 // Add accounts payable (credit)
                 var accountsPayableDto = new TotalDto
                 {
                     Oid = Guid.NewGuid(),
                     Concept = "Accounts Payable",
-                    Total = totalAmount,
+                    Total = accountsPayableAmount,
                     CreditAccountCode = "ACCOUNTS_PAYABLE", // Use mapping key
                     IncludeInTransaction = true
                 };

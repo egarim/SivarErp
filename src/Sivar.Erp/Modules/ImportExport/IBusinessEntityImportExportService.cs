@@ -1,4 +1,5 @@
-using Sivar.Erp.BusinessEntities;
+using Sivar.Erp.Modules.BusinessEntities.Application.DTOs;
+using Sivar.Erp.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

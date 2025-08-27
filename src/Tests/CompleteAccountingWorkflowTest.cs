@@ -173,10 +173,16 @@ namespace Sivar.Erp.Tests
 
                 // Step 3a: Purchase Document Creation
                 results.Add("=== STEP 3A: PURCHASE DOCUMENT CREATION ===");
+                results.Add($"Debug: BusinessEntities count: {_objectDb.BusinessEntities?.Count ?? 0}");
+                if (_objectDb.BusinessEntities?.Any() == true)
+                {
+                    var firstEntity = _objectDb.BusinessEntities.First();
+                    results.Add($"Debug: First business entity: {firstEntity?.Code ?? "NULL"} - {firstEntity?.Name ?? "NULL"}");
+                }
                 var purchaseDocument = CreatePurchaseInvoiceDocument();
                 results.Add($"✓ Created Purchase Invoice #{purchaseDocument.DocumentNumber}");
                 results.Add($"✓ Document date: {purchaseDocument.Date:M/d/yyyy}");
-                results.Add($"✓ Supplier: {purchaseDocument.BusinessEntity.Name}");
+                results.Add($"✓ Supplier: {purchaseDocument.BusinessEntity?.Name ?? "NULL"}");
                 results.Add($"✓ Document has {purchaseDocument.Lines.Count} lines"); results.Add("");
 
                 // Step 4a: Purchase Tax Calculation
@@ -187,7 +193,9 @@ namespace Sivar.Erp.Tests
                 foreach (var total in purchaseDocument.DocumentTotals)
                 {
                     var totalDto = total as TotalDto;
-                    results.Add($"   - {total.Concept}: ${total.Total:F2} " +
+                    var concept = total?.Concept ?? "NULL";
+                    var totalAmount = total?.Total.ToString("F2") ?? "NULL";
+                    results.Add($"   - {concept}: ${totalAmount} " +
                         $"(Debit: {totalDto?.DebitAccountCode ?? "N/A"}, " +
                         $"Credit: {totalDto?.CreditAccountCode ?? "N/A"}, " +
                         $"Include: {totalDto?.IncludeInTransaction ?? false})");
@@ -204,6 +212,19 @@ namespace Sivar.Erp.Tests
 
                 // Post purchase transaction
                 purchaseTransaction.LedgerEntries = purchaseLedgerEntries;
+                
+                // Debug: Show all entries before posting
+                results.Add("DEBUG - Purchase Ledger Entries:");
+                var totalDebits = 0m;
+                var totalCredits = 0m;
+                foreach (var entry in purchaseLedgerEntries)
+                {
+                    results.Add($"  {entry.EntryType}: {entry.OfficialCode} - ${entry.Amount:F2}");
+                    if (entry.EntryType == EntryType.Debit) totalDebits += entry.Amount;
+                    if (entry.EntryType == EntryType.Credit) totalCredits += entry.Amount;
+                }
+                results.Add($"Total Debits: ${totalDebits:F2}, Total Credits: ${totalCredits:F2}, Difference: ${Math.Abs(totalDebits - totalCredits):F2}");
+                
                 await _accountingModule!.PostTransactionAsync(purchaseTransaction);
                 results.Add("✓ Purchase transaction posted successfully");
                 results.Add("");
@@ -646,7 +667,7 @@ namespace Sivar.Erp.Tests
             // Create document with test scenario data
             var document = new DocumentDto
             {
-                DocumentType = documentType as Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType,
+                DocumentType = new SimpleDocumentType { Code = documentType.Code, Name = documentType.Name },
                 DocumentNumber = "CCF-2025-001",
                 Date = new DateOnly(2025, 6, 18),
                 BusinessEntity = businessEntity as Sivar.Erp.Core.Interfaces.IBusinessEntity,
@@ -697,13 +718,19 @@ namespace Sivar.Erp.Tests
         private DocumentDto CreatePurchaseInvoiceDocument()
         {
             // Get supplier business entity and purchase document type
-            var supplier = _objectDb.BusinessEntities.FirstOrDefault(be => be.Code == "PR001"); // Use a supplier code
-            var documentType = _objectDb.DocumentTypes.FirstOrDefault(dt => dt.Code == "PIF"); // Purchase Invoice
+            var supplier = _objectDb.BusinessEntities?.FirstOrDefault(be => be.Code == "PR001"); // Use a supplier code
+            var documentType = _objectDb.DocumentTypes?.FirstOrDefault(dt => dt.Code == "PIF"); // Purchase Invoice
 
-            if (supplier == null)
+            if (supplier == null && _objectDb.BusinessEntities?.Any() == true)
             {
                 // If no specific supplier found, use the first business entity as supplier
                 supplier = _objectDb.BusinessEntities.First();
+            }
+
+            if (supplier == null)
+            {
+                // Create a dummy supplier if none exists
+                throw new InvalidOperationException("No business entities found in ObjectDb. Data import may have failed.");
             }
 
             if (documentType == null)
@@ -712,10 +739,21 @@ namespace Sivar.Erp.Tests
                 documentType = new DocumentTypeDto { Code = "PIF", Name = "Purchase Invoice" };
             }
 
+            // For now, we'll bypass the casting issue by creating a simple mock document type
+            // This is a temporary fix until we complete the Documents module consolidation
+            var mockDocumentType = new SimpleDocumentType
+            {
+                Oid = Guid.NewGuid(),
+                Code = documentType.Code,
+                Name = documentType.Name,
+                IsEnabled = true,
+                DocumentOperation = "PurchaseInvoice"
+            };
+
             // Create purchase document
             var document = new DocumentDto
             {
-                DocumentType = documentType as Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType,
+                DocumentType = mockDocumentType,
                 DocumentNumber = "PIF-2025-001",
                 Date = new DateOnly(2025, 6, 17), // Day before sales
                 BusinessEntity = supplier as Sivar.Erp.Core.Interfaces.IBusinessEntity,
@@ -762,6 +800,16 @@ namespace Sivar.Erp.Tests
                  /// </summary>
         private void CalculateDocumentTaxes(DocumentDto document, string documentOperation = "SalesInvoice")
         {
+            // Add null checks for debugging
+            if (document == null)
+                throw new ArgumentNullException(nameof(document), "Document is null");
+            if (document.DocumentType == null)
+                throw new ArgumentNullException(nameof(document.DocumentType), "Document.DocumentType is null");
+            if (_taxRuleEvaluator == null)
+                throw new InvalidOperationException("_taxRuleEvaluator is null - SetupTaxAccountingProfilesFromCsv may not have been called");
+            if (_taxAccountingService == null)
+                throw new InvalidOperationException("_taxAccountingService is null - SetupTaxAccountingProfilesFromCsv may not have been called");
+
             _taxCalculator = new DocumentTaxCalculator(
                 document,
                 document.DocumentType.Code,
@@ -1420,6 +1468,46 @@ namespace Sivar.Erp.Tests
                 }
                 throw;
             }
+        }
+
+        [Test]
+        /// <summary>
+        /// Simple test to verify that BusinessEntities refactoring didn't break data import
+        /// </summary>
+        public async Task TestBusinessEntitiesRefactoring()
+        {
+            // Get DataImportHelper from the service provider (configured by factory)
+            var dataImportHelper = _serviceProvider.GetRequiredService<DataImportHelper>();
+
+            // Use your existing data directory with CSV files
+            var dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "ElSalvador");
+            dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
+
+            // Import all data using the factory-configured DataImportHelper
+            var importResults = await dataImportHelper.ImportAllDataAsync(_objectDb, dataDirectory);
+
+            // Check if BusinessEntities were imported
+            Assert.That(_objectDb.BusinessEntities, Is.Not.Null, "BusinessEntities collection should not be null");
+            Assert.That(_objectDb.BusinessEntities.Count, Is.GreaterThan(0), "BusinessEntities should be imported");
+            
+            var firstEntity = _objectDb.BusinessEntities.First();
+            Assert.That(firstEntity, Is.Not.Null, "First business entity should not be null");
+            Assert.That(firstEntity.Code, Is.Not.Null.And.Not.Empty, "Business entity code should not be empty");
+            Assert.That(firstEntity.Name, Is.Not.Null.And.Not.Empty, "Business entity name should not be empty");
+            
+            Console.WriteLine($"Successfully imported {_objectDb.BusinessEntities.Count} business entities");
+            Console.WriteLine($"First entity: {firstEntity.Code} - {firstEntity.Name}");
+        }
+
+        // Simple implementation of the Modules IDocumentType for testing
+        private class SimpleDocumentType : Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType
+        {
+            public Guid Oid { get; set; }
+            public string Code { get; set; } = string.Empty;
+            public string Name { get; set; } = string.Empty;
+            public bool IsEnabled { get; set; } = true;
+            public string DocumentOperation { get; set; } = string.Empty;
+            public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
         }
     }
 }
