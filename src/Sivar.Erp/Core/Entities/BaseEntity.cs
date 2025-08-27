@@ -1,3 +1,5 @@
+using Sivar.Erp.Core.Interfaces;
+
 namespace Sivar.Erp.Core.Entities
 {
     /// <summary>

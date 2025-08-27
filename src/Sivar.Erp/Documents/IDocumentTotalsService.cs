@@ -1,4 +1,5 @@
 using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using System.Threading.Tasks;
 
 namespace Sivar.Erp.Services.Documents
@@ -14,7 +15,7 @@ namespace Sivar.Erp.Services.Documents
         /// <param name="document">The document to add totals to</param>
         /// <param name="documentOperation">The document operation type (e.g. "SalesInvoice")</param>
         /// <returns>True if totals were added successfully</returns>
-        bool AddDocumentAccountingTotals(IDocument document, string documentOperation);
+        bool AddDocumentAccountingTotals(Sivar.Erp.Modules.Documents.Core.Entities.IDocument document, string documentOperation);
 
         /// <summary>
         /// Creates a document accounting profile

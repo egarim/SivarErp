@@ -1,4 +1,7 @@
-using Sivar.Erp.BusinessEntities;
+using Sivar.Erp.Core.Interfaces;
+using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Modules.Documents.Core.Enums;
+using Sivar.Erp.Modules.Documents.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,7 +9,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Modules.Documents.Application.DTOs
 {
     /// <summary>
     /// Data Transfer Object implementation for IDocument with enhanced change notification

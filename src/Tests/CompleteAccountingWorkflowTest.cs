@@ -38,6 +38,9 @@ using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Inventory;
 using Sivar.Erp.Modules.Inventory.Reports;
 using System.Diagnostics;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
+using Sivar.Erp.Modules.Documents.Core.Entities;
+using Sivar.Erp.Core.Interfaces;
 
 namespace Sivar.Erp.Tests
 {
@@ -643,12 +646,12 @@ namespace Sivar.Erp.Tests
             // Create document with test scenario data
             var document = new DocumentDto
             {
-                DocumentType = documentType,
+                DocumentType = documentType as Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType,
                 DocumentNumber = "CCF-2025-001",
                 Date = new DateOnly(2025, 6, 18),
-                BusinessEntity = businessEntity,
-                Lines = new List<IDocumentLine>(),
-                DocumentTotals = new List<ITotal>()
+                BusinessEntity = businessEntity as Sivar.Erp.Core.Interfaces.IBusinessEntity,
+                Lines = new List<Sivar.Erp.Modules.Documents.Core.Entities.IDocumentLine>(),
+                DocumentTotals = new List<Sivar.Erp.Modules.Documents.Core.Entities.ITotal>()
             };
 
             // Add document lines to match the original test results
@@ -661,7 +664,7 @@ namespace Sivar.Erp.Tests
                 var line1 = new LineDto
                 {
                     LineNumber = 1,
-                    Item = item1,
+                    Item = item1 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
                     Quantity = 2,
                     UnitPrice = 150.0m,  // Adjusted to get $450 total
                     Amount = 300.0m      // 2 × $150 = $300
@@ -674,7 +677,7 @@ namespace Sivar.Erp.Tests
                 var line2 = new LineDto
                 {
                     LineNumber = 2,
-                    Item = item2,
+                    Item = item2 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
                     Quantity = 1,
                     UnitPrice = 150.0m,  // Adjusted to get $450 total
                     Amount = 150.0m      // 1 × $150 = $150
@@ -712,12 +715,12 @@ namespace Sivar.Erp.Tests
             // Create purchase document
             var document = new DocumentDto
             {
-                DocumentType = documentType,
+                DocumentType = documentType as Sivar.Erp.Modules.Documents.Core.Entities.IDocumentType,
                 DocumentNumber = "PIF-2025-001",
                 Date = new DateOnly(2025, 6, 17), // Day before sales
-                BusinessEntity = supplier,
-                Lines = new List<IDocumentLine>(),
-                DocumentTotals = new List<ITotal>()
+                BusinessEntity = supplier as Sivar.Erp.Core.Interfaces.IBusinessEntity,
+                Lines = new List<Sivar.Erp.Modules.Documents.Core.Entities.IDocumentLine>(),
+                DocumentTotals = new List<Sivar.Erp.Modules.Documents.Core.Entities.ITotal>()
             };
 
             // Add purchase lines (same items we'll sell later)
@@ -729,7 +732,7 @@ namespace Sivar.Erp.Tests
                 var line1 = new LineDto
                 {
                     LineNumber = 1,
-                    Item = item1,
+                    Item = item1 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
                     Quantity = 2,
                     UnitPrice = 90.0m,  // Purchase cost (lower than sales price)
                     Amount = 180.0m     // 2 × $90 = $180
@@ -742,7 +745,7 @@ namespace Sivar.Erp.Tests
                 var line2 = new LineDto
                 {
                     LineNumber = 2,
-                    Item = item2,
+                    Item = item2 as Sivar.Erp.Modules.Documents.Core.Entities.IItem,
                     Quantity = 1,
                     UnitPrice = 90.0m,  // Purchase cost (lower than sales price)
                     Amount = 90.0m      // 1 × $90 = $90
@@ -1187,7 +1190,11 @@ namespace Sivar.Erp.Tests
                     var item = _objectDb.Items.FirstOrDefault(i => i.Code == itemCode);
                     if (item != null)
                     {
-                        await GenerateSimulatedKardexReport(results, item, purchaseDocument, salesDocument);
+                        var newItem = item as Sivar.Erp.Modules.Documents.Core.Entities.IItem;
+                        if (newItem != null)
+                        {
+                            GenerateSimulatedKardexReport(results, newItem, purchaseDocument, salesDocument);
+                        }
                         results.Add("");
                     }
                 }
@@ -1253,12 +1260,14 @@ namespace Sivar.Erp.Tests
                 results.Add($"❌ Error in inventory demonstration: {ex.Message}");
                 results.Add("Note: This may be expected if inventory services are not fully configured.");
             }
+            
+            await Task.CompletedTask;
         }
 
         /// <summary>
         /// Generates a simulated kardex report for an inventory item
         /// </summary>
-        private async Task GenerateSimulatedKardexReport(List<string> results, IItem item, DocumentDto purchaseDocument, DocumentDto salesDocument)
+        private void GenerateSimulatedKardexReport(List<string> results, Sivar.Erp.Modules.Documents.Core.Entities.IItem item, DocumentDto purchaseDocument, DocumentDto salesDocument)
         {
             results.Add($"KARDEX REPORT - {item.Code} ({item.Description})");
             results.Add($"Period: {purchaseDocument.Date:yyyy-MM-dd} to {salesDocument.Date:yyyy-MM-dd}");

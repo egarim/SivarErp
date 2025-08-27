@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Payments.Services;
 using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 using Sivar.Erp.Services.Accounting.Transactions;
 using Sivar.Erp.Services;
 

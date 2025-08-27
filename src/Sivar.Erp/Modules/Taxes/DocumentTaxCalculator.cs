@@ -3,6 +3,7 @@ using System.Linq;
 using Sivar.Erp.Services.Taxes.TaxRule;
 using Sivar.Erp.Services.Taxes.TaxAccountingProfiles;
 using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 
 namespace Sivar.Erp.Services.Taxes
 {
@@ -214,15 +215,18 @@ namespace Sivar.Erp.Services.Taxes
         {
             if (_taxAccountingService != null && _document.DocumentType != null)
             {
-                var accountingInfo = _taxAccountingService.GetTaxAccountingInfo(
-                    _document.DocumentType.DocumentOperation, 
-                    tax.Code);
-                    
-                if (accountingInfo != null)
+                if (Enum.TryParse<DocumentOperation>(_document.DocumentType.DocumentOperation, out var documentOperation))
                 {
-                    total.DebitAccountCode = accountingInfo.DebitAccountCode;
-                    total.CreditAccountCode = accountingInfo.CreditAccountCode;
-                    total.IncludeInTransaction = accountingInfo.IncludeInTransaction;
+                    var accountingInfo = _taxAccountingService.GetTaxAccountingInfo(
+                        documentOperation, 
+                        tax.Code);
+                        
+                    if (accountingInfo != null)
+                    {
+                        total.DebitAccountCode = accountingInfo.DebitAccountCode;
+                        total.CreditAccountCode = accountingInfo.CreditAccountCode;
+                        total.IncludeInTransaction = accountingInfo.IncludeInTransaction;
+                    }
                 }
             }
         }

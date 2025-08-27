@@ -1,20 +1,19 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using Sivar.Erp.Core.Interfaces;
 using Sivar.Erp.Core.Attributes;
-using Sivar.Erp.Modules.Documents.Core.Entities;
 
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Modules.Documents.Core.Entities
 {
     /// <summary>
     /// Interface for document entities
     /// </summary>
     public interface IDocument : INotifyPropertyChanged
     {
-
         [BusinessKey()]
         string DocumentNumber { get; set; }
+        
         /// <summary>
         /// Unique identifier for the document
         /// </summary>
@@ -49,7 +48,5 @@ namespace Sivar.Erp.Documents
         /// Totals for this document
         /// </summary>
         IList<ITotal> DocumentTotals { get; set; }
-
-
     }
 }

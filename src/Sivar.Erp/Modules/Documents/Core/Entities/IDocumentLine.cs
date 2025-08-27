@@ -1,18 +1,37 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Collections.Generic;
-using Sivar.Erp.Services.Taxes;
 
-
-namespace Sivar.Erp.Documents
+namespace Sivar.Erp.Modules.Documents.Core.Entities
 {
+    /// <summary>
+    /// Interface for document line entities
+    /// </summary>
     public interface IDocumentLine : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Line number within the document
+        /// </summary>
         double LineNumber { get; set; }
+
+        /// <summary>
+        /// Description of the line item
+        /// </summary>
         string Description { get; set; }
+
+        /// <summary>
+        /// The item associated with this line
+        /// </summary>
         IItem Item { get; set; }
+
+        /// <summary>
+        /// Collection of totals for this line
+        /// </summary>
         IList<ITotal> LineTotals { get; set; }
+
+        /// <summary>
+        /// Total amount for this line
+        /// </summary>
         decimal Amount { get; set; }
         
         /// <summary>
@@ -24,10 +43,5 @@ namespace Sivar.Erp.Documents
         /// Gets or sets the unit price of the line item
         /// </summary>
         decimal UnitPrice { get; set; }
-        
-        /// <summary>
-        /// Gets or sets the collection of taxes that apply to this line
-        /// </summary>
-        IList<TaxDto> Taxes { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.Services.Taxes;
 
 namespace Sivar.Erp.Documents
@@ -13,12 +14,12 @@ namespace Sivar.Erp.Documents
     /// </summary>
     public class LineDto : IDocumentLine, INotifyPropertyChanged
     {
-        private IItem _item;
+        private Sivar.Erp.Modules.Documents.Core.Entities.IItem _item;
         private string _lineItem;
         private decimal _amount;
         private decimal _quantity = 1;
         private decimal _unitPrice;
-        private ObservableCollection<ITotal> _lineTotals = new();
+        private ObservableCollection<Sivar.Erp.Modules.Documents.Core.Entities.ITotal> _lineTotals = new ObservableCollection<Sivar.Erp.Modules.Documents.Core.Entities.ITotal>();
         private ObservableCollection<TaxDto> _taxes = new();
 
         public LineDto()
@@ -28,7 +29,7 @@ namespace Sivar.Erp.Documents
             _taxes.CollectionChanged += Taxes_CollectionChanged;
         }
 
-        public IItem Item
+        public Sivar.Erp.Modules.Documents.Core.Entities.IItem Item
         {
             get => _item;
             set
@@ -101,7 +102,7 @@ namespace Sivar.Erp.Documents
             }
         }
         
-        public IList<ITotal> LineTotals
+        public IList<Sivar.Erp.Modules.Documents.Core.Entities.ITotal> LineTotals
         {
             get => _lineTotals;
             set
@@ -111,13 +112,13 @@ namespace Sivar.Erp.Documents
                     _lineTotals.CollectionChanged -= LineTotals_CollectionChanged;
                 }
 
-                if (value is ObservableCollection<ITotal> collection)
+                if (value is ObservableCollection<Sivar.Erp.Modules.Documents.Core.Entities.ITotal> collection)
                 {
                     _lineTotals = collection;
                 }
                 else
                 {
-                    _lineTotals = new ObservableCollection<ITotal>(value ?? new List<ITotal>());
+                    _lineTotals = new ObservableCollection<Sivar.Erp.Modules.Documents.Core.Entities.ITotal>(value ?? new List<Sivar.Erp.Modules.Documents.Core.Entities.ITotal>());
                 }
 
                 _lineTotals.CollectionChanged += LineTotals_CollectionChanged;
@@ -190,12 +191,12 @@ namespace Sivar.Erp.Documents
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void LineTotals_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void LineTotals_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             // Handle changes to line totals
         }
 
-        private void Taxes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void Taxes_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             // Handle new taxes
             if (e.NewItems != null)

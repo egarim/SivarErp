@@ -1,13 +1,14 @@
 
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 
 namespace Sivar.Erp.Documents
 {
     /// <summary>
     /// Data Transfer Object implementation for ITotal with change notification
     /// </summary>
-    public class TotalDto : ITotal, INotifyPropertyChanged
+    public class TotalDto : ITotal, Sivar.Erp.Modules.Documents.Core.Entities.ITotal, INotifyPropertyChanged
     {
         private Guid _oid;
         private string _concept;

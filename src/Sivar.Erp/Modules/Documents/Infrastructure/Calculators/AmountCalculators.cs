@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 
 namespace Sivar.Erp.Documents
 {

@@ -1,4 +1,5 @@
 using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.ErpSystem.TimeService;
 using System;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace Sivar.Erp.Services.Documents
         /// <summary>
         /// Adds accounting totals to a document based on document operation
         /// </summary>
-        public bool AddDocumentAccountingTotals(IDocument document, string documentOperation)
+        public bool AddDocumentAccountingTotals(Sivar.Erp.Modules.Documents.Core.Entities.IDocument document, string documentOperation)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
             if (string.IsNullOrWhiteSpace(documentOperation)) throw new ArgumentException("Document operation must be specified", nameof(documentOperation));
@@ -127,7 +128,7 @@ namespace Sivar.Erp.Services.Documents
 
         #region Private Methods
 
-        private bool AddSalesInvoiceTotals(IDocument document, IDocumentAccountingProfile profile)
+        private bool AddSalesInvoiceTotals(Sivar.Erp.Modules.Documents.Core.Entities.IDocument document, IDocumentAccountingProfile profile)
         {
             try
             {
@@ -200,7 +201,7 @@ namespace Sivar.Erp.Services.Documents
                 return false;
             }
         }
-        private bool AddPurchaseInvoiceTotals(IDocument document, IDocumentAccountingProfile profile)
+        private bool AddPurchaseInvoiceTotals(Sivar.Erp.Modules.Documents.Core.Entities.IDocument document, IDocumentAccountingProfile profile)
         {
             try
             {
