@@ -15,6 +15,7 @@ public class ApiTestBase : IDisposable
     protected readonly WebApplicationFactory<Program> Factory;
     protected readonly HttpClient Client;
     protected readonly JsonSerializerOptions JsonOptions;
+    protected readonly IServiceProvider ServiceProvider;
 
     public ApiTestBase()
     {
@@ -30,6 +31,7 @@ public class ApiTestBase : IDisposable
             });
 
         Client = Factory.CreateClient();
+        ServiceProvider = Factory.Services;
         
         JsonOptions = new JsonSerializerOptions
         {

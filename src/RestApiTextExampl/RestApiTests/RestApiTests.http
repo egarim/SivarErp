@@ -1,6 +1,0 @@
-@RestApiTests_HostAddress = http://localhost:5195
-
-GET {{RestApiTests_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

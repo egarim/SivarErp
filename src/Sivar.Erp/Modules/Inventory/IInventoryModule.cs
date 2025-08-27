@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Modules.Inventory.Reports;
-using Sivar.Erp.Core.Modules.Inventory;
+
 
 namespace Sivar.Erp.Modules.Inventory
 {

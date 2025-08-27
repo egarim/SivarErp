@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Sivar.Erp.Core.Domain.Entities;
 
 namespace Sivar.Erp.Core.Domain.Entities.Identity;
 

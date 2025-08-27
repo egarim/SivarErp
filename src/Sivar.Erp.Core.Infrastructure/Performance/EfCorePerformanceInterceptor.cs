@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 using Sivar.Erp.Core.Infrastructure.Performance;
 using Sivar.Erp.Core.Infrastructure.Logging;
+using Sivar.Erp.Core.Monitoring;
 using System.ComponentModel;
 
 namespace Sivar.Erp.Core.Infrastructure.Performance;
