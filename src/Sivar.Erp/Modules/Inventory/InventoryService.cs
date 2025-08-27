@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.Documents;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
@@ -41,7 +42,7 @@ namespace Sivar.Erp.Modules.Inventory
                 contextProvider);
                 
             // Initialize collections if they don't exist
-            _objectDb.InventoryItems ??= new List<Documents.IInventoryItem>();
+            _objectDb.InventoryItems ??= new List<Sivar.Erp.Documents.IInventoryItem>();
             _objectDb.StockLevels ??= new List<IStockLevel>();
             _objectDb.InventoryTransactions ??= new List<IInventoryTransaction>();
             _objectDb.InventoryReservations ??= new List<IInventoryReservation>();
@@ -51,7 +52,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// <summary>
         /// Gets an inventory item by code
         /// </summary>
-        public Task<Documents.IInventoryItem> GetInventoryItemAsync(string itemCode)
+        public Task<Sivar.Erp.Documents.IInventoryItem> GetInventoryItemAsync(string itemCode)
         {
             return Task.FromResult(_performanceLogger.Track("GetInventoryItemAsync", () =>
             {
@@ -65,7 +66,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// <summary>
         /// Creates a new inventory item
         /// </summary>
-        public async Task<Documents.IInventoryItem> CreateInventoryItemAsync(Documents.IInventoryItem item, string userName)
+        public async Task<Sivar.Erp.Documents.IInventoryItem> CreateInventoryItemAsync(Sivar.Erp.Documents.IInventoryItem item, string userName)
         {
             return await _performanceLogger.Track(nameof(CreateInventoryItemAsync), async () =>
             {
@@ -154,7 +155,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// Processes a receipt of inventory
         /// </summary>
         public async Task<IInventoryTransaction> ReceiveInventoryAsync(
-            Documents.IInventoryItem item,
+            Sivar.Erp.Documents.IInventoryItem item,
             decimal quantity,
             string warehouseCode,
             InventoryTransactionType transactionType,
@@ -221,7 +222,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// Processes an issue of inventory
         /// </summary>
         public async Task<IInventoryTransaction> IssueInventoryAsync(
-            Documents.IInventoryItem item,
+            Sivar.Erp.Documents.IInventoryItem item,
             decimal quantity,
             string warehouseCode,
             InventoryTransactionType transactionType,
@@ -352,7 +353,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// Records an inventory receipt (alias for ReceiveInventoryAsync for compatibility)
         /// </summary>
         public Task<IInventoryTransaction> RecordInventoryReceiptAsync(
-            Documents.IInventoryItem item,
+            Sivar.Erp.Documents.IInventoryItem item,
             decimal quantity,
             string warehouseCode,
             InventoryTransactionType transactionType,
@@ -369,7 +370,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// Records an inventory issue (alias for IssueInventoryAsync for compatibility)
         /// </summary>
         public Task<IInventoryTransaction> RecordInventoryIssueAsync(
-            Documents.IInventoryItem item,
+            Sivar.Erp.Documents.IInventoryItem item,
             decimal quantity,
             string warehouseCode,
             InventoryTransactionType transactionType,
@@ -386,7 +387,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// <summary>
         /// Updates stock level for an item in a warehouse
         /// </summary>
-        private async Task UpdateStockLevelAsync(Documents.IInventoryItem item, string warehouseCode, decimal quantityChange, string userName)
+        private async Task UpdateStockLevelAsync(Sivar.Erp.Documents.IInventoryItem item, string warehouseCode, decimal quantityChange, string userName)
         {
             var stockLevel = await GetStockLevelAsync(item.Code, warehouseCode);
 
@@ -421,7 +422,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// <summary>
         /// Updates inventory item cost using weighted average method
         /// </summary>
-        private async Task UpdateInventoryItemCostAsync(Documents.IInventoryItem item, decimal quantity, decimal unitCost, string userName)
+        private async Task UpdateInventoryItemCostAsync(Sivar.Erp.Documents.IInventoryItem item, decimal quantity, decimal unitCost, string userName)
         {
             // Get current total value
             var totalOnHand = 0m;

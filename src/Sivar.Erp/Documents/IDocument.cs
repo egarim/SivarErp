@@ -1,7 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Collections.Generic;
-using Sivar.Erp.BusinessEntities;
+using Sivar.Erp.Core.Interfaces;
+using Sivar.Erp.Core.Attributes;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 
 namespace Sivar.Erp.Documents
 {

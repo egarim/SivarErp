@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 
 namespace Sivar.Erp.Documents
 {
@@ -201,7 +202,7 @@ namespace Sivar.Erp.Documents
                 sb.AppendLine($"  {line.Item?.Code}: {line.Quantity} x ${line.UnitPrice:F2} = ${line.Amount:F2}");
 
                 // Show line taxes
-                var lineTaxes = line.LineTotals?.Where(t => t.Concept.StartsWith("Tax:")) ?? Enumerable.Empty<TotalDto>();
+                var lineTaxes = line.LineTotals?.Where(t => t.Concept.StartsWith("Tax:")) ?? Enumerable.Empty<Sivar.Erp.Modules.Documents.Core.Entities.ITotal>();
                 foreach (var tax in lineTaxes)
                 {
                     sb.AppendLine($"    + {tax.Concept}: ${tax.Total:F2}");
@@ -210,7 +211,7 @@ namespace Sivar.Erp.Documents
 
             // Document totals summary
             sb.AppendLine("Document Totals:");
-            foreach (var total in document.DocumentTotals ?? Enumerable.Empty<ITotal>())
+            foreach (var total in document.DocumentTotals ?? Enumerable.Empty<Sivar.Erp.Modules.Documents.Core.Entities.ITotal>())
             {
                 sb.AppendLine($"  {total.Concept}: ${total.Total:F2}");
             }

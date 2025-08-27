@@ -1,3 +1,5 @@
+using Sivar.Erp.Core.Enums;
+
 namespace Sivar.Erp.Modules.Accounting.JournalEntries;
 
 /// <summary>
@@ -28,7 +30,7 @@ public class JournalEntryQueryOptions
     /// <summary>
     /// Filter entries by entry type (Debit or Credit)
     /// </summary>
-    public Services.Accounting.Transactions.EntryType? EntryType { get; set; }
+    public EntryType? EntryType { get; set; }
 
     /// <summary>
     /// Filter entries by document number

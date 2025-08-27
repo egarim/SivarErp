@@ -2,6 +2,8 @@ using Sivar.Erp.Services;
 using Sivar.Erp.Services.Accounting.Transactions;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.ErpSystem.Diagnostics;
+using CoreEntryType = Sivar.Erp.Core.Enums.EntryType; // Core enum used in QueryOptions
+using LegacyEntryType = Sivar.Erp.Services.Accounting.Transactions.EntryType; // Legacy enum used by ILedgerEntry
 
 namespace Sivar.Erp.Modules.Accounting.JournalEntries;
 
@@ -52,7 +54,11 @@ public class JournalEntryService : IJournalEntryService
             }
 
             if (options.EntryType.HasValue)
-                query = query.Where(e => e.EntryType == options.EntryType.Value);
+            {
+                // Convert Core EntryType to Legacy EntryType
+                var legacyEntryType = ConvertEntryType(options.EntryType.Value);
+                query = query.Where(e => e.EntryType == legacyEntryType);
+            }
 
             // Date filtering requires matching transaction dates
             if (options.FromDate.HasValue || options.ToDate.HasValue)
@@ -136,7 +142,7 @@ public class JournalEntryService : IJournalEntryService
         return await _performanceLogger.Track(nameof(GetTransactionTotalDebitAsync), async () =>
         {
             var total = _objectDb.LedgerEntries
-                .Where(e => e.TransactionNumber == transactionNumber && e.EntryType == EntryType.Debit)
+                .Where(e => e.TransactionNumber == transactionNumber && e.EntryType == LegacyEntryType.Debit)
                 .Sum(e => e.Amount);
 
             return await Task.FromResult(total);
@@ -147,7 +153,7 @@ public class JournalEntryService : IJournalEntryService
         return await _performanceLogger.Track(nameof(GetTransactionTotalCreditAsync), async () =>
         {
             var total = _objectDb.LedgerEntries
-                .Where(e => e.TransactionNumber == transactionNumber && e.EntryType == EntryType.Credit)
+                .Where(e => e.TransactionNumber == transactionNumber && e.EntryType == LegacyEntryType.Credit)
                 .Sum(e => e.Amount);
 
             return await Task.FromResult(total);
@@ -175,5 +181,18 @@ public class JournalEntryService : IJournalEntryService
 
             return await Task.FromResult(accounts);
         });
+    }
+
+    /// <summary>
+    /// Converts Core EntryType to Legacy EntryType
+    /// </summary>
+    private LegacyEntryType ConvertEntryType(CoreEntryType coreEntryType)
+    {
+        return coreEntryType switch
+        {
+            CoreEntryType.Debit => LegacyEntryType.Debit,
+            CoreEntryType.Credit => LegacyEntryType.Credit,
+            _ => LegacyEntryType.Debit // Default fallback
+        };
     }
 }

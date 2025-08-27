@@ -1,5 +1,6 @@
 
 using Sivar.Erp.Services.Accounting.Transactions;
+using Sivar.Erp.Modules.Documents.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Sivar.Erp.Documents
                  /// <param name="document">The document to generate a transaction for</param>
                  /// <returns>A tuple containing the transaction and ledger entries</returns>
         public Task<(TransactionDto Transaction, List<LedgerEntryDto> LedgerEntries)>
-            GenerateTransactionAsync(IDocument document)
+            GenerateTransactionAsync(Sivar.Erp.Modules.Documents.Core.Entities.IDocument document)
         {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
@@ -106,7 +107,7 @@ namespace Sivar.Erp.Documents
         /// <summary>
         /// Generate a description for the transaction
         /// </summary>
-        private string GenerateTransactionDescription(IDocument document)
+        private string GenerateTransactionDescription(Sivar.Erp.Modules.Documents.Core.Entities.IDocument document)
         {
             string businessEntityName = document.BusinessEntity?.Name ?? "Unknown";
             string documentTypeCode = document.DocumentType?.Code ?? "Unknown";

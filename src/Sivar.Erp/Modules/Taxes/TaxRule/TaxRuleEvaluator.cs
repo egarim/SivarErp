@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sivar.Erp.Documents;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
 using Sivar.Erp.Services.Taxes;
 using Sivar.Erp.Services.Taxes.TaxGroup;
 
@@ -44,9 +45,14 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
             var entityGroupIds = GetGroupsForEntity(businessEntityId, GroupType.BusinessEntity);
 
             // Find applicable document-level taxes
-            return GetApplicableTaxes(document.DocumentType.DocumentOperation, entityGroupIds, new List<string>())
-                .Where(tax => tax.ApplicationLevel == TaxApplicationLevel.Document)
-                .ToList();
+            if (Enum.TryParse<DocumentOperation>(document.DocumentType.DocumentOperation, out var documentOperation))
+            {
+                return GetApplicableTaxes(documentOperation, entityGroupIds, new List<string>())
+                    .Where(tax => tax.ApplicationLevel == TaxApplicationLevel.Document)
+                    .ToList();
+            }
+            
+            return new List<ITax>();
         }
 
         /// <summary>
@@ -71,10 +77,15 @@ namespace Sivar.Erp.Services.Taxes.TaxRule
             var itemGroupIds = GetGroupsForEntity(itemId, GroupType.Item);
 
             // Find applicable line-level taxes
-            IEnumerable<ITax> enumerable = GetApplicableTaxes(document.DocumentType.DocumentOperation, entityGroupIds, itemGroupIds);
-            return enumerable
-                .Where(tax => tax.ApplicationLevel == TaxApplicationLevel.Line)
-                .ToList();
+            if (Enum.TryParse<DocumentOperation>(document.DocumentType.DocumentOperation, out var documentOperation))
+            {
+                IEnumerable<ITax> enumerable = GetApplicableTaxes(documentOperation, entityGroupIds, itemGroupIds);
+                return enumerable
+                    .Where(tax => tax.ApplicationLevel == TaxApplicationLevel.Line)
+                    .ToList();
+            }
+            
+            return new List<ITax>();
         }
 
         /// <summary>
