@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sivar.Erp.Core.Application.DTOs.Accounting;
 using Sivar.Erp.Core.Application.Services.Accounting;
 using Sivar.Erp.Core.Domain.Entities.Accounting;
-using Sivar.Erp.Core.Domain.Enums;
+using AccountTypeEnum = Sivar.Erp.Core.Domain.Enums.AccountType;
 
 namespace Sivar.Erp.Core.Api.Controllers;
 
@@ -126,7 +126,7 @@ public class AccountsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAccountsByType(
-        AccountType type,
+        AccountTypeEnum type,
         CancellationToken cancellationToken = default)
     {
         try
@@ -251,7 +251,7 @@ public class AccountsController : ControllerBase
     {
         try
         {
-            var accountTypes = Enum.GetValues<AccountType>()
+            var accountTypes = Enum.GetValues<AccountTypeEnum>()
                 .Select(type => new
                 {
                     Value = (int)type,
@@ -306,15 +306,15 @@ public class AccountsController : ControllerBase
         }
     }
 
-    private static string GetAccountTypeDisplayName(AccountType type)
+    private static string GetAccountTypeDisplayName(AccountTypeEnum type)
     {
         return type switch
         {
-            AccountType.Asset => "Assets",
-            AccountType.Liability => "Liabilities",
-            AccountType.Equity => "Equity",
-            AccountType.Revenue => "Revenue",
-            AccountType.Expense => "Expenses",
+            AccountTypeEnum.Asset => "Assets",
+            AccountTypeEnum.Liability => "Liabilities",
+            AccountTypeEnum.Equity => "Equity",
+            AccountTypeEnum.Revenue => "Revenue",
+            AccountTypeEnum.Expense => "Expenses",
             _ => type.ToString()
         };
     }
@@ -341,25 +341,25 @@ public class AccountsController : ControllerBase
         };
     }
 
-    private static AccountType GetCategoryAccountType(AccountCategory category)
+    private static AccountTypeEnum GetCategoryAccountType(AccountCategory category)
     {
         return category switch
         {
-            AccountCategory.CurrentAssets => AccountType.Asset,
-            AccountCategory.FixedAssets => AccountType.Asset,
-            AccountCategory.IntangibleAssets => AccountType.Asset,
-            AccountCategory.Investments => AccountType.Asset,
-            AccountCategory.CurrentLiabilities => AccountType.Liability,
-            AccountCategory.LongTermLiabilities => AccountType.Liability,
-            AccountCategory.Capital => AccountType.Equity,
-            AccountCategory.RetainedEarnings => AccountType.Equity,
-            AccountCategory.OperatingRevenue => AccountType.Revenue,
-            AccountCategory.NonOperatingRevenue => AccountType.Revenue,
-            AccountCategory.CostOfGoodsSold => AccountType.Expense,
-            AccountCategory.OperatingExpenses => AccountType.Expense,
-            AccountCategory.NonOperatingExpenses => AccountType.Expense,
-            AccountCategory.TaxExpenses => AccountType.Expense,
-            _ => AccountType.Asset
+            AccountCategory.CurrentAssets => AccountTypeEnum.Asset,
+            AccountCategory.FixedAssets => AccountTypeEnum.Asset,
+            AccountCategory.IntangibleAssets => AccountTypeEnum.Asset,
+            AccountCategory.Investments => AccountTypeEnum.Asset,
+            AccountCategory.CurrentLiabilities => AccountTypeEnum.Liability,
+            AccountCategory.LongTermLiabilities => AccountTypeEnum.Liability,
+            AccountCategory.Capital => AccountTypeEnum.Equity,
+            AccountCategory.RetainedEarnings => AccountTypeEnum.Equity,
+            AccountCategory.OperatingRevenue => AccountTypeEnum.Revenue,
+            AccountCategory.NonOperatingRevenue => AccountTypeEnum.Revenue,
+            AccountCategory.CostOfGoodsSold => AccountTypeEnum.Expense,
+            AccountCategory.OperatingExpenses => AccountTypeEnum.Expense,
+            AccountCategory.NonOperatingExpenses => AccountTypeEnum.Expense,
+            AccountCategory.TaxExpenses => AccountTypeEnum.Expense,
+            _ => AccountTypeEnum.Asset
         };
     }
 }

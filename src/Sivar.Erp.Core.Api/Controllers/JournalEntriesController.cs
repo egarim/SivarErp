@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Sivar.Erp.Core.Application.Services.Accounting;
-using Sivar.Erp.Core.Shared.DTOs.Accounting;
+using Sivar.Erp.Core.Application.DTOs.Accounting;
 using Sivar.Erp.Core.Shared.Responses;
 using Sivar.Erp.Core.Domain.Enums;
 
@@ -51,12 +51,25 @@ public class JournalEntriesController : ControllerBase
         [FromQuery] DateOnly? fromDate = null,
         [FromQuery] DateOnly? toDate = null,
         [FromQuery] JournalEntryStatus? status = null,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var result = await _journalEntryService.GetJournalEntriesAsync(companyId, fromDate, toDate, status, cancellationToken);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            ApiResponse<IEnumerable<JournalEntryDto>> result;
+            
+            if (fromDate.HasValue && toDate.HasValue)
+            {
+                result = await _journalEntryService.GetJournalEntriesByDateRangeAsync(fromDate.Value, toDate.Value, companyId, cancellationToken);
+            }
+            else
+            {
+                result = await _journalEntryService.GetJournalEntriesPagedAsync(pageNumber, pageSize, companyId, status, cancellationToken);
+            }
+            
+            var listResult = ApiResponse<List<JournalEntryDto>>.Success(result.Data?.ToList() ?? new List<JournalEntryDto>());
+            return result.IsSuccess ? Ok(listResult) : BadRequest(listResult);
         }
         catch (Exception ex)
         {
@@ -90,7 +103,28 @@ public class JournalEntriesController : ControllerBase
     /// Posts a journal entry to make it permanent
     /// </summary>
     [HttpPost("{id:guid}/post")]
-    public async Task<ActionResult<ApiResponse<string>>> PostJournalEntry(
+    public async Task<ActionResult<ApiResponse<JournalEntryDto>>> PostJournalEntry(
+        Guid id,
+        [FromHeader] Guid companyId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _journalEntryService.PostJournalEntryAsync(id, companyId, cancellationToken);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error posting journal entry {Id}", id);
+            return StatusCode(500, ApiResponse<JournalEntryDto>.Failure("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Reverses a journal entry with a reason
+    /// </summary>
+    [HttpPost("{id:guid}/reverse")]
+    public async Task<ActionResult<ApiResponse<JournalEntryDto>>> ReverseJournalEntry(
         Guid id,
         [FromBody] PostJournalEntryDto dto,
         [FromHeader] Guid companyId,
@@ -98,34 +132,13 @@ public class JournalEntriesController : ControllerBase
     {
         try
         {
-            var result = await _journalEntryService.PostJournalEntryAsync(id, dto, companyId, cancellationToken);
+            var result = await _journalEntryService.ReverseJournalEntryAsync(id, dto.Reason, companyId, cancellationToken);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error posting journal entry {Id}", id);
-            return StatusCode(500, ApiResponse<string>.Failure("Internal server error"));
-        }
-    }
-
-    /// <summary>
-    /// Unposts a journal entry to make it editable again
-    /// </summary>
-    [HttpPost("{id:guid}/unpost")]
-    public async Task<ActionResult<ApiResponse<string>>> UnpostJournalEntry(
-        Guid id,
-        [FromHeader] Guid companyId,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var result = await _journalEntryService.UnpostJournalEntryAsync(id, companyId, cancellationToken);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error unposting journal entry {Id}", id);
-            return StatusCode(500, ApiResponse<string>.Failure("Internal server error"));
+            _logger.LogError(ex, "Error reversing journal entry {Id}", id);
+            return StatusCode(500, ApiResponse<JournalEntryDto>.Failure("Internal server error"));
         }
     }
 
@@ -140,7 +153,7 @@ public class JournalEntriesController : ControllerBase
     {
         try
         {
-            var result = await _journalEntryService.GetTrialBalanceAsync(companyId, asOfDate, cancellationToken);
+            var result = await _journalEntryService.GetTrialBalanceAsync(asOfDate.ToDateTime(TimeOnly.MinValue), companyId, cancellationToken);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
         catch (Exception ex)

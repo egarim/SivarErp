@@ -1,0 +1,209 @@
+using Sivar.Erp.Core.Infrastructure.Telemetry;
+using Sivar.Erp.Core.Infrastructure.Logging;
+using System.ComponentModel;
+using System.Diagnostics;
+
+namespace Sivar.Erp.Core.Api.Middleware;
+
+/// <summary>
+/// Middleware for enriching telemetry with request context
+/// </summary>
+[Description("Middleware for enriching telemetry with request context")]
+public class TelemetryEnrichmentMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly SivarErpTelemetry _telemetry;
+    private readonly IErpLoggingService _loggingService;
+
+    public TelemetryEnrichmentMiddleware(
+        RequestDelegate next,
+        SivarErpTelemetry telemetry,
+        IErpLoggingService loggingService)
+    {
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _telemetry = telemetry ?? throw new ArgumentNullException(nameof(telemetry));
+        _loggingService = loggingService ?? throw new ArgumentNullException(nameof(loggingService));
+    }
+
+    /// <summary>
+    /// Processes HTTP request with telemetry enrichment
+    /// </summary>
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var operationName = GetOperationName(context);
+        
+        // Start activity for distributed tracing
+        using var activity = _telemetry.ActivitySource.StartActivity(operationName);
+        
+        try
+        {
+            // Enrich activity with request context
+            EnrichActivityWithRequestContext(activity, context);
+            
+            // Increment request counter
+            _telemetry.IncrementCounter("api_requests_total", new[]
+            {
+                new KeyValuePair<string, object?>("method", context.Request.Method),
+                new KeyValuePair<string, object?>("endpoint", GetEndpointName(context.Request.Path))
+            });
+            
+            // Process request
+            await _next(context);
+            
+            // Record response telemetry
+            RecordResponseTelemetry(context, operationName);
+        }
+        catch (Exception ex)
+        {
+            // Record error telemetry
+            RecordErrorTelemetry(context, operationName, ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Enriches activity with HTTP request context
+    /// </summary>
+    private static void EnrichActivityWithRequestContext(Activity? activity, HttpContext context)
+    {
+        if (activity == null) return;
+
+        activity.SetTag("http.method", context.Request.Method);
+        activity.SetTag("http.url", context.Request.Path.Value);
+        activity.SetTag("http.scheme", context.Request.Scheme);
+        activity.SetTag("http.host", context.Request.Host.Value);
+        activity.SetTag("user_agent", context.Request.Headers.UserAgent.FirstOrDefault());
+        
+        // Add company context if available (will be set by company middleware later)
+        if (context.Items.ContainsKey("CompanyId"))
+        {
+            activity.SetTag("company.id", context.Items["CompanyId"]?.ToString());
+        }
+        
+        if (context.Items.ContainsKey("UserId"))
+        {
+            activity.SetTag("user.id", context.Items["UserId"]?.ToString());
+        }
+
+        // Add remote IP if available
+        var remoteIp = context.Connection.RemoteIpAddress?.ToString();
+        if (!string.IsNullOrEmpty(remoteIp))
+        {
+            activity.SetTag("client.ip", remoteIp);
+        }
+    }
+
+    /// <summary>
+    /// Records response telemetry metrics
+    /// </summary>
+    private void RecordResponseTelemetry(HttpContext context, string operationName)
+    {
+        var statusCode = context.Response.StatusCode;
+        var statusClass = GetStatusClass(statusCode);
+        
+        // Increment response counter
+        _telemetry.IncrementCounter("api_responses_total", new[]
+        {
+            new KeyValuePair<string, object?>("method", context.Request.Method),
+            new KeyValuePair<string, object?>("endpoint", GetEndpointName(context.Request.Path)),
+            new KeyValuePair<string, object?>("status_code", statusCode),
+            new KeyValuePair<string, object?>("status_class", statusClass)
+        });
+
+        // Record response size if available
+        if (context.Response.ContentLength.HasValue)
+        {
+            _telemetry.RecordValue("api_response_size_bytes", context.Response.ContentLength.Value, new[]
+            {
+                new KeyValuePair<string, object?>("endpoint", GetEndpointName(context.Request.Path))
+            });
+        }
+
+        // Log successful API call
+        _loggingService.LogBusinessProcess($"API call completed: {operationName} with status {statusCode}");
+    }
+
+    /// <summary>
+    /// Records error telemetry metrics
+    /// </summary>
+    private void RecordErrorTelemetry(HttpContext context, string operationName, Exception exception)
+    {
+        // Increment error counter
+        _telemetry.IncrementCounter("api_errors_total", new[]
+        {
+            new KeyValuePair<string, object?>("method", context.Request.Method),
+            new KeyValuePair<string, object?>("endpoint", GetEndpointName(context.Request.Path)),
+            new KeyValuePair<string, object?>("exception_type", exception.GetType().Name)
+        });
+
+        // Set activity status
+        if (Activity.Current != null)
+        {
+            Activity.Current.SetStatus(ActivityStatusCode.Error, exception.Message);
+            Activity.Current.SetTag("error.type", exception.GetType().Name);
+            Activity.Current.SetTag("error.message", exception.Message);
+        }
+
+        // Log error with telemetry context
+        _loggingService.LogError($"API error in {operationName}", exception, new
+        {
+            Operation = operationName,
+            Method = context.Request.Method,
+            Path = context.Request.Path.Value,
+            ExceptionType = exception.GetType().Name
+        });
+    }
+
+    /// <summary>
+    /// Generates operation name for telemetry
+    /// </summary>
+    private static string GetOperationName(HttpContext context)
+    {
+        var method = context.Request.Method;
+        var endpoint = GetEndpointName(context.Request.Path);
+        return $"{method} {endpoint}";
+    }
+
+    /// <summary>
+    /// Gets normalized endpoint name for consistent telemetry
+    /// </summary>
+    private static string GetEndpointName(PathString path)
+    {
+        var pathValue = path.Value ?? "/";
+        
+        if (pathValue == "/")
+            return "/";
+        
+        // Normalize path by replacing IDs with placeholders
+        var segments = pathValue.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        for (int i = 0; i < segments.Length; i++)
+        {
+            if (Guid.TryParse(segments[i], out _))
+            {
+                segments[i] = "{id}";
+            }
+            else if (int.TryParse(segments[i], out _))
+            {
+                segments[i] = "{number}";
+            }
+        }
+        
+        return "/" + string.Join("/", segments);
+    }
+
+    /// <summary>
+    /// Gets HTTP status class (1xx, 2xx, 3xx, 4xx, 5xx)
+    /// </summary>
+    private static string GetStatusClass(int statusCode)
+    {
+        return (statusCode / 100) switch
+        {
+            1 => "1xx",
+            2 => "2xx",
+            3 => "3xx",
+            4 => "4xx",
+            5 => "5xx",
+            _ => "unknown"
+        };
+    }
+}

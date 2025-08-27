@@ -63,6 +63,16 @@ public class User : BaseEntity
     public virtual ICollection<UserCompany> UserCompanies { get; set; } = new List<UserCompany>();
     
     /// <summary>
+    /// Roles assigned to this user
+    /// </summary>
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    
+    /// <summary>
+    /// Custom permissions granted to this user
+    /// </summary>
+    public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
+    
+    /// <summary>
     /// Invitations sent by this user
     /// </summary>
     public virtual ICollection<UserInvitation> SentInvitations { get; set; } = new List<UserInvitation>();

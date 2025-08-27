@@ -25,10 +25,10 @@ public class AccountRepository : TenantRepository<Account>, IAccountRepository
             .FirstOrDefaultAsync(a => a.Code == code, cancellationToken);
     }
 
-    public async Task<IEnumerable<Account>> GetByTypeAsync(AccountType type, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Account>> GetByTypeAsync(Domain.Enums.AccountType type, CancellationToken cancellationToken = default)
     {
         return await _dbSet
-            .Where(a => a.Type == type)
+            .Where(a => a.Type == (Domain.Entities.Accounting.AccountType)type)
             .OrderBy(a => a.Code)
             .ToListAsync(cancellationToken);
     }

@@ -1,6 +1,5 @@
 using Sivar.Erp.Core.Domain.Entities.Accounting;
 using Sivar.Erp.Core.Domain.Interfaces;
-using Sivar.Erp.Core.Domain.Enums;
 
 namespace Sivar.Erp.Core.Domain.Interfaces.Repositories.Accounting;
 
@@ -17,7 +16,7 @@ public interface IAccountRepository : ITenantRepository<Account>
     /// <summary>
     /// Gets accounts by type
     /// </summary>
-    Task<IEnumerable<Account>> GetByTypeAsync(AccountType type, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Account>> GetByTypeAsync(Enums.AccountType type, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Gets accounts by category

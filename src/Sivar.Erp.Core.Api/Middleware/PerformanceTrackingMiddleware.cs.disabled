@@ -1,0 +1,163 @@
+using Sivar.Erp.Core.Infrastructure.Performance;
+using Sivar.Erp.Core.Infrastructure.Logging;
+using System.ComponentModel;
+using System.Diagnostics;
+
+namespace Sivar.Erp.Core.Api.Middleware;
+
+/// <summary>
+/// Middleware for tracking API request performance
+/// </summary>
+[Description("Middleware for tracking API request performance")]
+public class PerformanceTrackingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly IPerformanceMonitor _performanceMonitor;
+    private readonly IErpLoggingService _loggingService;
+    private const int SlowRequestThresholdMs = 2000;
+
+    public PerformanceTrackingMiddleware(
+        RequestDelegate next,
+        IPerformanceMonitor performanceMonitor,
+        IErpLoggingService loggingService)
+    {
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _performanceMonitor = performanceMonitor ?? throw new ArgumentNullException(nameof(performanceMonitor));
+        _loggingService = loggingService ?? throw new ArgumentNullException(nameof(loggingService));
+    }
+
+    /// <summary>
+    /// Processes HTTP request with performance tracking
+    /// </summary>
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var operationName = GetOperationName(context);
+        var stopwatch = Stopwatch.StartNew();
+        
+        using var tracker = _performanceMonitor.StartTracking(operationName);
+        
+        try
+        {
+            // Log request start
+            _loggingService.LogBusinessProcess($"API Request started: {operationName}");
+            
+            // Process request
+            await _next(context);
+            
+            stopwatch.Stop();
+            var duration = stopwatch.Elapsed;
+            var success = context.Response.StatusCode < 400;
+            
+            // Record performance metrics
+            _performanceMonitor.RecordOperation(operationName, duration, success);
+            
+            // Log request completion
+            LogRequestCompletion(context, operationName, duration, success);
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            var duration = stopwatch.Elapsed;
+            
+            // Record failed operation
+            _performanceMonitor.RecordOperation(operationName, duration, false);
+            
+            // Log error
+            _loggingService.LogError($"API Request failed: {operationName}", ex, new
+            {
+                Duration = duration.TotalMilliseconds,
+                Method = context.Request.Method,
+                Path = context.Request.Path.Value,
+                StatusCode = context.Response.StatusCode
+            });
+            
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Generates operation name from HTTP context
+    /// </summary>
+    private static string GetOperationName(HttpContext context)
+    {
+        var method = context.Request.Method;
+        var path = context.Request.Path.Value ?? "/";
+        
+        // Normalize path for consistent metrics
+        var normalizedPath = NormalizePath(path);
+        
+        return $"API.{method}.{normalizedPath}";
+    }
+
+    /// <summary>
+    /// Normalizes API path for consistent operation naming
+    /// </summary>
+    private static string NormalizePath(string path)
+    {
+        if (string.IsNullOrEmpty(path) || path == "/")
+            return "Root";
+        
+        // Remove leading slash
+        path = path.TrimStart('/');
+        
+        // Replace path parameters with placeholders
+        var segments = path.Split('/');
+        for (int i = 0; i < segments.Length; i++)
+        {
+            // Replace GUIDs with {id}
+            if (Guid.TryParse(segments[i], out _))
+            {
+                segments[i] = "{id}";
+            }
+            // Replace numbers with {number}
+            else if (int.TryParse(segments[i], out _))
+            {
+                segments[i] = "{number}";
+            }
+        }
+        
+        return string.Join(".", segments);
+    }
+
+    /// <summary>
+    /// Logs request completion with performance details
+    /// </summary>
+    private void LogRequestCompletion(HttpContext context, string operationName, TimeSpan duration, bool success)
+    {
+        var durationMs = duration.TotalMilliseconds;
+        var statusCode = context.Response.StatusCode;
+        
+        // Log performance metrics
+        _loggingService.LogPerformanceMetric(
+            operationName,
+            $"Duration: {durationMs:F2}ms, Status: {statusCode}",
+            success);
+        
+        // Log slow requests
+        if (durationMs > SlowRequestThresholdMs)
+        {
+            _loggingService.LogWarning(
+                $"Slow API request detected: {durationMs:F2}ms",
+                new
+                {
+                    Operation = operationName,
+                    Duration = durationMs,
+                    Method = context.Request.Method,
+                    Path = context.Request.Path.Value,
+                    StatusCode = statusCode,
+                    UserAgent = context.Request.Headers.UserAgent.ToString(),
+                    RemoteIpAddress = context.Connection.RemoteIpAddress?.ToString()
+                });
+        }
+        
+        // Log successful completion
+        if (success)
+        {
+            _loggingService.LogInformation($"API Request completed: {operationName} in {durationMs:F2}ms");
+        }
+        else
+        {
+            _loggingService.LogWarning($"API Request failed: {operationName} with status {statusCode} in {durationMs:F2}ms");
+        }
+    }
+}

@@ -17,9 +17,13 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
     
     <!-- Microsoft Extensions for testing -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
+    
+    <!-- Web API Testing -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.8" />
     
     <!-- Moq for mocking if needed -->
     <PackageReference Include="Moq" Version="4.20.69" />
@@ -27,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sivar.Erp.Core\Sivar.Erp.Core.csproj" />
+    <ProjectReference Include="..\Sivar.Erp.Core.Api\Sivar.Erp.Core.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

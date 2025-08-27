@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Sivar.Erp.Core.Domain.Entities.Accounting;
-using Sivar.Erp.Core.Domain.Enums;
+using AccountTypeEnum = Sivar.Erp.Core.Domain.Enums.AccountType;
 
 namespace Sivar.Erp.Core.Application.DTOs.Accounting;
 
@@ -21,7 +21,7 @@ public class CreateAccountDto
     public string? Description { get; set; }
     
     [Required]
-    public AccountType Type { get; set; }
+    public AccountTypeEnum Type { get; set; }
     
     [Required]
     public AccountCategory Category { get; set; }
@@ -62,7 +62,7 @@ public class UpdateAccountDto
     public string? Description { get; set; }
     
     [Required]
-    public AccountType Type { get; set; }
+    public AccountTypeEnum Type { get; set; }
     
     [Required]
     public AccountCategory Category { get; set; }
@@ -94,7 +94,7 @@ public class AccountDto
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public AccountType Type { get; set; }
+    public AccountTypeEnum Type { get; set; }
     public string TypeName { get; set; } = string.Empty;
     public AccountCategory Category { get; set; }
     public string CategoryName { get; set; } = string.Empty;
@@ -127,7 +127,7 @@ public class AccountSummaryDto
     public Guid Id { get; set; }
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public AccountType Type { get; set; }
+    public AccountTypeEnum Type { get; set; }
     public string TypeName { get; set; } = string.Empty;
     public AccountCategory Category { get; set; }
     public string CategoryName { get; set; } = string.Empty;
@@ -142,7 +142,7 @@ public class AccountSummaryDto
 /// </summary>
 public class ChartOfAccountsQueryDto
 {
-    public AccountType? Type { get; set; }
+    public AccountTypeEnum? Type { get; set; }
     public AccountCategory? Category { get; set; }
     public bool? IsActive { get; set; }
     public bool? IsHeader { get; set; }

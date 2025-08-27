@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Sivar.Erp.Core.Domain.Entities.Accounting;
 using Sivar.Erp.Core.Domain.Enums;
+using AccountTypeEnum = Sivar.Erp.Core.Domain.Enums.AccountType;
 
 namespace Sivar.Erp.Core.Application.DTOs.Accounting;
 
@@ -263,4 +264,39 @@ public class JournalEntryQueryDto
     public Guid? SourceId { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
+}
+
+/// <summary>
+/// DTO for trial balance report
+/// </summary>
+public class TrialBalanceDto
+{
+    public DateTime AsOfDate { get; set; }
+    public string CompanyName { get; set; } = string.Empty;
+    public List<TrialBalanceLineDto> Lines { get; set; } = new();
+    public decimal TotalDebits { get; set; }
+    public decimal TotalCredits { get; set; }
+    public bool IsBalanced => TotalDebits == TotalCredits;
+}
+
+/// <summary>
+/// DTO for trial balance line item
+/// </summary>
+public class TrialBalanceLineDto
+{
+    public Guid AccountId { get; set; }
+    public string AccountCode { get; set; } = string.Empty;
+    public string AccountName { get; set; } = string.Empty;
+    public AccountTypeEnum AccountType { get; set; }
+    public decimal DebitBalance { get; set; }
+    public decimal CreditBalance { get; set; }
+}
+
+/// <summary>
+/// DTO for posting a journal entry
+/// </summary>
+public class PostJournalEntryDto
+{
+    [MaxLength(500)]
+    public string Reason { get; set; } = string.Empty;
 }
