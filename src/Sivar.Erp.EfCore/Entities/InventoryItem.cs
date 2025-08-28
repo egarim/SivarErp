@@ -18,66 +18,66 @@ public class InventoryItem : BaseEntity, IInventoryItem
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string Code { get; set; } = string.Empty;
+    public virtual string Code { get; set; } = string.Empty;
 
     /// <summary>
     /// Type of item (Product, Service, etc.)
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string Type { get; set; } = string.Empty;
+    public virtual string Type { get; set; } = string.Empty;
 
     /// <summary>
     /// Description of the item
     /// </summary>
     [Required]
     [MaxLength(500)]
-    public string Description { get; set; } = string.Empty;
+    public virtual string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Base price of the item
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
-    public decimal BasePrice { get; set; }
+    public virtual decimal BasePrice { get; set; }
 
     /// <summary>
     /// Whether the item is tracked in inventory
     /// </summary>
-    public bool IsInventoryTracked { get; set; } = true;
+    public virtual bool IsInventoryTracked { get; set; } = true;
 
     /// <summary>
     /// Unit of measure for the item
     /// </summary>
     [Required]
     [MaxLength(20)]
-    public string UnitOfMeasure { get; set; } = string.Empty;
+    public virtual string UnitOfMeasure { get; set; } = string.Empty;
 
     /// <summary>
     /// Minimum stock level before reordering
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
-    public decimal ReorderPoint { get; set; }
+    public virtual decimal ReorderPoint { get; set; }
 
     /// <summary>
     /// Target stock level when reordering
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
-    public decimal ReorderQuantity { get; set; }
+    public virtual decimal ReorderQuantity { get; set; }
 
     /// <summary>
     /// Current average cost of the item
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
-    public decimal AverageCost { get; set; }
+    public virtual decimal AverageCost { get; set; }
 
     /// <summary>
     /// Warehouse location
     /// </summary>
     [MaxLength(100)]
-    public string Location { get; set; } = string.Empty;
+    public virtual string Location { get; set; } = string.Empty;
 
     /// <summary>
     /// Inventory valuation method (WeightedAverage, FIFO, LIFO)
     /// </summary>
-    public InventoryValuationMethod ValuationMethod { get; set; } = InventoryValuationMethod.WeightedAverage;
+    public virtual InventoryValuationMethod ValuationMethod { get; set; } = InventoryValuationMethod.WeightedAverage;
 }

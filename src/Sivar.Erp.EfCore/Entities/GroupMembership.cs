@@ -15,17 +15,17 @@ public class GroupMembership : BaseEntity
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string GroupCode { get; set; } = string.Empty;
+    public virtual string GroupCode { get; set; } = string.Empty;
 
     /// <summary>
     /// The entity ID that is a member of the group (either business entity or item depending on GroupType)
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string EntityId { get; set; } = string.Empty;
+    public virtual string EntityId { get; set; } = string.Empty;
 
     /// <summary>
     /// The type of group this membership relates to
     /// </summary>
-    public GroupType GroupType { get; set; }
+    public virtual GroupType GroupType { get; set; }
 }

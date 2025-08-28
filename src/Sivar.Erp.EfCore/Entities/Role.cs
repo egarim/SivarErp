@@ -15,35 +15,35 @@ public class Role : BaseEntity, IRole
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
+    public virtual string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Display name of the role
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string DisplayName { get; set; } = string.Empty;
+    public virtual string DisplayName { get; set; } = string.Empty;
 
     /// <summary>
     /// Description of the role
     /// </summary>
     [MaxLength(500)]
-    public string Description { get; set; } = string.Empty;
+    public virtual string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Whether this is a system role
     /// </summary>
-    public bool IsSystemRole { get; set; } = false;
+    public virtual bool IsSystemRole { get; set; } = false;
 
     /// <summary>
     /// Role creation date
     /// </summary>
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public virtual DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Permissions (stored as JSON)
     /// </summary>
-    public string PermissionsJson { get; set; } = "[]";
+    public virtual string PermissionsJson { get; set; } = "[]";
 
     // Interface implementation (not mapped to database)
     [NotMapped]

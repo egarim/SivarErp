@@ -16,34 +16,34 @@ public class FiscalPeriod : BaseEntity, IFiscalPeriod
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string Code { get; set; } = string.Empty;
+    public virtual string Code { get; set; } = string.Empty;
 
     /// <summary>
     /// Start date of the fiscal period
     /// </summary>
-    public DateOnly StartDate { get; set; }
+    public virtual DateOnly StartDate { get; set; }
 
     /// <summary>
     /// End date of the fiscal period
     /// </summary>
-    public DateOnly EndDate { get; set; }
+    public virtual DateOnly EndDate { get; set; }
 
     /// <summary>
     /// Name of the fiscal period
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string Name { get; set; } = string.Empty;
+    public virtual string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Whether the fiscal period is currently open
     /// </summary>
-    public bool IsOpen { get; set; } = true;
+    public virtual bool IsOpen { get; set; } = true;
 
     /// <summary>
     /// Whether this is the current active fiscal period
     /// </summary>
-    public bool IsCurrent { get; set; } = false;
-    public FiscalPeriodStatus Status { get; set; }
-    public string Description { get; set; }
+    public virtual bool IsCurrent { get; set; } = false;
+    public virtual FiscalPeriodStatus Status { get; set; }
+    public virtual string Description { get; set; } = string.Empty;
 }

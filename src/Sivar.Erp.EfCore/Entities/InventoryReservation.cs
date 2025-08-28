@@ -20,76 +20,76 @@ public class InventoryReservation : BaseEntity, IInventoryReservation
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string ReservationId { get; set; } = string.Empty;
+    public virtual string ReservationId { get; set; } = string.Empty;
 
     /// <summary>
     /// Code of the inventory item being reserved
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string ItemCode { get; set; } = string.Empty;
+    public virtual string ItemCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Quantity being reserved
     /// </summary>
     [Column(TypeName = "decimal(18,6)")]
-    public decimal Quantity { get; set; }
+    public virtual decimal Quantity { get; set; }
 
     /// <summary>
     /// Warehouse code where the item is reserved
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string WarehouseCode { get; set; } = string.Empty;
+    public virtual string WarehouseCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Source document number (e.g., sales order number)
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string SourceDocumentNumber { get; set; } = string.Empty;
+    public virtual string SourceDocumentNumber { get; set; } = string.Empty;
 
     /// <summary>
     /// Reservation status
     /// </summary>
-    public ReservationStatus Status { get; set; }
+    public virtual ReservationStatus Status { get; set; }
 
     /// <summary>
     /// Date/time when the reservation was created
     /// </summary>
     [Required]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public virtual DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// User who created the reservation
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string CreatedBy { get; set; } = string.Empty;
+    public virtual string CreatedBy { get; set; } = string.Empty;
 
     /// <summary>
     /// Date/time when the reservation expires
     /// </summary>
     [Required]
-    public DateTime ExpiresAt { get; set; }
+    public virtual DateTime ExpiresAt { get; set; }
 
     /// <summary>
     /// Date/time when the reservation was last updated
     /// </summary>
     [Required]
-    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+    public virtual DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Priority level of the reservation
     /// </summary>
-    public int Priority { get; set; } = 1;
+    public virtual int Priority { get; set; } = 1;
 
     /// <summary>
     /// Optional notes about the reservation
     /// </summary>
     [Required]
     [MaxLength(500)]
-    public string Notes { get; set; } = string.Empty;
+    public virtual string Notes { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets whether the reservation is expired based on current time

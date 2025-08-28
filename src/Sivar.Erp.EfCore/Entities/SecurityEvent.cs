@@ -15,61 +15,61 @@ public class SecurityEvent : BaseEntity, ISecurityEvent
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public virtual string Id { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Timestamp when the event occurred
     /// </summary>
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    public virtual DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Action that was performed
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string Action { get; set; } = string.Empty;
+    public virtual string Action { get; set; } = string.Empty;
 
     /// <summary>
     /// Result of the action
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string Result { get; set; } = string.Empty;
+    public virtual string Result { get; set; } = string.Empty;
 
     /// <summary>
     /// Details about the event
     /// </summary>
     [MaxLength(2000)]
-    public string Details { get; set; } = string.Empty;
+    public virtual string Details { get; set; } = string.Empty;
 
     /// <summary>
     /// User ID who performed the action
     /// </summary>
     [MaxLength(100)]
-    public string? UserId { get; set; }
+    public virtual string? UserId { get; set; }
 
     /// <summary>
     /// Username who performed the action
     /// </summary>
     [MaxLength(100)]
-    public string? UserName { get; set; }
+    public virtual string? UserName { get; set; }
 
     /// <summary>
     /// IP address from which the action was performed
     /// </summary>
     [MaxLength(50)]
-    public string? IpAddress { get; set; }
+    public virtual string? IpAddress { get; set; }
 
     /// <summary>
     /// User agent of the client
     /// </summary>
     [MaxLength(500)]
-    public string? UserAgent { get; set; }
+    public virtual string? UserAgent { get; set; }
 
     /// <summary>
     /// Additional data (stored as JSON)
     /// </summary>
-    public string? AdditionalDataJson { get; set; }
+    public virtual string? AdditionalDataJson { get; set; }
 
     // Interface implementation (not mapped to database)
     [NotMapped]

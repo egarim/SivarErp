@@ -15,19 +15,19 @@ public class Payment : BaseEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string PaymentId { get; set; } = string.Empty;
+    public virtual string PaymentId { get; set; } = string.Empty;
 
     /// <summary>
     /// Document number associated with this payment
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DocumentNumber { get; set; } = string.Empty;
+    public virtual string DocumentNumber { get; set; } = string.Empty;
 
     /// <summary>
     /// Foreign key to PaymentMethod
     /// </summary>
-    public Guid PaymentMethodId { get; set; }
+    public virtual Guid PaymentMethodId { get; set; }
 
     /// <summary>
     /// Navigation property to PaymentMethod
@@ -39,38 +39,38 @@ public class Payment : BaseEntity
     /// Payment amount
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
-    public decimal Amount { get; set; }
+    public virtual decimal Amount { get; set; }
 
     /// <summary>
     /// Date when the payment was made
     /// </summary>
-    public DateOnly PaymentDate { get; set; }
+    public virtual DateOnly PaymentDate { get; set; }
 
     /// <summary>
     /// Reference number for the payment
     /// </summary>
     [MaxLength(200)]
-    public string? Reference { get; set; }
+    public virtual string? Reference { get; set; }
 
     /// <summary>
     /// Bank account used for the payment
     /// </summary>
     [MaxLength(100)]
-    public string? BankAccount { get; set; }
+    public virtual string? BankAccount { get; set; }
 
     /// <summary>
     /// Payment status
     /// </summary>
-    public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
+    public virtual PaymentStatus Status { get; set; } = PaymentStatus.Pending;
 
     /// <summary>
     /// Additional notes about the payment
     /// </summary>
     [MaxLength(1000)]
-    public string? Notes { get; set; }
+    public virtual string? Notes { get; set; }
 
     /// <summary>
     /// Additional data (stored as JSON)
     /// </summary>
-    public string? AdditionalData { get; set; }
+    public virtual string? AdditionalData { get; set; }
 }

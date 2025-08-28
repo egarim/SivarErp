@@ -15,25 +15,25 @@ public class Item : BaseEntity, IItem
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string Code { get; set; } = string.Empty;
+    public virtual string Code { get; set; } = string.Empty;
 
     /// <summary>
     /// Type of item (Product, Service, etc.)
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string Type { get; set; } = string.Empty;
+    public virtual string Type { get; set; } = string.Empty;
 
     /// <summary>
     /// Description of the item
     /// </summary>
     [Required]
     [MaxLength(500)]
-    public string Description { get; set; } = string.Empty;
+    public virtual string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Base price of the item
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
-    public decimal BasePrice { get; set; }
+    public virtual decimal BasePrice { get; set; }
 }

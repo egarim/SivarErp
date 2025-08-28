@@ -14,30 +14,30 @@ public class Transaction : BaseEntity, ITransaction
     /// Reference to the parent document
     /// </summary>
     [MaxLength(100)]
-    public string? DocumentNumber { get; set; }
+    public virtual string? DocumentNumber { get; set; }
 
     /// <summary>
     /// Unique transaction number
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string TransactionNumber { get; set; } = string.Empty;
+    public virtual string TransactionNumber { get; set; } = string.Empty;
 
     /// <summary>
     /// Date of the transaction (may differ from document date)
     /// </summary>
-    public DateOnly TransactionDate { get; set; }
+    public virtual DateOnly TransactionDate { get; set; }
 
     /// <summary>
     /// Description of the transaction
     /// </summary>
     [MaxLength(500)]
-    public string? Description { get; set; }
+    public virtual string? Description { get; set; }
 
     /// <summary>
     /// Whether the transaction has been posted
     /// </summary>
-    public bool IsPosted { get; set; } = false;
+    public virtual bool IsPosted { get; set; } = false;
 
     /// <summary>
     /// Navigation property to ledger entries

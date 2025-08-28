@@ -28,41 +28,41 @@ public class StockLevel : BaseEntity, IStockLevel
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string ItemCode { get; set; } = string.Empty;
+    public virtual string ItemCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Warehouse or location code
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string WarehouseCode { get; set; } = string.Empty;
+    public virtual string WarehouseCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Physical quantity on hand
     /// </summary>
     [Required]
     [Column(TypeName = "decimal(18,6)")]
-    public decimal QuantityOnHand { get; set; }
+    public virtual decimal QuantityOnHand { get; set; }
 
     /// <summary>
     /// Quantity reserved for sales orders
     /// </summary>
     [Required]
     [Column(TypeName = "decimal(18,6)")]
-    public decimal QuantityReserved { get; set; }
+    public virtual decimal QuantityReserved { get; set; }
 
     /// <summary>
     /// Quantity on order (incoming)
     /// </summary>
     [Required]
     [Column(TypeName = "decimal(18,6)")]
-    public decimal QuantityOnOrder { get; set; }
+    public virtual decimal QuantityOnOrder { get; set; }
 
     /// <summary>
     /// Date/time when the stock level was last updated
     /// </summary>
     [Required]
-    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+    public virtual DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Gets the available quantity (on hand minus reserved)

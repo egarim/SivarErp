@@ -15,35 +15,35 @@ public class User : BaseEntity, IUser
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string Id { get; set; } = string.Empty;
+    public virtual string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// Username for login
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string Username { get; set; } = string.Empty;
+    public virtual string Username { get; set; } = string.Empty;
 
     /// <summary>
     /// Email address
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string Email { get; set; } = string.Empty;
+    public virtual string Email { get; set; } = string.Empty;
 
     /// <summary>
     /// First name
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string FirstName { get; set; } = string.Empty;
+    public virtual string FirstName { get; set; } = string.Empty;
 
     /// <summary>
     /// Last name
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string LastName { get; set; } = string.Empty;
+    public virtual string LastName { get; set; } = string.Empty;
 
     /// <summary>
     /// Full name (computed property)
@@ -54,39 +54,39 @@ public class User : BaseEntity, IUser
     /// <summary>
     /// Whether the user is active
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public virtual bool IsActive { get; set; } = true;
 
     /// <summary>
     /// User creation date
     /// </summary>
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public virtual DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Last login date
     /// </summary>
-    public DateTime? LastLoginDate { get; set; }
+    public virtual DateTime? LastLoginDate { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
     [Required]
     [MaxLength(500)]
-    public string PasswordHash { get; set; } = string.Empty;
+    public virtual string PasswordHash { get; set; } = string.Empty;
 
     /// <summary>
     /// User roles (stored as JSON)
     /// </summary>
-    public string RolesJson { get; set; } = "[]";
+    public virtual string RolesJson { get; set; } = "[]";
 
     /// <summary>
     /// Direct permissions (stored as JSON)
     /// </summary>
-    public string DirectPermissionsJson { get; set; } = "[]";
+    public virtual string DirectPermissionsJson { get; set; } = "[]";
 
     /// <summary>
     /// Additional properties (stored as JSON)
     /// </summary>
-    public string? PropertiesJson { get; set; }
+    public virtual string? PropertiesJson { get; set; }
 
     // Interface implementations (not mapped to database)
     [NotMapped]

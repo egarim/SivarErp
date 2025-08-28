@@ -15,51 +15,51 @@ public class DocumentAccountingProfile : BaseEntity, IDocumentAccountingProfile
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DocumentOperation { get; set; } = string.Empty;
+    public virtual string DocumentOperation { get; set; } = string.Empty;
 
     /// <summary>
     /// Account code to use for sales or revenue
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string SalesAccountCode { get; set; } = string.Empty;
+    public virtual string SalesAccountCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Account code to use for accounts receivable
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string AccountsReceivableCode { get; set; } = string.Empty;
+    public virtual string AccountsReceivableCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Account code to use for cost of goods sold
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string CostOfGoodsSoldAccountCode { get; set; } = string.Empty;
+    public virtual string CostOfGoodsSoldAccountCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Account code to use for inventory
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string InventoryAccountCode { get; set; } = string.Empty;
+    public virtual string InventoryAccountCode { get; set; } = string.Empty;
 
     /// <summary>
     /// Cost ratio used for calculating cost of goods sold (e.g. 0.6 for 60%)
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
-    public decimal CostRatio { get; set; }
+    public virtual decimal CostRatio { get; set; }
 
     /// <summary>
     /// Created by user
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string CreatedBy { get; set; } = string.Empty;
+    public virtual string CreatedBy { get; set; } = string.Empty;
 
     /// <summary>
     /// Created date
     /// </summary>
-    public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
+    public virtual DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
 }

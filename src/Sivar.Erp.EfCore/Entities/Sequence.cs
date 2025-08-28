@@ -14,44 +14,44 @@ public class Sequence : BaseEntity
     /// </summary>
     [Required]
     [MaxLength(50)]
-    public string Code { get; set; } = string.Empty;
+    public virtual string Code { get; set; } = string.Empty;
 
     /// <summary>
     /// Name of the sequence
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string Name { get; set; } = string.Empty;
+    public virtual string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Current value of the sequence
     /// </summary>
-    public long CurrentValue { get; set; } = 0;
+    public virtual long CurrentValue { get; set; } = 0;
 
     /// <summary>
     /// Increment value for the sequence
     /// </summary>
-    public int IncrementBy { get; set; } = 1;
+    public virtual int IncrementBy { get; set; } = 1;
 
     /// <summary>
     /// Prefix for the generated numbers
     /// </summary>
     [MaxLength(50)]
-    public string? Prefix { get; set; }
+    public virtual string? Prefix { get; set; }
 
     /// <summary>
     /// Suffix for the generated numbers
     /// </summary>
     [MaxLength(50)]
-    public string? Suffix { get; set; }
+    public virtual string? Suffix { get; set; }
 
     /// <summary>
     /// Minimum length of the number part (with zero padding)
     /// </summary>
-    public int MinLength { get; set; } = 1;
+    public virtual int MinLength { get; set; } = 1;
 
     /// <summary>
     /// Whether the sequence is currently active
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public virtual bool IsActive { get; set; } = true;
 }
