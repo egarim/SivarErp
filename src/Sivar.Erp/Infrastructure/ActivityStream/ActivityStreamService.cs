@@ -33,7 +33,7 @@ namespace Sivar.Erp.Infrastructure.ActivityStream
         /// </summary>
         /// <param name="activity">The activity to record</param>
         /// <returns>The created activity record</returns>
-        public Task<ActivityRecord> RecordActivityAsync(ActivityRecord activity)
+        public Task<IActivityRecord> RecordActivityAsync(IActivityRecord activity)
         {
             // Generate ID if not provided
             if (activity.Id == Guid.Empty)
@@ -75,7 +75,7 @@ namespace Sivar.Erp.Infrastructure.ActivityStream
         /// <param name="target">What was acted upon</param>
         /// <param name="timeZoneId">Timezone where the activity occurred</param>
         /// <returns>The created activity record</returns>
-        public async Task<ActivityRecord> RecordActivityAsync(
+        public async Task<IActivityRecord> RecordActivityAsync(
             IStreamObject actor, 
             string verb, 
             IStreamObject target,
@@ -100,7 +100,7 @@ namespace Sivar.Erp.Infrastructure.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public Task<IEnumerable<ActivityRecord>> GetActorActivityStreamAsync(
+        public Task<IEnumerable<IActivityRecord>> GetActorActivityStreamAsync(
             string actorType, 
             string actorKey, 
             int page = 1, 
@@ -125,7 +125,7 @@ namespace Sivar.Erp.Infrastructure.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public Task<IEnumerable<ActivityRecord>> GetTargetActivityStreamAsync(
+        public Task<IEnumerable<IActivityRecord>> GetTargetActivityStreamAsync(
             string targetType, 
             string targetKey, 
             int page = 1, 
@@ -149,7 +149,7 @@ namespace Sivar.Erp.Infrastructure.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public Task<IEnumerable<ActivityRecord>> GetGlobalActivityStreamAsync(
+        public Task<IEnumerable<IActivityRecord>> GetGlobalActivityStreamAsync(
             bool onlyPublic = true,
             int page = 1, 
             int pageSize = 20)
@@ -182,7 +182,7 @@ namespace Sivar.Erp.Infrastructure.ActivityStream
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>List of activity records</returns>
-        public Task<IEnumerable<ActivityRecord>> SearchActivitiesAsync(
+        public Task<IEnumerable<IActivityRecord>> SearchActivitiesAsync(
             string? query = null,
             IEnumerable<string>? tags = null,
             DateOnly? startDate = null, 
@@ -236,7 +236,7 @@ namespace Sivar.Erp.Infrastructure.ActivityStream
         /// <summary>
         /// Generates a default description for an activity
         /// </summary>
-        private string GenerateDefaultDescription(ActivityRecord activity)
+        private string GenerateDefaultDescription(IActivityRecord activity)
         {
             if (activity.Actor == null || activity.Target == null || string.IsNullOrEmpty(activity.Verb))
             {

@@ -559,13 +559,13 @@ namespace Sivar.Erp.Modules.Inventory
 
         #endregion
     }
-
     #region Supporting DTOs
+
 
     /// <summary>
     /// Represents an inventory layer for FIFO/LIFO costing
     /// </summary>
-    public class InventoryLayerDto
+    public class InventoryLayerDto : IInventoryLayerDto
     {
         public Guid Oid { get; set; }
         public string ItemCode { get; set; }

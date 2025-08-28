@@ -18,7 +18,7 @@ namespace Sivar.Erp.ErpSystem.Modules.Security.Core
         Task<IEnumerable<SecurityEvent>> GetSecurityEventsAsync(DateTime fromDate, DateTime toDate, string? userId = null);
     }
 
-    public class SecurityEvent
+    public class SecurityEvent : ISecurityEvent
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;

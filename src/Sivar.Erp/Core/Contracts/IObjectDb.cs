@@ -21,9 +21,9 @@ namespace Sivar.Erp.Core.Contracts
     public interface IObjectDb
     {
         // Infrastructure layer types
-        IList<PerformanceLog> PerformanceLogs { get; set; }
-        IList<ActivityRecord> ActivityRecords { get; set; }
-        IList<SequenceDto> Sequences { get; set; }
+        IList<IPerformanceLog> PerformanceLogs { get; set; }
+        IList<IActivityRecord> ActivityRecords { get; set; }
+        IList<ISequenceDto> Sequences { get; set; }
 
         // Core.Contracts - Accounting
         IList<IFiscalPeriod> fiscalPeriods { get; set; }
@@ -49,15 +49,15 @@ namespace Sivar.Erp.Core.Contracts
         IList<IStockLevel> StockLevels { get; set; }
         IList<IInventoryTransaction> InventoryTransactions { get; set; }
         IList<IInventoryReservation> InventoryReservations { get; set; }
-        IList<InventoryLayerDto> InventoryLayers { get; set; }
+        IList<IInventoryLayerDto> InventoryLayers { get; set; }
 
         // Payment System
-        IList<PaymentMethodDto> PaymentMethods { get; set; }
-        IList<PaymentDto> Payments { get; set; }
+        IList<IPaymentMethodDto> PaymentMethods { get; set; }
+        IList<IPaymentDto> Payments { get; set; }
 
         // Security System
-        IList<User> Users { get; set; }
-        IList<Role> Roles { get; set; }
-        IList<SecurityEvent> SecurityEvents { get; set; }
+        IList<IUser> Users { get; set; }
+        IList<IRole> Roles { get; set; }
+        IList<ISecurityEvent> SecurityEvents { get; set; }
     }
 }

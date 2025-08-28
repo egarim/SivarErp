@@ -24,9 +24,9 @@ namespace Sivar.Erp.Infrastructure.Data
     public class ObjectDb : IObjectDb
     {
         // Infrastructure.Diagnostics
-        public IList<PerformanceLog> PerformanceLogs { get; set; } = new List<PerformanceLog>();
-        public IList<ActivityRecord> ActivityRecords { get; set; } = new List<ActivityRecord>();
-        public IList<SequenceDto> Sequences { get; set; } = new List<SequenceDto>();
+        public IList<IPerformanceLog> PerformanceLogs { get; set; } = new List<IPerformanceLog>();
+        public IList<IActivityRecord> ActivityRecords { get; set; } = new List<IActivityRecord>();
+        public IList<ISequenceDto> Sequences { get; set; } = new List<ISequenceDto>();
 
         // Core.Contracts - Accounting
         public IList<IFiscalPeriod> fiscalPeriods { get; set; } = new List<IFiscalPeriod>();
@@ -52,16 +52,16 @@ namespace Sivar.Erp.Infrastructure.Data
         public IList<CoreIStockLevel> StockLevels { get; set; } = new List<CoreIStockLevel>();
         public IList<CoreIInventoryTransaction> InventoryTransactions { get; set; } = new List<CoreIInventoryTransaction>();
         public IList<CoreIInventoryReservation> InventoryReservations { get; set; } = new List<CoreIInventoryReservation>();
-        public IList<InventoryLayerDto> InventoryLayers { get; set; } = new List<InventoryLayerDto>();
+        public IList<IInventoryLayerDto> InventoryLayers { get; set; } = new List<IInventoryLayerDto>();
 
         // Payment System
-        public IList<PaymentMethodDto> PaymentMethods { get; set; } = new List<PaymentMethodDto>();
-        public IList<PaymentDto> Payments { get; set; } = new List<PaymentDto>();
+        public IList<IPaymentMethodDto> PaymentMethods { get; set; } = new List<IPaymentMethodDto>();
+        public IList<IPaymentDto> Payments { get; set; } = new List<IPaymentDto>();
 
         // Security System
-        public IList<User> Users { get; set; } = new List<User>();
-        public IList<Role> Roles { get; set; } = new List<Role>();
-        public IList<SecurityEvent> SecurityEvents { get; set; } = new List<SecurityEvent>();
+        public IList<IUser> Users { get; set; } = new List<IUser>();
+        public IList<IRole> Roles { get; set; } = new List<IRole>();
+        public IList<ISecurityEvent> SecurityEvents { get; set; } = new List<ISecurityEvent>();
 
         /// <summary>
         /// Initializes a new instance of ObjectDb for Infrastructure layer
