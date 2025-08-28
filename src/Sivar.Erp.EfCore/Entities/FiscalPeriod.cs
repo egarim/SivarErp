@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Sivar.Erp.Core.Enums;
-using Sivar.Erp.Modules.Accounting.Domain.FiscalPeriods;
+
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 
 namespace Sivar.Erp.EfCore.Entities;
 
@@ -46,4 +47,5 @@ public class FiscalPeriod : BaseEntity, IFiscalPeriod
     public virtual bool IsCurrent { get; set; } = false;
     public virtual FiscalPeriodStatus Status { get; set; }
     public virtual string Description { get; set; } = string.Empty;
+ 
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sivar.Erp.Core.Enums;
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 
 namespace Sivar.Erp.Core.Contracts
 {
@@ -14,7 +15,7 @@ namespace Sivar.Erp.Core.Contracts
         DateOnly StartDate { get; set; }
         DateOnly EndDate { get; set; }
         bool IsActive { get; set; }
-        FiscalPeriodStatus Status { get; set; } // Add Status property
+        FiscalPeriodStatus Status { get; set; } 
         DateTime CreatedDate { get; set; }
         string CreatedBy { get; set; }
     }
