@@ -85,7 +85,7 @@ namespace Sivar.Erp.Modules.ImportExport
                     // Validate membership
                     if (!_membershipValidator.ValidateMembership(membership))
                     {
-                        errors.Add($"Line {i + 1}: Membership validation failed for group {membership.GroupId} and entity {membership.EntityId}");
+                        errors.Add($"Line {i + 1}: Membership validation failed for group {membership.GroupCode} and entity {membership.EntityId}");
                         continue;
                     }
 
@@ -190,7 +190,7 @@ namespace Sivar.Erp.Modules.ImportExport
         {
             var membership = new GroupMembershipDto
             {
-                Oid = Guid.NewGuid() // Generate a new ID for imported memberships
+                ID = Guid.NewGuid() // Generate a new ID for imported memberships
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -202,11 +202,11 @@ namespace Sivar.Erp.Modules.ImportExport
                     case "oid":
                         if (Guid.TryParse(value, out var oid))
                         {
-                            membership.Oid = oid;
+                            membership.ID = oid;
                         }
                         break;
                     case "groupid":
-                        membership.GroupId = value;
+                        membership.GroupCode = value;
                         break;
                     case "entityid":
                         membership.EntityId = value;
@@ -239,7 +239,7 @@ namespace Sivar.Erp.Modules.ImportExport
         /// <returns>CSV row as a string</returns>
         private string GetCsvRow(GroupMembershipDto membership)
         {
-            return $"{membership.Oid},\"{membership.GroupId}\",\"{membership.EntityId}\",{membership.GroupType}";
+            return $"{membership.ID},\"{membership.GroupCode}\",\"{membership.EntityId}\",{membership.GroupType}";
         }
     }
 }

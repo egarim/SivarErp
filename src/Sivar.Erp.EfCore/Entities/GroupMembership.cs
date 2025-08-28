@@ -1,14 +1,18 @@
+using DevExpress.Persistent.Base;
+using Sivar.Erp.Modules.Taxes.TaxGroup;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Modules.Taxes.TaxGroup;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+
+[NavigationItem("Taxes")]
+[DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Group Memberships
 /// </summary>
 [Table("GroupMemberships")]
-public class GroupMembership : BaseEntity
+public class GroupMembership : BaseEntity, IGroupMembership
 {
     /// <summary>
     /// The group code that defines the tax behavior

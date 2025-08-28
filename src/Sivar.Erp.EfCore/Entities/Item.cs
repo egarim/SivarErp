@@ -1,9 +1,12 @@
+using DevExpress.Persistent.Base;
+using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[DefaultClassOptions()]
+[NavigationItem("Inventory")]
 /// <summary>
 /// Entity Framework entity for Items
 /// </summary>

@@ -95,7 +95,7 @@ namespace Sivar.Erp.Modules.Taxes.TaxRule
         {
             return _groupMemberships
                 .Where(m => m.EntityId == entityId && m.GroupType == groupType)
-                .Select(m => m.GroupId)
+                .Select(m => m.GroupCode)
                 .ToList();
         }
 

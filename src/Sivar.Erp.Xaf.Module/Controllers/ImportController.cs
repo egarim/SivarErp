@@ -48,6 +48,18 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                     case FIleType.TaxRules:
                         await ImportTaxRules(csvContent);
                         break;
+                    case FIleType.BusinessEntities:
+                        await ImportBusinessEntities(csvContent);
+                        break;
+                    case FIleType.DocumentTypes:
+                        await ImportDocumentTypes(csvContent);
+                        break;
+                    case FIleType.Items:
+                        await ImportItems(csvContent);
+                        break;
+                    case FIleType.GroupMemberships:
+                        await ImportGroupMemberships(csvContent);
+                        break;
                     default:
                         throw new UserFriendlyException($"Unsupported file type: {importFile.FileType}");
                 }
@@ -140,6 +152,38 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
 
             HandleImportResult(importedItems, errors, "tax rules");
+        }
+
+        private async Task ImportBusinessEntities(string csvContent)
+        {
+            var importService = new XafBusinessEntityImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "business entities");
+        }
+
+        private async Task ImportDocumentTypes(string csvContent)
+        {
+            var importService = new XafDocumentTypeImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "document types");
+        }
+
+        private async Task ImportItems(string csvContent)
+        {
+            var importService = new XafItemImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "items");
+        }
+
+        private async Task ImportGroupMemberships(string csvContent)
+        {
+            var importService = new XafGroupMembershipImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "group memberships");
         }
 
         private void HandleImportResult<T>(IEnumerable<T> importedItems, IEnumerable<string> errors, string itemTypeName)

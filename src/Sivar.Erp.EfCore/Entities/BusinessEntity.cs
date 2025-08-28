@@ -5,6 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+
+
+[NavigationItem("Customers")]
 [DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Business Entities (customers, suppliers, etc.)

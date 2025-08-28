@@ -1,9 +1,12 @@
+using DevExpress.Persistent.Base;
+using Sivar.Erp.Modules.Accounting.Domain.Transactions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Modules.Accounting.Domain.Transactions;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[DefaultClassOptions()]
+[NavigationItem("Accounting")]
 /// <summary>
 /// Entity Framework entity for Financial Transactions
 /// </summary>

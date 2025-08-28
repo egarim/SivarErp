@@ -1,9 +1,12 @@
+using DevExpress.Persistent.Base;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Modules.Documents.Core.Interfaces;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[DefaultClassOptions()]
+[NavigationItem("Documents")]
 /// <summary>
 /// Entity Framework entity for Document Types
 /// </summary>

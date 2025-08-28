@@ -20,7 +20,7 @@ namespace Sivar.Erp.Modules.Taxes.TaxGroup
             }
 
             // Check required fields
-            if (string.IsNullOrWhiteSpace(membership.GroupId))
+            if (string.IsNullOrWhiteSpace(membership.GroupCode))
             {
                 return false;
             }

@@ -7,7 +7,7 @@ namespace Sivar.Erp.Modules.Taxes.TaxGroup
     /// <summary>
     /// Represents membership of an entity or item in a tax group
     /// </summary>
-    public class GroupMembershipDto : INotifyPropertyChanged
+    public class GroupMembershipDto : INotifyPropertyChanged, IGroupMembership
     {
         private Guid _oid;
         private string _groupId;
@@ -17,7 +17,7 @@ namespace Sivar.Erp.Modules.Taxes.TaxGroup
         /// <summary>
         /// Unique identifier for the membership
         /// </summary>
-        public Guid Oid
+        public Guid ID
         {
             get => _oid;
             set
@@ -33,7 +33,7 @@ namespace Sivar.Erp.Modules.Taxes.TaxGroup
         /// <summary>
         /// The tax group ID that this membership belongs to
         /// </summary>
-        public string GroupId
+        public string GroupCode
         {
             get => _groupId;
             set

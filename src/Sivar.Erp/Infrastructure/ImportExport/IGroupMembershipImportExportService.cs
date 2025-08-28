@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sivar.Erp.Core.Contracts;
+using Sivar.Erp.Modules.Taxes.TaxGroup;
 
 namespace Sivar.Erp.Infrastructure.ImportExport
 {
