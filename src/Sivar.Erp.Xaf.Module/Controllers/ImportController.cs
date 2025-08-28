@@ -26,20 +26,7 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             Import.Execute += Import_Execute;
 
         }
-        private string GetCsvContentFromUser()
-        {
-            // Implementation would show file upload dialog
-            // For example purposes, return sample CSV
-            return @"AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId
-Cash,1001,Asset,,
-Bank Account,1002,Asset,,
-Accounts Receivable,1201,Asset,,
-Inventory,1301,Asset,,
-Accounts Payable,2001,Liability,,
-Retained Earnings,3001,Equity,,
-Sales Revenue,4001,Revenue,,
-Cost of Goods Sold,5001,Expense,,";
-        }
+
         private async void Import_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
 
@@ -57,30 +44,59 @@ Cost of Goods Sold,5001,Expense,,";
                     // Process the CSV content
                 }
 
-                var Validator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
-                // Create the service with current ObjectSpace
-                var importService = new XafAccountImportExportService(ObjectSpace,Validator);
-
-                // Import accounts
-                var (importedAccounts, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
-
-                if (errors.Any())
+                if (importFile.FileType == FIleType.Accounts)
                 {
-                    // Show errors to user
-                    string errorMessage = string.Join("\\n", errors);
-                    throw new UserFriendlyException($"Import completed with errors:\\n{errorMessage}");
-                }
-                else
-                {
-                    // Show success message
-                    Application.ShowViewStrategy.ShowMessage(
-                        $"Successfully imported {importedAccounts.Count()} accounts.",
-                        InformationType.Success);
+                    var Validator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
+                    // Create the service with current ObjectSpace
+                    var importService = new XafAccountImportExportService(ObjectSpace, Validator);
 
-                    // Refresh the view
-                    View.ObjectSpace.Refresh();
+                    // Import accounts
+                    var (importedAccounts, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+                    if (errors.Any())
+                    {
+                        // Show errors to user
+                        string errorMessage = string.Join("\\n", errors);
+                        throw new UserFriendlyException($"Import completed with errors:\\n{errorMessage}");
+                    }
+                    else
+                    {
+                        // Show success message
+                        Application.ShowViewStrategy.ShowMessage(
+                            $"Successfully imported {importedAccounts.Count()} accounts.",
+                            InformationType.Success);
+
+                        // Refresh the view
+                        View.ObjectSpace.Refresh();
+                    }
                 }
+
+                if (importFile.FileType == FIleType.Taxes)
+                {
+                    // Create the service with current ObjectSpace
+                    var importService = new XafTaxImportExportService(ObjectSpace);
+                    // Import taxes
+                    var (importedTaxes, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                    if (errors.Any())
+                    {
+                        // Show errors to user
+                        string errorMessage = string.Join("\\n", errors);
+                        throw new UserFriendlyException($"Import completed with errors:\\n{errorMessage}");
+                    }
+                    else
+                    {
+                        // Show success message
+                        Application.ShowViewStrategy.ShowMessage(
+                            $"Successfully imported {importedTaxes.Count()} taxes.",
+                            InformationType.Success);
+                        // Refresh the view
+                        View.ObjectSpace.Refresh();
+                    }
+                }
+
+
             }
+            
             catch (Exception ex)
             {
                 Application.ShowViewStrategy.ShowMessage(

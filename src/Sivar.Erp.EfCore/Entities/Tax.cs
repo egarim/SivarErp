@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.Persistent.Base;
 using Sivar.Erp.Modules.Taxes;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Taxes
 /// </summary>
