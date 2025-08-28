@@ -6,7 +6,7 @@ namespace Sivar.Erp.Modules.Inventory.Models
     /// <summary>
     /// Represents a reservation of inventory item quantity for a specific document
     /// </summary>
-    public class ItemReservationDto : IEntity, IInventoryReservation
+    public class ItemReservationDto : IInventoryReservation
     {
         public Guid Oid { get; set; }
         public string Id { get; set; }

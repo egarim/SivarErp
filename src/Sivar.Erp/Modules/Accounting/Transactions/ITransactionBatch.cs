@@ -6,7 +6,7 @@ namespace Sivar.Erp.Modules.Accounting.Transactions
     /// <summary>
     /// Interface for transaction batches
     /// </summary>
-    public interface ITransactionBatch : IEntity
+    public interface ITransactionBatch 
     {
         /// <summary>
         /// Batch reference code

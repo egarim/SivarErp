@@ -1,3 +1,4 @@
+using Sivar.Erp.Core.Attributes;
 using System;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace Sivar.Erp.Modules.Accounting.Transactions
     /// <summary>
     /// Interface for financial transactions
     /// </summary>
-    public interface ITransaction : IEntity
+    public interface ITransaction 
     {
         /// <summary>
         /// Reference to the parent document

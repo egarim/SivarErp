@@ -68,7 +68,7 @@ namespace Tests
         private Dictionary<string, string>? _accountMappings;
         private TaxRuleEvaluator? _taxRuleEvaluator;
         private ITaxAccountingProfileService? _taxAccountingService; private ITaxAccountingProfileImportExportService? _taxAccountingImportService;
-        private IDocumentTotalsService? _documentTotalsService;
+
         private Sivar.Erp.Core.Contracts.ImportExport.IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
         private IDocumentAccountingProfileService? _documentAccountingProfileService; private ISecurityModule? _securityModule;
         private IPaymentService? _paymentService;

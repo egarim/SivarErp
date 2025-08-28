@@ -5,7 +5,7 @@ namespace Sivar.Erp.ErpSystem.Options
     /// <summary>
     /// Interface for option entities
     /// </summary>
-    public interface IOption : IEntity
+    public interface IOption 
     {
         /// <summary>
         /// Unique code for the option

@@ -1,9 +1,11 @@
+using Sivar.Erp.Core.Attributes;
+
 namespace Sivar.Erp.Modules.Accounting.ChartOfAccounts
 {
     /// <summary>
     /// Interface for chart of accounts entries
     /// </summary>
-    public interface IAccount : IEntity
+    public interface IAccount 
     {
         /// <summary>
         /// UTC timestamp when the entity was created

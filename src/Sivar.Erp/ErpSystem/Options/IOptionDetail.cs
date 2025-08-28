@@ -5,7 +5,7 @@ namespace Sivar.Erp.ErpSystem.Options
     /// <summary>
     /// Interface for option detail entities that store time-bound values
     /// </summary>
-    public interface IOptionDetail : IEntity
+    public interface IOptionDetail 
     {
         /// <summary>
         /// Reference to the parent option

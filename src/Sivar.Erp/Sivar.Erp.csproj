@@ -28,7 +28,6 @@
     <Folder Include="Modules\Documents\Core\Enums\" />
     <Folder Include="Modules\Documents\Application\DTOs\" />
     <Folder Include="Modules\Documents\Application\Services\" />
-    <Folder Include="Presentation\Controllers\" />
   </ItemGroup>
 
 </Project>

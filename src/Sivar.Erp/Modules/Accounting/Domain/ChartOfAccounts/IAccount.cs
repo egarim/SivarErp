@@ -1,3 +1,4 @@
+using Sivar.Erp.Core.Attributes;
 using Sivar.Erp.Core.Contracts;
 using Sivar.Erp.Core.Enums;
 

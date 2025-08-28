@@ -1,3 +1,4 @@
+using Sivar.Erp.Core.Attributes;
 using System;
 
 namespace Sivar.Erp.Modules.Accounting.FiscalPeriods
@@ -5,7 +6,7 @@ namespace Sivar.Erp.Modules.Accounting.FiscalPeriods
     /// <summary>
     /// Interface for fiscal period entities
     /// </summary>
-    public interface IFiscalPeriod : IEntity
+    public interface IFiscalPeriod
     {
         [BusinessKey]
         string Code { get; set; }

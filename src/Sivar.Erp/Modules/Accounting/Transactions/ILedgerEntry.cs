@@ -1,3 +1,4 @@
+using Sivar.Erp.Core.Attributes;
 using System;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace Sivar.Erp.Modules.Accounting.Transactions
     /// <summary>
     /// Interface for ledger entries
     /// </summary>
-    public interface ILedgerEntry : IEntity
+    public interface ILedgerEntry 
     {
         /// <summary>
         /// Reference to the parent transaction

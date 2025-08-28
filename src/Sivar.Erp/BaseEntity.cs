@@ -4,7 +4,7 @@ namespace Sivar.Erp
     /// Base entity class implementing common interfaces
     /// This is used when you can control the base class
     /// </summary>
-    public abstract class BaseEntity : IEntity
+    public abstract class BaseEntity 
     {
         /// <summary>
         /// Unique identifier for the entity

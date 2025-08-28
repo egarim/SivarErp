@@ -5,7 +5,7 @@ namespace Sivar.Erp.ErpSystem.Options
     /// <summary>
     /// Interface for option choice entities
     /// </summary>
-    public interface IOptionChoice : IEntity
+    public interface IOptionChoice 
     {
         /// <summary>
         /// Reference to the parent option

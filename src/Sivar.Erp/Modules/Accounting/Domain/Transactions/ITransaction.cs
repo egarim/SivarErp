@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Sivar.Erp.Core.Attributes;
 using Sivar.Erp.Core.Contracts;
 
 namespace Sivar.Erp.Modules.Accounting.Domain.Transactions
