@@ -428,21 +428,21 @@ namespace Sivar.Erp.Modules
             var csv = new System.Text.StringBuilder();
             csv.AppendLine("Oid,GroupId,EntityId,GroupType");
             
-            // National clients as registered taxpayers
-            csv.AppendLine($"{Guid.NewGuid()},\"REGISTERED_TAXPAYERS\",\"CL001\",BusinessEntity");
-            csv.AppendLine($"{Guid.NewGuid()},\"REGISTERED_TAXPAYERS\",\"CL002\",BusinessEntity");
-            csv.AppendLine($"{Guid.NewGuid()},\"REGISTERED_TAXPAYERS\",\"CL003\",BusinessEntity");
+            // National clients as registered taxpayers (using fixed GUIDs to prevent file changes)
+            csv.AppendLine($"{"4580fa29-e1d1-433c-b99b-d35d251a0682"},\"REGISTERED_TAXPAYERS\",\"CL001\",BusinessEntity");
+            csv.AppendLine($"{"134590f1-f417-480e-86dd-b9268d049826"},\"REGISTERED_TAXPAYERS\",\"CL002\",BusinessEntity");
+            csv.AppendLine($"{"4c29c716-55ca-401d-98b5-95b644e43388"},\"REGISTERED_TAXPAYERS\",\"CL003\",BusinessEntity");
             
-            // International clients as final consumers
-            csv.AppendLine($"{Guid.NewGuid()},\"FINAL_CONSUMERS\",\"CL004\",BusinessEntity");
-            csv.AppendLine($"{Guid.NewGuid()},\"FINAL_CONSUMERS\",\"CL005\",BusinessEntity");
+            // International clients as final consumers (using fixed GUIDs to prevent file changes)
+            csv.AppendLine($"{"27441d11-9dd2-419a-9494-e477c4a4fff9"},\"FINAL_CONSUMERS\",\"CL004\",BusinessEntity");
+            csv.AppendLine($"{"d4e72e7b-4e34-40a3-8e57-d89f2394a5e3"},\"FINAL_CONSUMERS\",\"CL005\",BusinessEntity");
             
-            // All products as taxable items
-            csv.AppendLine($"{Guid.NewGuid()},\"TAXABLE_ITEMS\",\"PR001\",Item");
-            csv.AppendLine($"{Guid.NewGuid()},\"TAXABLE_ITEMS\",\"PR002\",Item");
-            csv.AppendLine($"{Guid.NewGuid()},\"TAXABLE_ITEMS\",\"PR003\",Item");
-            csv.AppendLine($"{Guid.NewGuid()},\"TAXABLE_ITEMS\",\"PR004\",Item");
-            csv.AppendLine($"{Guid.NewGuid()},\"TAXABLE_ITEMS\",\"PR005\",Item");
+            // All products as taxable items (using fixed GUIDs to prevent file changes)
+            csv.AppendLine($"{"152a6323-28f6-4c95-a02b-c75666549045"},\"TAXABLE_ITEMS\",\"PR001\",Item");
+            csv.AppendLine($"{"7b170694-8e2b-45df-a8ab-1ae656d3cd71"},\"TAXABLE_ITEMS\",\"PR002\",Item");
+            csv.AppendLine($"{"53af5223-d087-4a84-acbf-562894c46a45"},\"TAXABLE_ITEMS\",\"PR003\",Item");
+            csv.AppendLine($"{"654a0687-99c0-477a-9b1e-904a7295a6fc"},\"TAXABLE_ITEMS\",\"PR004\",Item");
+            csv.AppendLine($"{"2205a680-3f3b-49b2-b5f3-6f9e1bccb401"},\"TAXABLE_ITEMS\",\"PR005\",Item");
 
             return csv.ToString();
         }
@@ -455,15 +455,15 @@ namespace Sivar.Erp.Modules
             var csv = new System.Text.StringBuilder();
             csv.AppendLine("Oid,Code,Name,IsEnabled,DocumentOperation");
             
-            // Common document types for El Salvador
-            csv.AppendLine($"{Guid.NewGuid()},\"FCF\",\"Factura de Consumidor Final\",true,SalesInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"CCF\",\"Comprobante de Cr�dito Fiscal\",true,SalesInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"NC\",\"Nota de Cr�dito\",true,SalesCreditNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"ND\",\"Nota de D�bito\",true,SalesDebitNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"FEX\",\"Factura de Exportaci�n\",true,SalesInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"COM\",\"Compra\",true,PurchaseInvoice");
-            csv.AppendLine($"{Guid.NewGuid()},\"NCC\",\"Nota de Cr�dito de Compra\",true,PurchaseCreditNote");
-            csv.AppendLine($"{Guid.NewGuid()},\"NDC\",\"Nota de D�bito de Compra\",true,PurchaseDebitNote");
+            // Common document types for El Salvador (using fixed GUIDs to prevent file changes)
+            csv.AppendLine($"{"17fc5777-22f1-472e-a7c8-77b22b2e5f45"},\"FCF\",\"Factura de Consumidor Final\",true,SalesInvoice");
+            csv.AppendLine($"{"d52ac394-d30e-4de8-92e4-6a767699d184"},\"CCF\",\"Comprobante de Cr�dito Fiscal\",true,SalesInvoice");
+            csv.AppendLine($"{"67e350ef-0870-45e7-b131-806e104bde8f"},\"NC\",\"Nota de Cr�dito\",true,SalesCreditNote");
+            csv.AppendLine($"{"64e7cb47-a0e0-4afe-805d-d938403b31e3"},\"ND\",\"Nota de D�bito\",true,SalesDebitNote");
+            csv.AppendLine($"{"8711afcf-4ebe-4669-bc4b-b1fba1387354"},\"FEX\",\"Factura de Exportaci�n\",true,SalesInvoice");
+            csv.AppendLine($"{"85ee80f1-8b9c-4935-8266-9faa305f2dc5"},\"COM\",\"Compra\",true,PurchaseInvoice");
+            csv.AppendLine($"{"5d35a3d0-b0cb-4eb5-94ea-55ec9a524059"},\"NCC\",\"Nota de Cr�dito de Compra\",true,PurchaseCreditNote");
+            csv.AppendLine($"{"81b0eb94-eff1-45c1-94f4-aae36ac94f40"},\"NDC\",\"Nota de D�bito de Compra\",true,PurchaseDebitNote");
 
             return csv.ToString();
         }
