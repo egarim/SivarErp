@@ -29,80 +29,73 @@ namespace Sivar.Erp.Xaf.Module.Controllers
 
         private async void Import_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
-
             try
             {
-                // This would typically come from a file upload dialog
-                string csvContent = ""; ///GetCsvContentFromUser();
                 var importFile = this.View.CurrentObject as ImportFile;
-                var MemoryStream = new System.IO.MemoryStream();
-                importFile.File.SaveToStream(MemoryStream);
-                MemoryStream.Position = 0;
-                using (var reader = new System.IO.StreamReader(MemoryStream, Encoding.UTF8))
+                string csvContent = await ExtractCsvContentFromFile(importFile);
+
+                switch (importFile.FileType)
                 {
-                    csvContent = reader.ReadToEnd();
-                    // Process the CSV content
+                    case FIleType.Accounts:
+                        await ImportAccounts(csvContent);
+                        break;
+                    case FIleType.Taxes:
+                        await ImportTaxes(csvContent);
+                        break;
+                    default:
+                        throw new UserFriendlyException($"Unsupported file type: {importFile.FileType}");
                 }
-
-                if (importFile.FileType == FIleType.Accounts)
-                {
-                    var Validator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
-                    // Create the service with current ObjectSpace
-                    var importService = new XafAccountImportExportService(ObjectSpace, Validator);
-
-                    // Import accounts
-                    var (importedAccounts, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
-
-                    if (errors.Any())
-                    {
-                        // Show errors to user
-                        string errorMessage = string.Join("\\n", errors);
-                        throw new UserFriendlyException($"Import completed with errors:\\n{errorMessage}");
-                    }
-                    else
-                    {
-                        // Show success message
-                        Application.ShowViewStrategy.ShowMessage(
-                            $"Successfully imported {importedAccounts.Count()} accounts.",
-                            InformationType.Success);
-
-                        // Refresh the view
-                        View.ObjectSpace.Refresh();
-                    }
-                }
-
-                if (importFile.FileType == FIleType.Taxes)
-                {
-                    // Create the service with current ObjectSpace
-                    var importService = new XafTaxImportExportService(ObjectSpace);
-                    // Import taxes
-                    var (importedTaxes, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
-                    if (errors.Any())
-                    {
-                        // Show errors to user
-                        string errorMessage = string.Join("\\n", errors);
-                        throw new UserFriendlyException($"Import completed with errors:\\n{errorMessage}");
-                    }
-                    else
-                    {
-                        // Show success message
-                        Application.ShowViewStrategy.ShowMessage(
-                            $"Successfully imported {importedTaxes.Count()} taxes.",
-                            InformationType.Success);
-                        // Refresh the view
-                        View.ObjectSpace.Refresh();
-                    }
-                }
-
-
             }
-            
             catch (Exception ex)
             {
                 Application.ShowViewStrategy.ShowMessage(
                     $"Error during import: {ex.Message}",
                     InformationType.Error);
             }
+        }
+
+        private async Task<string> ExtractCsvContentFromFile(ImportFile importFile)
+        {
+            var memoryStream = new System.IO.MemoryStream();
+            importFile.File.SaveToStream(memoryStream);
+            memoryStream.Position = 0;
+            
+            using (var reader = new System.IO.StreamReader(memoryStream, Encoding.UTF8))
+            {
+                return await reader.ReadToEndAsync();
+            }
+        }
+
+        private async Task ImportAccounts(string csvContent)
+        {
+            var validator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
+            var importService = new XafAccountImportExportService(ObjectSpace, validator);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "accounts");
+        }
+
+        private async Task ImportTaxes(string csvContent)
+        {
+            var importService = new XafTaxImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "taxes");
+        }
+
+        private void HandleImportResult<T>(IEnumerable<T> importedItems, IEnumerable<string> errors, string itemTypeName)
+        {
+            if (errors.Any())
+            {
+                string errorMessage = string.Join("\\n", errors);
+                throw new UserFriendlyException($"Import completed with errors:\\n{errorMessage}");
+            }
+            
+            Application.ShowViewStrategy.ShowMessage(
+                $"Successfully imported {importedItems.Count()} {itemTypeName}.",
+                InformationType.Success);
+            
+            View.ObjectSpace.Refresh();
         }
         protected override void OnActivated()
         {

@@ -25,6 +25,7 @@ public sealed class XafModule : ModuleBase {
         //
         AdditionalExportedTypes.Add(typeof(Account));
         AdditionalExportedTypes.Add(typeof(ImportFile));
+        AdditionalExportedTypes.Add(typeof(Tax));
         AdditionalExportedTypes.Add(typeof(BusinessEntity));
         AdditionalExportedTypes.Add(typeof(Sivar.Erp.EfCore.BusinessObjects.ApplicationUser));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole));

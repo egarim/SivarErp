@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using Sivar.Erp.Modules.Taxes;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[NavigationItem("Taxes")]
 [DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Taxes
@@ -15,14 +17,14 @@ public class Tax : BaseEntity, ITax
     /// <summary>
     /// Display name of the tax
     /// </summary>
-    [Required]
+    [System.ComponentModel.DataAnnotations.Required]
     [MaxLength(200)]
     public virtual string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Short code for the tax (e.g., VAT, GST)
     /// </summary>
-    [Required]
+    [System.ComponentModel.DataAnnotations.Required]
     [MaxLength(50)]
     public virtual string Code { get; set; } = string.Empty;
 
@@ -42,10 +44,13 @@ public class Tax : BaseEntity, ITax
     [Column(TypeName = "decimal(18,4)")]
     public virtual decimal Amount { get; set; }
 
+
+
     /// <summary>
     /// Percentage to apply when TaxType is Percentage
     /// </summary>
     [Column(TypeName = "decimal(18,4)")]
+    [ModelDefault("DisplayFormat", "{0:F2}%")]
     public virtual decimal Percentage { get; set; }
 
     /// <summary>
