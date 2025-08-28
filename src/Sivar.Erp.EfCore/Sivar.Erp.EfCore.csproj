@@ -1,17 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Sivar.Erp\Sivar.Erp.csproj" />
-  </ItemGroup>
+		<PackageReference Include="DevExpress.ExpressApp.EFCore" Version="25.1.3" />
+		<PackageReference Include="DevExpress.ExpressApp.Objects" Version="25.1.3" />
+		<PackageReference Include="DevExpress.ExpressApp.Security" Version="25.1.3" />
+		<PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.1.3" />
+		<PackageReference Include="DevExpress.Persistent.Base" Version="25.1.3" />
+		<PackageReference Include="DevExpress.Persistent.BaseImpl.EFCore" Version="25.1.3" />
+
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.8" />
+
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Sivar.Erp\Sivar.Erp.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Extensions\" />
+	  <Folder Include="Repositories\" />
+	</ItemGroup>
 
 </Project>

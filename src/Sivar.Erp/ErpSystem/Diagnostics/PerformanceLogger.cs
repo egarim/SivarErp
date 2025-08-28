@@ -154,7 +154,7 @@ namespace Sivar.Erp.ErpSystem.Diagnostics
             // Store performance log in ObjectDb if provided
             if (_objectDb != null)
             {
-                var performanceLog = new PerformanceLog
+                var performanceLog = new PerformanceLogDto
                 {
                     Timestamp = DateTime.UtcNow,
                     Method = methodName,

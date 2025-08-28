@@ -21,7 +21,7 @@ namespace Sivar.Erp.Modules
 {
     public interface IObjectDb
     {
-        IList<PerformanceLog> PerformanceLogs { get; set; }
+        IList<PerformanceLogDto> PerformanceLogs { get; set; }
         IList<IFiscalPeriod> fiscalPeriods { get; set; }
         IList<IAccount> Accounts { get; set; }
         IList<IBusinessEntity> BusinessEntities { get; set; }

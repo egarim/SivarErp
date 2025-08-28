@@ -28,6 +28,7 @@ namespace Sivar.Erp.Modules.Accounting.Transactions
         /// <summary>
         /// Batch has been rejected
         /// </summary>
-        Rejected
+        Rejected,
+        Posted
     }
 }

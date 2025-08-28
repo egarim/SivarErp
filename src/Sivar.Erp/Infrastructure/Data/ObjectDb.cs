@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 // Explicit Core namespace imports to avoid ambiguity
-using CoreIStockLevel = Sivar.Erp.Core.Contracts.IStockLevel;
+
 using CoreIInventoryTransaction = Sivar.Erp.Core.Contracts.IInventoryTransaction;
 using CoreIInventoryReservation = Sivar.Erp.Core.Contracts.IInventoryReservation;
 
@@ -49,7 +49,7 @@ namespace Sivar.Erp.Infrastructure.Data
 
         // Core.Contracts - Inventory (explicit types to avoid ambiguity)
         public IList<IInventoryItem> InventoryItems { get; set; } = new List<IInventoryItem>();
-        public IList<CoreIStockLevel> StockLevels { get; set; } = new List<CoreIStockLevel>();
+        public IList<IStockLevel> StockLevels { get; set; } = new List<IStockLevel>();
         public IList<CoreIInventoryTransaction> InventoryTransactions { get; set; } = new List<CoreIInventoryTransaction>();
         public IList<CoreIInventoryReservation> InventoryReservations { get; set; } = new List<CoreIInventoryReservation>();
         public IList<IInventoryLayerDto> InventoryLayers { get; set; } = new List<IInventoryLayerDto>();

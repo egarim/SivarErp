@@ -2,7 +2,7 @@ using System;
 
 namespace Sivar.Erp.ErpSystem.Diagnostics
 {
-    public class PerformanceLog
+    public class PerformanceLogDto
     {
         public int Id { get; set; }
         public DateTime Timestamp { get; set; }

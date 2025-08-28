@@ -15,18 +15,7 @@ namespace Sivar.Erp.Core.Contracts
         string CreatedBy { get; set; }
     }
 
-    /// <summary>
-    /// Interface for stock levels
-    /// </summary>
-    public interface IStockLevel
-    {
-        string ItemCode { get; set; }
-        string? LocationCode { get; set; }
-        decimal QuantityOnHand { get; set; }
-        decimal ReservedQuantity { get; set; }
-        decimal AvailableQuantity { get; set; }
-        DateTime LastUpdated { get; set; }
-    }
+  
 
     /// <summary>
     /// Interface for inventory transactions

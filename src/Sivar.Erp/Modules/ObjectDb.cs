@@ -51,7 +51,7 @@ namespace Sivar.Erp.Modules
         public IList<ITransactionBatch> TransactionBatches { get; set; } = new List<ITransactionBatch>();
 
         public IList<ITaxRule> TaxRules { get; set; } = new List<ITaxRule>();
-        public IList<PerformanceLog> PerformanceLogs { get; set; } = new List<PerformanceLog>();
+        public IList<PerformanceLogDto> PerformanceLogs { get; set; } = new List<PerformanceLogDto>();
         public IList<IDocumentAccountingProfile> DocumentAccountingProfiles { get; set; } = new List<IDocumentAccountingProfile>();
 
         /// <summary>

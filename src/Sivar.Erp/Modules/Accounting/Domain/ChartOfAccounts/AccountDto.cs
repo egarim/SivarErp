@@ -1,4 +1,5 @@
 using Sivar.Erp.Core.Enums;
+using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 
 namespace Sivar.Erp.Modules.Accounting.Domain.ChartOfAccounts
 {
