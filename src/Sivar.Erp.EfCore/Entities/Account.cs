@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.Persistent.Base;
 using Sivar.Erp.Core.Enums;
 using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Chart of Accounts
 /// </summary>

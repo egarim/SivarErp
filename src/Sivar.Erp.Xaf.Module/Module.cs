@@ -1,17 +1,18 @@
-﻿using System.ComponentModel;
-using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.DC;
-using DevExpress.Persistent.Base;
-using DevExpress.ExpressApp.Model;
+﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.Updating;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.DomainLogics;
 using DevExpress.ExpressApp.Model.NodeGenerators;
-using DevExpress.ExpressApp.StateMachine;
-using DevExpress.Persistent.BaseImpl.EF.StateMachine;
 using DevExpress.ExpressApp.ReportsV2;
+using DevExpress.ExpressApp.StateMachine;
+using DevExpress.ExpressApp.Updating;
+using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF.StateMachine;
+using Sivar.Erp.EfCore.Entities;
+using System.ComponentModel;
 
 namespace Sivar.Erp.EfCore;
 
@@ -21,6 +22,8 @@ public sealed class XafModule : ModuleBase {
         //
         // XafModule
         //
+        AdditionalExportedTypes.Add(typeof(Account));
+        AdditionalExportedTypes.Add(typeof(BusinessEntity));
         AdditionalExportedTypes.Add(typeof(Sivar.Erp.EfCore.BusinessObjects.ApplicationUser));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.ModelDifference));

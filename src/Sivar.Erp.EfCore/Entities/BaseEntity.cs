@@ -1,3 +1,4 @@
+using DevExpress.Persistent.BaseImpl.EF;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,7 +7,7 @@ namespace Sivar.Erp.EfCore.Entities;
 /// <summary>
 /// Base entity class for Entity Framework entities
 /// </summary>
-public abstract class BaseEntity: DevExpress.Persistent.BaseImpl.EF.BaseObject
+public abstract class BaseEntity: BaseObject
 {
     ///// <summary>
     ///// Unique identifier for the entity

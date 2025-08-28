@@ -12,11 +12,16 @@ namespace Sivar.Erp.EfCore.Entities;
 public class LedgerEntry : BaseEntity, ILedgerEntry
 {
     /// <summary>
-    /// Reference to the parent transaction
+    /// Reference to the parent transaction (business key for compatibility)
     /// </summary>
     [Required]
     [MaxLength(100)]
     public virtual string TransactionNumber { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Foreign key reference to the parent transaction Oid
+    /// </summary>
+    public virtual Guid? TransactionId { get; set; }
 
     /// <summary>
     /// Unique ledger entry number
@@ -59,6 +64,6 @@ public class LedgerEntry : BaseEntity, ILedgerEntry
     /// <summary>
     /// Navigation property to the parent transaction
     /// </summary>
-    [ForeignKey(nameof(TransactionNumber))]
+    [ForeignKey(nameof(TransactionId))]
     public virtual Transaction? Transaction { get; set; }
 }

@@ -1,9 +1,11 @@
+using DevExpress.Persistent.Base;
+using Sivar.Erp.Core.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Core.Interfaces;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Business Entities (customers, suppliers, etc.)
 /// </summary>

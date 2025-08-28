@@ -1,9 +1,11 @@
+using DevExpress.Persistent.Base;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Modules.Documents.Core.Interfaces;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Document Accounting Profiles
 /// </summary>

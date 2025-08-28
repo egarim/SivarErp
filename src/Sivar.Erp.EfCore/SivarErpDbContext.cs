@@ -119,14 +119,10 @@ public class SivarErpDbContext : DbContext
         // Transaction entity configuration
         modelBuilder.Entity<Transaction>(entity =>
         {
+            // Use unique index instead of HasAlternateKey to avoid constraint conflicts
             entity.HasIndex(e => e.TransactionNumber).IsUnique();
             entity.HasIndex(e => e.DocumentNumber);
             entity.HasIndex(e => e.TransactionDate);
-            
-            entity.HasMany(t => t.LedgerEntries)
-                  .WithOne(le => le.Transaction)
-                  .HasForeignKey(le => le.TransactionNumber)
-                  .HasPrincipalKey(t => t.TransactionNumber);
         });
 
         // LedgerEntry entity configuration
@@ -135,6 +131,13 @@ public class SivarErpDbContext : DbContext
             entity.HasIndex(e => e.LedgerEntryNumber).IsUnique();
             entity.HasIndex(e => e.OfficialCode);
             entity.HasIndex(e => e.TransactionNumber);
+            entity.HasIndex(e => e.TransactionId);
+            
+            // Configure proper Guid-based relationship using TransactionId -> Transaction primary key
+            entity.HasOne(le => le.Transaction)
+                  .WithMany(t => t.LedgerEntries)
+                  .HasForeignKey(le => le.ID)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // TransactionBatch entity configuration
@@ -181,8 +184,11 @@ public class SivarErpDbContext : DbContext
         // InventoryItem entity configuration
         modelBuilder.Entity<InventoryItem>(entity =>
         {
-            entity.HasIndex(e => e.Code).IsUnique();
+            // Note: HasAlternateKey automatically creates a unique constraint, so no need for explicit unique index
             entity.HasIndex(e => e.Description);
+            
+            // Explicitly mark Code as an alternative key for foreign key relationships
+            entity.HasAlternateKey(e => e.ID);
         });
 
         // StockLevel entity configuration
@@ -194,6 +200,9 @@ public class SivarErpDbContext : DbContext
         // InventoryTransaction entity configuration
         modelBuilder.Entity<InventoryTransaction>(entity =>
         {
+            // Map the InventoryTransaction.Id property to a different column name to avoid conflict with BaseEntity.ID
+            entity.Property(e => e.Id).HasColumnName("InventoryTransactionId");
+            
             entity.HasIndex(e => e.TransactionNumber).IsUnique();
             entity.HasIndex(e => e.TransactionDate);
             entity.HasIndex(e => e.ReferenceDocumentNumber);
@@ -213,6 +222,13 @@ public class SivarErpDbContext : DbContext
         {
             entity.HasIndex(e => new { e.ItemCode, e.WarehouseCode, e.CreatedDate });
             entity.HasIndex(e => e.TransactionId);
+            
+            // Configure the relationship to use Code instead of ID
+            entity.HasOne(il => il.InventoryItem)
+                  .WithMany() // No back-reference collection needed for now
+                  .HasForeignKey(il => il.ID)
+                  .HasPrincipalKey(i => i.ID)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -274,6 +290,9 @@ public class SivarErpDbContext : DbContext
         // User entity configuration
         modelBuilder.Entity<User>(entity =>
         {
+            // Map the User.Id property to a different column name to avoid conflict with BaseEntity.ID
+            entity.Property(e => e.Id).HasColumnName("UserId");
+            
             entity.HasIndex(e => e.Id).IsUnique();
             entity.HasIndex(e => e.Username).IsUnique();
             entity.HasIndex(e => e.Email).IsUnique();
@@ -288,6 +307,9 @@ public class SivarErpDbContext : DbContext
         // SecurityEvent entity configuration
         modelBuilder.Entity<SecurityEvent>(entity =>
         {
+            // Map the SecurityEvent.Id property to a different column name to avoid conflict with BaseEntity.ID
+            entity.Property(e => e.Id).HasColumnName("SecurityEventId");
+            
             entity.HasIndex(e => e.Id).IsUnique();
             entity.HasIndex(e => e.Timestamp);
             entity.HasIndex(e => e.Action);
