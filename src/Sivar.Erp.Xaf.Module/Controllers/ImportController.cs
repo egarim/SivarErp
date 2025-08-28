@@ -39,6 +39,9 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                     case FIleType.Accounts:
                         await ImportAccounts(csvContent);
                         break;
+                    case FIleType.TaxGroups:
+                        await ImportTaxGroups(csvContent);
+                        break;
                     case FIleType.Taxes:
                         await ImportTaxes(csvContent);
                         break;
@@ -60,9 +63,46 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             importFile.File.SaveToStream(memoryStream);
             memoryStream.Position = 0;
             
-            using (var reader = new System.IO.StreamReader(memoryStream, Encoding.UTF8))
+            // Read the file with proper encoding detection
+            return await ReadFileWithEncodingDetection(memoryStream);
+        }
+
+        private async Task<string> ReadFileWithEncodingDetection(MemoryStream stream)
+        {
+            stream.Position = 0;
+            var buffer = new byte[Math.Min(1024, stream.Length)];
+            await stream.ReadAsync(buffer, 0, buffer.Length);
+            stream.Position = 0;
+
+            // Check for UTF-8 BOM
+            if (buffer.Length >= 3 && buffer[0] == 0xEF && buffer[1] == 0xBB && buffer[2] == 0xBF)
             {
-                return await reader.ReadToEndAsync();
+                // File has UTF-8 BOM, read as UTF-8
+                using (var reader = new StreamReader(stream, Encoding.UTF8))
+                {
+                    return await reader.ReadToEndAsync();
+                }
+            }
+            
+            // Try UTF-8 first (without BOM)
+            try
+            {
+                stream.Position = 0;
+                using (var reader = new StreamReader(stream, new UTF8Encoding(false, true)))
+                {
+                    var content = await reader.ReadToEndAsync();
+                    // If UTF-8 parsing succeeded without throwing, return the content
+                    return content;
+                }
+            }
+            catch (DecoderFallbackException)
+            {
+                // UTF-8 failed, try Windows-1252 (Latin-1)
+                stream.Position = 0;
+                using (var reader = new StreamReader(stream, Encoding.GetEncoding(1252)))
+                {
+                    return await reader.ReadToEndAsync();
+                }
             }
         }
 
@@ -81,6 +121,14 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
 
             HandleImportResult(importedItems, errors, "taxes");
+        }
+
+        private async Task ImportTaxGroups(string csvContent)
+        {
+            var importService = new XafTaxGroupImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "tax groups");
         }
 
         private void HandleImportResult<T>(IEnumerable<T> importedItems, IEnumerable<string> errors, string itemTypeName)

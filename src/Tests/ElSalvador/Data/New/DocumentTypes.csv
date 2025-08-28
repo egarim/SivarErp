@@ -1,9 +1,9 @@
-Oid,Code,Name,IsEnabled,DocumentOperation
+﻿Oid,Code,Name,IsEnabled,DocumentOperation
 17fc5777-22f1-472e-a7c8-77b22b2e5f45,"FCF","Factura de Consumidor Final",true,SalesInvoice
-d52ac394-d30e-4de8-92e4-6a767699d184,"CCF","Comprobante de Cr�dito Fiscal",true,SalesInvoice
-67e350ef-0870-45e7-b131-806e104bde8f,"NC","Nota de Cr�dito",true,SalesCreditNote
-64e7cb47-a0e0-4afe-805d-d938403b31e3,"ND","Nota de D�bito",true,SalesDebitNote
-8711afcf-4ebe-4669-bc4b-b1fba1387354,"FEX","Factura de Exportaci�n",true,SalesInvoice
+d52ac394-d30e-4de8-92e4-6a767699d184,"CCF","Comprobante de Crï¿½dito Fiscal",true,SalesInvoice
+67e350ef-0870-45e7-b131-806e104bde8f,"NC","Nota de Crï¿½dito",true,SalesCreditNote
+64e7cb47-a0e0-4afe-805d-d938403b31e3,"ND","Nota de Dï¿½bito",true,SalesDebitNote
+8711afcf-4ebe-4669-bc4b-b1fba1387354,"FEX","Factura de Exportaciï¿½n",true,SalesInvoice
 85ee80f1-8b9c-4935-8266-9faa305f2dc5,"COM","Compra",true,PurchaseInvoice
-5d35a3d0-b0cb-4eb5-94ea-55ec9a524059,"NCC","Nota de Cr�dito de Compra",true,PurchaseCreditNote
-81b0eb94-eff1-45c1-94f4-aae36ac94f40,"NDC","Nota de D�bito de Compra",true,PurchaseDebitNote
+5d35a3d0-b0cb-4eb5-94ea-55ec9a524059,"NCC","Nota de Crï¿½dito de Compra",true,PurchaseCreditNote
+81b0eb94-eff1-45c1-94f4-aae36ac94f40,"NDC","Nota de Dï¿½bito de Compra",true,PurchaseDebitNote

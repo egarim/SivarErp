@@ -8,8 +8,8 @@ ISRNR25,Renta No Domiciliados 25%,Percentage,Document,25.00,,true,false,,2102040
 ISRSE,Renta Servicios Eventuales,Percentage,Document,10.00,,true,false,,21020401,ISR Personal Eventual
 ISRPP,Renta Permanentes,Percentage,Document,10.00,,true,false,,21020303,ISR Personal Permanente
 PAGO_CUENTA,Pago a Cuenta,Percentage,Document,1.75,,true,false,,210602,Pago a Cuenta Mensual
-RET_PAGO_CUENTA,Retenciуn Pago a Cuenta,Percentage,Document,1.00,,true,false,,210608,Pago a Cuenta Retenido a Proveedores
-FOVIAL,Contribuciуn FOVIAL,FixedAmount,Line,,0.20,true,false,,430162,FOVIAL
-COTRANS,Contribuciуn COTRANS,FixedAmount,Line,,0.10,true,false,,430162,COTRANS y FOVIAL
-CESC5,Contribuciуn Especial Seguridad 5%,Percentage,Document,5.00,,true,false,,210609,Contribuciуn Especial Seguridad
-TURISMO5,Contribuciуn Turismo 5%,Percentage,Document,5.00,,true,false,,210610,Contribuciуn al Turismo
+RET_PAGO_CUENTA,Retención Pago a Cuenta,Percentage,Document,1.00,,true,false,,210608,Pago a Cuenta Retenido a Proveedores
+FOVIAL,Contribución FOVIAL,FixedAmount,Line,,0.20,true,false,,430162,FOVIAL
+COTRANS,Contribución COTRANS,FixedAmount,Line,,0.10,true,false,,430162,COTRANS y FOVIAL
+CESC5,Contribución Especial Seguridad 5%,Percentage,Document,5.00,,true,false,,210609,Contribución Especial Seguridad
+TURISMO5,Contribución Turismo 5%,Percentage,Document,5.00,,true,false,,210610,Contribución al Turismo

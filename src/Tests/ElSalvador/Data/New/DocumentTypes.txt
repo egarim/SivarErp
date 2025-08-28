@@ -1,15 +1,15 @@
-Code,Name,DocumentOperation,IsEnabled
-CCF,Comprobante de Cr閐ito Fiscal,SalesInvoice,true
+锘緾ode,Name,DocumentOperation,IsEnabled
+CCF,Comprobante de Cr茅dito Fiscal,SalesInvoice,true
 FCF,Factura de Consumidor Final,SalesInvoice,true
-NR,Nota de Remisi髇,DeliveryNote,true
-NE,Nota de Exportaci髇,SalesInvoice,true
-NC,Nota de Cr閐ito,CreditNote,true
-ND,Nota de D閎ito,DebitNote,true
+NR,Nota de Remisi贸n,DeliveryNote,true
+NE,Nota de Exportaci贸n,SalesInvoice,true
+NC,Nota de Cr茅dito,CreditNote,true
+ND,Nota de D茅bito,DebitNote,true
 REC,Comprobante de Recibo,Receipt,true
-CO,Cotizaci髇,Quotation,true
+CO,Cotizaci贸n,Quotation,true
 PED,Pedido,SalesOrder,true
 OC,Orden de Compra,PurchaseOrder,true
-SC,Solicitud de Cotizaci髇,RequestForQuotation,true
-SR,Solicitud de Requisici髇,PurchaseRequisition,true
-GR,Recepci髇 de Mercader韆,GoodsReceiptNote,true
+SC,Solicitud de Cotizaci贸n,RequestForQuotation,true
+SR,Solicitud de Requisici贸n,PurchaseRequisition,true
+GR,Recepci贸n de Mercader铆a,GoodsReceiptNote,true
 FC,Factura de Compra,PurchaseInvoice,true

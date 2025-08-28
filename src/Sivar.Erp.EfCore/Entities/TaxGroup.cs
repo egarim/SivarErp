@@ -1,15 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.Persistent.Base;
 using Microsoft.EntityFrameworkCore;
 using Sivar.Erp.Modules.Taxes.TaxGroup;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[NavigationItem("Taxes")]
 /// <summary>
 /// Entity Framework entity for Tax Groups
 /// </summary>
 [Table("TaxGroups")]
-[Index(nameof(Code), IsUnique = true, Name = "IX_TaxGroups_Code")]
+[Microsoft.EntityFrameworkCore.Index(nameof(Code), IsUnique = true, Name = "IX_TaxGroups_Code")]
 public class TaxGroup : BaseEntity, ITaxGroup
 {
     /// <summary>

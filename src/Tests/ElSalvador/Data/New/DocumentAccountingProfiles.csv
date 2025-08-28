@@ -1,4 +1,4 @@
-DocumentOperation,SalesAccountCode,AccountsReceivableCode,InventoryAccountCode,CostOfGoodsSoldAccountCode,CostRatio
+﻿DocumentOperation,SalesAccountCode,AccountsReceivableCode,InventoryAccountCode,CostOfGoodsSoldAccountCode,CostRatio
 SalesInvoice,51010101,11030101,1105010201,41010111,0.6
 SalesInvoiceProduct2,51010102,11030101,1105010202,41010112,0.6
 SalesInvoiceProduct3,51010103,11030101,1105010203,41010113,0.6

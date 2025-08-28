@@ -1,4 +1,4 @@
-TaxCode,DocumentOperation,BusinessEntityGroupCode,ItemGroupCode,IsEnabled,Priority
+﻿TaxCode,DocumentOperation,BusinessEntityGroupCode,ItemGroupCode,IsEnabled,Priority
 IVA,SalesInvoice,REGISTERED_TAXPAYERS,,true,1
 IVA,SalesInvoice,,TAXABLE_ITEMS,true,1
 IVA,SalesInvoice,,EXEMPT_ITEMS,false,0
