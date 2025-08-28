@@ -6,6 +6,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.Persistent.BaseImpl.EF.StateMachine;
+using Sivar.Erp.Xaf.Module.BusinessObjects;
 
 namespace Sivar.Erp.EfCore.BusinessObjects;
 
@@ -37,6 +38,8 @@ public class XafEFCoreDbContext : SivarErpDbContext
     public XafEFCoreDbContext(DbContextOptions<XafEFCoreDbContext> options) : base(options) {
     }
     //public DbSet<ModuleInfo> ModulesInfo { get; set; }
+
+    public DbSet<ImportFile> ImportFiles { get; set; }
     public DbSet<ModelDifference> ModelDifferences { get; set; }
     public DbSet<ModelDifferenceAspect> ModelDifferenceAspects { get; set; }
     public DbSet<PermissionPolicyRole> Roles { get; set; }

@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.StateMachine;
 using Sivar.Erp.EfCore.Entities;
+using Sivar.Erp.Xaf.Module.BusinessObjects;
 using System.ComponentModel;
 
 namespace Sivar.Erp.EfCore;
@@ -23,6 +24,7 @@ public sealed class XafModule : ModuleBase {
         // XafModule
         //
         AdditionalExportedTypes.Add(typeof(Account));
+        AdditionalExportedTypes.Add(typeof(ImportFile));
         AdditionalExportedTypes.Add(typeof(BusinessEntity));
         AdditionalExportedTypes.Add(typeof(Sivar.Erp.EfCore.BusinessObjects.ApplicationUser));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole));
