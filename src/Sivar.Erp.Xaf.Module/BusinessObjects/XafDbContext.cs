@@ -32,7 +32,8 @@ public class XafDesignTimeDbContextFactory : IDesignTimeDbContextFactory<XafEFCo
     }
 }
 [TypesInfoInitializer(typeof(XafContextInitializer))]
-public class XafEFCoreDbContext : DbContext {
+public class XafEFCoreDbContext : SivarErpDbContext
+{
     public XafEFCoreDbContext(DbContextOptions<XafEFCoreDbContext> options) : base(options) {
     }
     //public DbSet<ModuleInfo> ModulesInfo { get; set; }

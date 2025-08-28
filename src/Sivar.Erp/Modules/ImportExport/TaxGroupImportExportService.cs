@@ -190,7 +190,7 @@ namespace Sivar.Erp.Modules.ImportExport
         {
             var taxGroup = new TaxGroupDto
             {
-                Oid = Guid.NewGuid(),
+                ID = Guid.NewGuid(),
                 IsEnabled = true  // Default to enabled
             };
 

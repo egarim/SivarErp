@@ -20,8 +20,8 @@ public class StockLevel : BaseEntity, IStockLevel
     [NotMapped]
     string IStockLevel.Id 
     { 
-        get => Oid.ToString(); 
-        set => Oid = Guid.TryParse(value, out var guid) ? guid : Guid.NewGuid(); 
+        get => ID.ToString(); 
+        set => ID = Guid.TryParse(value, out var guid) ? guid : Guid.NewGuid(); 
     }
     /// <summary>
     /// Item code for which this stock level is tracked

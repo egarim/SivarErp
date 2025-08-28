@@ -191,7 +191,7 @@ namespace Sivar.Erp.Modules.ImportExport
         {
             var taxRule = new TaxRuleDto
             {
-                Oid = Guid.NewGuid(),
+                ID = Guid.NewGuid(),
                 IsEnabled = true,
                 Priority = 1
             };

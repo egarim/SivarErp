@@ -11,7 +11,7 @@ namespace Sivar.Erp.Modules.Taxes.TaxRule
         /// <summary>
         /// Unique identifier for the tax rule
         /// </summary>
-        Guid Oid { get; set; }
+        Guid ID { get; set; }
         
         /// <summary>
         /// Reference to the tax that should be applied

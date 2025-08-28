@@ -197,7 +197,7 @@ namespace Sivar.Erp.Infrastructure.ImportExport.Documents
         {
             var documentType = new DocumentTypeDto
             {
-                Oid = Guid.NewGuid(),
+                ID = Guid.NewGuid(),
                 IsEnabled = true
             };
 

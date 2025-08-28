@@ -180,8 +180,8 @@ public class ActivityRecord : BaseEntity, IActivityRecord
     [NotMapped]
     public Guid Id
     {
-        get => Oid;
-        set => Oid = value;
+        get => ID;
+        set => ID = value;
     }
 }
 

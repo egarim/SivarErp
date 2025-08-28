@@ -22,7 +22,7 @@ namespace Sivar.Erp.Modules.Taxes
         /// <summary>
         /// Unique identifier for the tax
         /// </summary>
-        public Guid Oid
+        public Guid ID
         {
             get => _oid;
             set

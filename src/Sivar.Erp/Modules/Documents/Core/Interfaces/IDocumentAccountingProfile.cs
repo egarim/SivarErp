@@ -10,7 +10,7 @@ namespace Sivar.Erp.Modules.Documents.Core.Interfaces
         /// <summary>
         /// Unique identifier for the profile
         /// </summary>
-        Guid Oid { get; set; }
+        Guid ID { get; set; }
 
         /// <summary>
         /// Document operation this profile applies to (e.g. "SalesInvoice", "PurchaseInvoice")

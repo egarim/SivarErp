@@ -13,7 +13,7 @@ namespace Sivar.Erp.Modules.Documents.Application.DTOs
         /// <summary>
         /// Unique identifier for the accounting profile
         /// </summary>
-        public Guid Oid { get; set; } = Guid.NewGuid();
+        public Guid ID { get; set; } = Guid.NewGuid();
         
         /// <summary>
         /// Document operation this profile applies to (e.g., "SalesInvoice", "PurchaseOrder")

@@ -19,7 +19,7 @@ namespace Sivar.Erp.Modules.Documents.Application.DTOs
         /// <summary>
         /// Unique identifier for the document type
         /// </summary>
-        public Guid Oid
+        public Guid ID
         {
             get => _oid;
             set

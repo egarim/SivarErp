@@ -8,7 +8,7 @@ namespace Sivar.Erp.Modules.Inventory
         string CreatedBy { get; set; }
         DateTime CreatedDate { get; set; }
         string ItemCode { get; set; }
-        Guid Oid { get; set; }
+        Guid ID { get; set; }
         decimal Quantity { get; set; }
         decimal RemainingQuantity { get; set; }
         string TransactionId { get; set; }

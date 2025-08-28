@@ -190,7 +190,7 @@ namespace Sivar.Erp.Modules.ImportExport
         {
             var tax = new TaxDto
             {
-                Oid = Guid.NewGuid(),
+                ID = Guid.NewGuid(),
                 IsEnabled = true, // Default to enabled
                 IsIncludedInPrice = false // Default to not included in price
             };

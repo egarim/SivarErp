@@ -465,7 +465,7 @@ namespace Sivar.Erp.Modules.Inventory
         {
             var layer = new InventoryLayerDto
             {
-                Oid = Guid.NewGuid(),
+                ID = Guid.NewGuid(),
                 ItemCode = itemCode,
                 WarehouseCode = warehouseCode,
                 Quantity = quantity,
@@ -519,7 +519,7 @@ namespace Sivar.Erp.Modules.Inventory
                 _logger.LogDebug(
                     "Consumed {ConsumedQuantity} from layer {LayerId} for item {ItemCode}. " +
                     "Layer remaining: {RemainingQuantity}",
-                    consumeFromThisLayer, layer.Oid, itemCode, layer.RemainingQuantity);
+                    consumeFromThisLayer, layer.ID, itemCode, layer.RemainingQuantity);
             }
 
             if (remainingToConsume > 0)
@@ -567,7 +567,7 @@ namespace Sivar.Erp.Modules.Inventory
     /// </summary>
     public class InventoryLayerDto : IInventoryLayerDto
     {
-        public Guid Oid { get; set; }
+        public Guid ID { get; set; }
         public string ItemCode { get; set; }
         public string WarehouseCode { get; set; }
         public decimal Quantity { get; set; }

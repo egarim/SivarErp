@@ -8,11 +8,11 @@ namespace Sivar.Erp.EfCore.Entities;
 /// </summary>
 public abstract class BaseEntity: DevExpress.Persistent.BaseImpl.EF.BaseObject
 {
-    /// <summary>
-    /// Unique identifier for the entity
-    /// </summary>
-    [Key]
-    public virtual Guid Oid { get; set; } = Guid.NewGuid();
+    ///// <summary>
+    ///// Unique identifier for the entity
+    ///// </summary>
+    //[Key]
+    //public virtual Guid Oid { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// UTC timestamp when the entity was created

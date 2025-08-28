@@ -774,7 +774,7 @@ namespace Tests
             // This is a temporary fix until we complete the Documents module consolidation
             var mockDocumentType = new SimpleDocumentType
             {
-                Oid = Guid.NewGuid(),
+                ID = Guid.NewGuid(),
                 Code = documentType.Code,
                 Name = documentType.Name,
                 IsEnabled = true,
@@ -1586,7 +1586,7 @@ namespace Tests
         // Simple implementation of the Modules IDocumentType for testing
         private class SimpleDocumentType : IDocumentType
         {
-            public Guid Oid { get; set; }
+            public Guid ID { get; set; }
             public string Code { get; set; } = string.Empty;
             public string Name { get; set; } = string.Empty;
             public bool IsEnabled { get; set; } = true;

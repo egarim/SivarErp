@@ -31,7 +31,7 @@ namespace Sivar.Erp.Modules.Taxes
         /// <summary>
         /// Unique identifier for the tax
         /// </summary>
-        Guid Oid { get; set; }
+        Guid ID { get; set; }
         /// <summary>
         /// Percentage to apply when TaxType is Percentage
         /// </summary>

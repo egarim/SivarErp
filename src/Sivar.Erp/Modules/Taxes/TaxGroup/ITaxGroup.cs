@@ -11,7 +11,7 @@ namespace Sivar.Erp.Modules.Taxes.TaxGroup
         /// <summary>
         /// Unique identifier for the tax group
         /// </summary>
-        Guid Oid { get; set; }
+        Guid ID { get; set; }
         
         /// <summary>
         /// Unique code for the tax group

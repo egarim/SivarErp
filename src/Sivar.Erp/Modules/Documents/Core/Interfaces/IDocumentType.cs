@@ -11,7 +11,7 @@ namespace Sivar.Erp.Modules.Documents.Core.Interfaces
         /// <summary>
         /// Unique identifier for the document type
         /// </summary>
-        Guid Oid { get; set; }
+        Guid ID { get; set; }
 
         /// <summary>
         /// Unique code for the document type (e.g., "INV", "PO")
