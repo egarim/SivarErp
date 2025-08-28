@@ -14,6 +14,7 @@ using Sivar.Erp.Infrastructure.ActivityStream;
 using Sivar.Erp.ErpSystem.Modules.Security.Core;
 using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Inventory;
+using Sivar.Erp.Modules.Accounting.Transactions;
 
 namespace Sivar.Erp.Infrastructure.Data
 {

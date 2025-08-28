@@ -1,5 +1,6 @@
 using DevExpress.Persistent.Base;
-using Sivar.Erp.Modules.Accounting.Domain.Transactions;
+
+using Sivar.Erp.Modules.Accounting.Transactions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

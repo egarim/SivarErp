@@ -1139,7 +1139,7 @@ namespace Tests
             // Find all debit entries
             var debitQueryOptions = new JournalEntryQueryOptions
             {
-                EntryType = Sivar.Erp.Core.Enums.EntryType.Debit,
+                EntryType = EntryType.Debit,
                 OnlyPosted = true
             };
 

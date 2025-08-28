@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sivar.Erp.Core.Enums;
 using Sivar.Erp.Modules.Accounting.FiscalPeriods;
+using Sivar.Erp.Modules.Accounting.Transactions;
 
 namespace Sivar.Erp.Core.Contracts
 {
@@ -20,47 +21,11 @@ namespace Sivar.Erp.Core.Contracts
         string CreatedBy { get; set; }
     }
 
-    /// <summary>
-    /// Interface for transactions
-    /// </summary>
-    public interface ITransaction
-    {
-        string TransactionNumber { get; set; }
-        DateOnly TransactionDate { get; set; }
-        string? DocumentNumber { get; set; }
-        string? Description { get; set; }
-        bool IsPosted { get; set; }
-        IList<ILedgerEntry>? LedgerEntries { get; set; }
-        DateTime CreatedDate { get; set; }
-        string CreatedBy { get; set; }
-    }
+   
 
-    /// <summary>
-    /// Interface for ledger entries
-    /// </summary>
-    public interface ILedgerEntry
-    {
-        string LedgerEntryNumber { get; set; }
-        string TransactionNumber { get; set; }
-        string OfficialCode { get; set; }
-        EntryType EntryType { get; set; }
-        decimal Amount { get; set; }
-        string? Description { get; set; }
-        DateTime CreatedDate { get; set; }
-        string CreatedBy { get; set; }
-    }
+   
 
-    /// <summary>
-    /// Interface for transaction batches
-    /// </summary>
-    public interface ITransactionBatch
-    {
-        string BatchNumber { get; set; }
-        string BatchName { get; set; }
-        IList<ITransaction> Transactions { get; set; }
-        DateTime CreatedDate { get; set; }
-        string CreatedBy { get; set; }
-    }
+   
 
     /// <summary>
     /// Interface for account balance calculator

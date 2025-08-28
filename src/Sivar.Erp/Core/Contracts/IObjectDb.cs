@@ -11,6 +11,7 @@ using Sivar.Erp.Infrastructure.Sequencers;
 using Sivar.Erp.ErpSystem.Modules.Security.Core;
 using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Inventory;
+using Sivar.Erp.Modules.Accounting.Transactions;
 
 namespace Sivar.Erp.Core.Contracts
 {

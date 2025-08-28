@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.Modules.Accounting.Transactions;
-using CoreEntryType = Sivar.Erp.Core.Enums.EntryType; // Core enum used in QueryOptions
+
 
 namespace Sivar.Erp.Modules.Accounting.JournalEntries;
 
@@ -54,7 +54,7 @@ public class JournalEntryService : IJournalEntryService
             if (options.EntryType.HasValue)
             {
                 // Convert Core EntryType to Accounting Module EntryType
-                var moduleEntryType = ConvertEntryType(options.EntryType.Value);
+                var moduleEntryType = options.EntryType.Value;
                 query = query.Where(e => e.EntryType == moduleEntryType);
             }
 
@@ -181,16 +181,5 @@ public class JournalEntryService : IJournalEntryService
         });
     }
 
-    /// <summary>
-    /// Converts Core EntryType to Accounting Module EntryType
-    /// </summary>
-    private EntryType ConvertEntryType(CoreEntryType coreEntryType)
-    {
-        return coreEntryType switch
-        {
-            CoreEntryType.Debit => EntryType.Debit,
-            CoreEntryType.Credit => EntryType.Credit,
-            _ => EntryType.Debit // Default fallback
-        };
-    }
+   
 }

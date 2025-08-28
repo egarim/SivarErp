@@ -33,6 +33,7 @@ public sealed class XafModule : ModuleBase {
         AdditionalExportedTypes.Add(typeof(DocumentType));
         AdditionalExportedTypes.Add(typeof(GroupMembership));
         AdditionalExportedTypes.Add(typeof(Item));
+        AdditionalExportedTypes.Add(typeof(FiscalPeriod));
         AdditionalExportedTypes.Add(typeof(Sivar.Erp.EfCore.BusinessObjects.ApplicationUser));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole));
         AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.ModelDifference));

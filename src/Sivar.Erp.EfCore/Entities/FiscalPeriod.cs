@@ -1,11 +1,14 @@
+using DevExpress.Persistent.Base;
+using Sivar.Erp.Core.Enums;
+using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Core.Enums;
-
-using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+
+[DefaultClassOptions()]
+[NavigationItem("Accounting")]
 /// <summary>
 /// Entity Framework entity for Fiscal Periods
 /// </summary>

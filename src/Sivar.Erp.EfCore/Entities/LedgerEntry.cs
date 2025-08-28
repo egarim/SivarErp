@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Sivar.Erp.Core.Enums;
-using Sivar.Erp.Modules.Accounting.Domain.Transactions;
+using Sivar.Erp.Modules.Accounting.Transactions;
+
 
 namespace Sivar.Erp.EfCore.Entities;
 

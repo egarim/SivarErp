@@ -17,11 +17,6 @@ namespace Sivar.Erp.Modules.Accounting.FiscalPeriods
         /// <returns>Created fiscal period with ID</returns>
         Task<IFiscalPeriod> CreateFiscalPeriodAsync(IFiscalPeriod fiscalPeriod, string userId);
 
-       
-
-       
-
-
         /// <summary>
         /// Gets fiscal periods by status
         /// </summary>

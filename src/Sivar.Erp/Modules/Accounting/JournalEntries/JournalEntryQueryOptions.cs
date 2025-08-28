@@ -1,6 +1,7 @@
 
 
 using Sivar.Erp.Core.Enums;
+using Sivar.Erp.Modules.Accounting.Transactions;
 
 namespace Sivar.Erp.Modules.Accounting.JournalEntries;
 
