@@ -1,10 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.Persistent.Base;
 using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Modules.Taxes.TaxRule;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sivar.Erp.EfCore.Entities;
 
+[NavigationItem("Taxes")]
+[DefaultClassOptions()]
 /// <summary>
 /// Entity Framework entity for Tax Rules
 /// </summary>

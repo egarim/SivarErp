@@ -45,6 +45,9 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                     case FIleType.Taxes:
                         await ImportTaxes(csvContent);
                         break;
+                    case FIleType.TaxRules:
+                        await ImportTaxRules(csvContent);
+                        break;
                     default:
                         throw new UserFriendlyException($"Unsupported file type: {importFile.FileType}");
                 }
@@ -129,6 +132,14 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
 
             HandleImportResult(importedItems, errors, "tax groups");
+        }
+
+        private async Task ImportTaxRules(string csvContent)
+        {
+            var importService = new XafTaxRuleImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "tax rules");
         }
 
         private void HandleImportResult<T>(IEnumerable<T> importedItems, IEnumerable<string> errors, string itemTypeName)
