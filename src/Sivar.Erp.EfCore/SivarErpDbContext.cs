@@ -100,6 +100,35 @@ public class SivarErpDbContext : DbContext
         ConfigureSystemEntities(modelBuilder);
     }
 
+    public override int SaveChanges()
+    {
+        UpdateLedgerEntryDerivedProperties();
+        return base.SaveChanges();
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        UpdateLedgerEntryDerivedProperties();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void UpdateLedgerEntryDerivedProperties()
+    {
+        var ledgerEntries = ChangeTracker.Entries<LedgerEntry>()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
+            .Select(e => e.Entity)
+            .Where(le => le.Account != null);
+
+        foreach (var entry in ledgerEntries)
+        {
+            if (entry.Account != null)
+            {
+                entry.OfficialCode = entry.Account.OfficialCode;
+                entry.AccountName = entry.Account.AccountName;
+            }
+        }
+    }
+
     private void ConfigureAccountingEntities(ModelBuilder modelBuilder)
     {
         // Account entity configuration
@@ -134,11 +163,11 @@ public class SivarErpDbContext : DbContext
             entity.HasIndex(e => e.TransactionId);
             entity.HasIndex(e => e.AccountId);
             
-            // Configure proper Guid-based relationship using TransactionId -> Transaction primary key
+            // Configure proper relationship using TransactionId -> Transaction primary key
             entity.HasOne(le => le.Transaction)
                   .WithMany(t => t.LedgerEntries)
-                  .HasForeignKey(le => le.ID)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .HasForeignKey(le => le.TransactionId)
+                  .OnDelete(DeleteBehavior.Cascade);
             
             // Configure Account relationship
             entity.HasOne(le => le.Account)

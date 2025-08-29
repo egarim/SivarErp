@@ -1,0 +1,6 @@
+﻿Code,Name,Address,City,State,ZipCode,Country,PhoneNumber,Email
+CL001,"CLIENTE NACIONAL 1","Calle El Progreso #123","San Salvador","San Salvador","1101","El Salvador","+503 2222-1111","cliente1@empresa.com.sv"
+CL002,"CLIENTE NACIONAL 2","Av. Los Heroes #456","Santa Tecla","La Libertad","1501","El Salvador","+503 2222-2222","cliente2@empresa.com.sv"
+CL003,"CLIENTE NACIONAL 3","Boulevard Los Proceres #789","San Miguel","San Miguel","3101","El Salvador","+503 2222-3333","cliente3@empresa.com.sv"
+CL004,"CLIENTE EXTERIOR 1","Reforma 222","Ciudad de Mexico","CDMX","11000","Mexico","+52 55 1234-5678","cliente4@empresa.com.mx"
+CL005,"CLIENTE EXTERIOR 2","6th Avenue","New York","NY","10001","United States","+1 212 555-0123","cliente5@enterprise.com"

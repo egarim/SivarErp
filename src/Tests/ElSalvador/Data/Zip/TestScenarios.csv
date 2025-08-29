@@ -1,0 +1,3 @@
+﻿TestScenarioId,Description,DocumentType,DocumentNumber,BusinessEntityCode,Date
+SCENARIO_001,Basic Sales Invoice Test,CCF,CCF-2025-001,CL001,2025-06-18
+SCENARIO_002,Large Order Test,CCF,CCF-2025-002,CL002,2025-06-18

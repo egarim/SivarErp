@@ -15,9 +15,9 @@ using System.Text;
 
 namespace Sivar.Erp.Xaf.Module.BusinessObjects
 {
-    public enum FIleType
+    public enum FileType
     {
-        Accounts,TaxGroups,Taxes,BusinessEntities,Items,DocumentTypes,GroupMemberships, TaxRules
+        Accounts,TaxGroups,Taxes,BusinessEntities,Items,DocumentTypes,GroupMemberships, TaxRules,All
     }
     // Register this entity in your DbContext (usually in the BusinessObjects folder of your project) with the "public DbSet<ImportFile> ImportFiles { get; set; }" syntax.
     [DefaultClassOptions]
@@ -34,7 +34,7 @@ namespace Sivar.Erp.Xaf.Module.BusinessObjects
             // In the constructor, initialize collection properties, e.g.: 
             // this.AssociatedEntities = new ObservableCollection<AssociatedEntityObject>();
         }
-        public virtual FIleType FileType { get; set; }
+        public virtual FileType FileType { get; set; }
         public virtual FileData File { get; set; }
 
         public virtual string Name { get; set; }

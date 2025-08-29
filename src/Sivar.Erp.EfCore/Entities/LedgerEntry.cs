@@ -12,6 +12,15 @@ namespace Sivar.Erp.EfCore.Entities;
 [Table("LedgerEntries")]
 public class LedgerEntry : BaseEntity, ILedgerEntry
 {
+    /// <summary>
+    /// Default constructor for EF Core
+    /// </summary>
+    public LedgerEntry()
+    {
+        // Generate a temporary unique number that will be replaced by the sequencer
+        LedgerEntryNumber = $"TEMP-{Guid.NewGuid().ToString("N")[..8]}";
+    }
+
     [Browsable(false)]
     /// <summary>
     /// Reference to the parent transaction (business key for compatibility)
@@ -64,23 +73,11 @@ public class LedgerEntry : BaseEntity, ILedgerEntry
     /// </summary>
     public virtual Guid? AccountId { get; set; }
 
-    private Account? _account;
-
     /// <summary>
     /// Navigation property to the Account
     /// </summary>
     [ForeignKey(nameof(AccountId))]
-    public virtual Account? Account 
-    { 
-        get => _account;
-        set 
-        {
-            _account = value;
-            // Update the persisted values when account changes
-            OfficialCode = value?.OfficialCode ?? string.Empty;
-            AccountName = value?.AccountName ?? string.Empty;
-        }
-    }
+    public virtual Account? Account { get; set; }
 
 
     /// <summary>

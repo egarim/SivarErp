@@ -1,0 +1,8 @@
+﻿TaxCode,DocumentOperation,DebitAccountCode,CreditAccountCode,AccountDescription,IncludeInTransaction
+IVA,SalesInvoice,,VAT_PAYABLE,IVA DEBITO FISCAL - CONTRIBUYENTES,true
+IVA,PurchaseInvoice,VAT_RECEIVABLE,,IVA CREDITO FISCAL,true
+IVA,SalesCreditNote,VAT_PAYABLE,,IVA DEBITO FISCAL - CONTRIBUYENTES,true
+IVA,PurchaseCreditNote,,VAT_RECEIVABLE,IVA CREDITO FISCAL,true
+IVAR,PurchaseInvoice,11070103,210607,IVA Retenido a Proveedores,true
+RENTA,SalesInvoice,,WITHHOLDING_PAYABLE,RETENCION DE RENTA POR PAGAR,true
+RENTA,PurchaseInvoice,WITHHOLDING_RECEIVABLE,,RETENCION DE RENTA POR COBRAR,true

@@ -7,6 +7,7 @@ using Sivar.Erp.Xaf.Module.Services.ImportExport;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,32 +33,41 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             try
             {
                 var importFile = this.View.CurrentObject as ImportFile;
-                string csvContent = await ExtractCsvContentFromFile(importFile);
+
+                string csvContent="";
+                if (FileType.All != importFile.FileType)
+                {
+                    
+                    csvContent = await ExtractCsvContentFromFile(importFile);
+                }
 
                 switch (importFile.FileType)
                 {
-                    case FIleType.Accounts:
+                    case FileType.All:
+                        await ImportFromZipFile(importFile);
+                        break;
+                    case FileType.Accounts:
                         await ImportAccounts(csvContent);
                         break;
-                    case FIleType.TaxGroups:
+                    case FileType.TaxGroups:
                         await ImportTaxGroups(csvContent);
                         break;
-                    case FIleType.Taxes:
+                    case FileType.Taxes:
                         await ImportTaxes(csvContent);
                         break;
-                    case FIleType.TaxRules:
+                    case FileType.TaxRules:
                         await ImportTaxRules(csvContent);
                         break;
-                    case FIleType.BusinessEntities:
+                    case FileType.BusinessEntities:
                         await ImportBusinessEntities(csvContent);
                         break;
-                    case FIleType.DocumentTypes:
+                    case FileType.DocumentTypes:
                         await ImportDocumentTypes(csvContent);
                         break;
-                    case FIleType.Items:
+                    case FileType.Items:
                         await ImportItems(csvContent);
                         break;
-                    case FIleType.GroupMemberships:
+                    case FileType.GroupMemberships:
                         await ImportGroupMemberships(csvContent);
                         break;
                     default:
@@ -199,6 +209,211 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                 InformationType.Success);
             
             View.ObjectSpace.Refresh();
+        }
+
+        /// <summary>
+        /// Imports data from a ZIP file containing multiple CSV files.
+        /// The ZIP file should contain CSV files named according to FileType enum values (e.g., accounts.csv, taxes.csv).
+        /// Not all file types are required in the ZIP - only the ones present will be processed.
+        /// </summary>
+        /// <param name="importFile">The import file containing the ZIP archive</param>
+        private async Task ImportFromZipFile(ImportFile importFile)
+        {
+            var allErrors = new List<string>();
+            var importResults = new Dictionary<string, int>();
+
+            using (var memoryStream = new MemoryStream())
+            {
+                importFile.File.SaveToStream(memoryStream);
+                memoryStream.Position = 0;
+
+                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read))
+                {
+                    // Define the mapping between file names and FileType enum values
+                    var fileTypeMapping = new Dictionary<string, FileType>
+                    {
+                        { "accounts.csv", FileType.Accounts },
+                        { "taxgroups.csv", FileType.TaxGroups },
+                        { "taxes.csv", FileType.Taxes },
+                        { "taxrules.csv", FileType.TaxRules },
+                        { "businessentities.csv", FileType.BusinessEntities },
+                        { "documenttypes.csv", FileType.DocumentTypes },
+                        { "items.csv", FileType.Items },
+                        { "groupmemberships.csv", FileType.GroupMemberships }
+                    };
+
+                    foreach (var entry in archive.Entries)
+                    {
+                        var fileName = entry.Name.ToLowerInvariant();
+                        
+                        if (fileTypeMapping.TryGetValue(fileName, out var fileType))
+                        {
+                            try
+                            {
+                                using (var entryStream = entry.Open())
+                                {
+                                    var csvContent = await ReadCsvFromStream(entryStream);
+                                    
+                                    var itemCount = await ProcessSingleFileType(fileType, csvContent, allErrors);
+                                    if (itemCount > 0)
+                                    {
+                                        var typeName = GetTypeDisplayName(fileType);
+                                        importResults[typeName] = itemCount;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                allErrors.Add($"Error processing {entry.Name}: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Display results
+            if (allErrors.Any())
+            {
+                string errorMessage = string.Join("\\n", allErrors);
+                throw new UserFriendlyException($"Import completed with errors:\\n{errorMessage}");
+            }
+
+            if (importResults.Any())
+            {
+                string successMessage = "Successfully imported:\\n" +
+                    string.Join("\\n", importResults.Select(kvp => $"- {kvp.Value} {kvp.Key}"));
+                        
+                Application.ShowViewStrategy.ShowMessage(successMessage, InformationType.Success);
+                View.ObjectSpace.Refresh();
+            }
+            else
+            {
+                Application.ShowViewStrategy.ShowMessage(
+                    "No valid CSV files found in the ZIP archive.",
+                    InformationType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Reads CSV content from a stream with proper encoding detection.
+        /// Supports UTF-8 (with and without BOM) and Windows-1252 encodings.
+        /// Works with both seekable and non-seekable streams (like ZIP entry streams).
+        /// </summary>
+        /// <param name="stream">The stream to read from</param>
+        /// <returns>The CSV content as a string</returns>
+        private async Task<string> ReadCsvFromStream(Stream stream)
+        {
+            // For non-seekable streams (like ZIP entry streams), we need to read everything into memory first
+            using (var memoryStream = new MemoryStream())
+            {
+                await stream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+                
+                // Now we can work with the seekable memory stream
+                return await ReadFileWithEncodingDetection(memoryStream);
+            }
+        }
+
+        /// <summary>
+        /// Processes a single file type import and returns the count of imported items.
+        /// </summary>
+        /// <param name="fileType">The type of file being imported</param>
+        /// <param name="csvContent">The CSV content to import</param>
+        /// <param name="allErrors">List to collect any errors that occur</param>
+        /// <returns>The number of items successfully imported</returns>
+        private async Task<int> ProcessSingleFileType(FileType fileType, string csvContent, List<string> allErrors)
+        {
+            try
+            {
+                switch (fileType)
+                {
+                    case FileType.Accounts:
+                        var accountValidator = new AccountValidator(AccountValidator.GetElSalvadorAccountTypePrefixes());
+                        var accountImportService = new XafAccountImportExportService(ObjectSpace, accountValidator);
+                        var (accountItems, accountErrors) = await accountImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(accountErrors);
+                        return accountItems.Count();
+
+                    case FileType.TaxGroups:
+                        var taxGroupImportService = new XafTaxGroupImportExportService(ObjectSpace);
+                        var (taxGroupItems, taxGroupErrors) = await taxGroupImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(taxGroupErrors);
+                        return taxGroupItems.Count();
+
+                    case FileType.Taxes:
+                        var taxImportService = new XafTaxImportExportService(ObjectSpace);
+                        var (taxItems, taxErrors) = await taxImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(taxErrors);
+                        return taxItems.Count();
+
+                    case FileType.TaxRules:
+                        var taxRuleImportService = new XafTaxRuleImportExportService(ObjectSpace);
+                        var (taxRuleItems, taxRuleErrors) = await taxRuleImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(taxRuleErrors);
+                        return taxRuleItems.Count();
+
+                    case FileType.BusinessEntities:
+                        var businessEntityImportService = new XafBusinessEntityImportExportService(ObjectSpace);
+                        var (businessEntityItems, businessEntityErrors) = await businessEntityImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(businessEntityErrors);
+                        return businessEntityItems.Count();
+
+                    case FileType.DocumentTypes:
+                        var documentTypeImportService = new XafDocumentTypeImportExportService(ObjectSpace);
+                        var (documentTypeItems, documentTypeErrors) = await documentTypeImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(documentTypeErrors);
+                        return documentTypeItems.Count();
+
+                    case FileType.Items:
+                        var itemImportService = new XafItemImportExportService(ObjectSpace);
+                        var (itemItems, itemErrors) = await itemImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(itemErrors);
+                        return itemItems.Count();
+
+                    case FileType.GroupMemberships:
+                        var groupMembershipImportService = new XafGroupMembershipImportExportService(ObjectSpace);
+                        var (groupMembershipItems, groupMembershipErrors) = await groupMembershipImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(groupMembershipErrors);
+                        return groupMembershipItems.Count();
+
+                    default:
+                        return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                allErrors.Add($"Error importing {fileType}: {ex.Message}");
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Gets the display name for a FileType enum value.
+        /// </summary>
+        /// <param name="fileType">The FileType enum value</param>
+        /// <returns>A user-friendly display name</returns>
+        private string GetTypeDisplayName(FileType fileType)
+        {
+            return fileType switch
+            {
+                FileType.Accounts => "accounts",
+                FileType.TaxGroups => "tax groups",
+                FileType.Taxes => "taxes",
+                FileType.TaxRules => "tax rules",
+                FileType.BusinessEntities => "business entities",
+                FileType.DocumentTypes => "document types",
+                FileType.Items => "items",
+                FileType.GroupMemberships => "group memberships",
+                _ => fileType.ToString().ToLowerInvariant()
+            };
         }
         protected override void OnActivated()
         {
