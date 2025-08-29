@@ -8,7 +8,7 @@ namespace Sivar.Erp.EfCore.Entities;
 /// Entity Framework entity for Payment Methods
 /// </summary>
 [Table("PaymentMethods")]
-public class PaymentMethod : BaseEntity
+public class PaymentMethod : BaseEntity, IPaymentMethod
 {
     /// <summary>
     /// Unique code for the payment method
@@ -54,4 +54,6 @@ public class PaymentMethod : BaseEntity
     /// Additional properties (stored as JSON)
     /// </summary>
     public virtual string? AdditionalProperties { get; set; }
+    [NotMapped]
+    Dictionary<string, string> IPaymentMethod.AdditionalProperties { get; set; }
 }

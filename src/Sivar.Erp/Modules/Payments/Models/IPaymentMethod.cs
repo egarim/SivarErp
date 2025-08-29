@@ -2,7 +2,7 @@ using System;
 
 namespace Sivar.Erp.Modules.Payments.Models
 {
-    public interface IPaymentMethodDto
+    public interface IPaymentMethod
     {
         string? AccountCode { get; set; }
         Dictionary<string, string> AdditionalProperties { get; set; }

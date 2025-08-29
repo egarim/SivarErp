@@ -53,7 +53,7 @@ namespace Sivar.Erp.Core.Contracts
         IList<IInventoryLayerDto> InventoryLayers { get; set; }
 
         // Payment System
-        IList<IPaymentMethodDto> PaymentMethods { get; set; }
+        IList<IPaymentMethod> PaymentMethods { get; set; }
         IList<IPaymentDto> Payments { get; set; }
 
         // Security System

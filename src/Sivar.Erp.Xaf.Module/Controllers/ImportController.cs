@@ -70,6 +70,9 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                     case FileType.GroupMemberships:
                         await ImportGroupMemberships(csvContent);
                         break;
+                    case FileType.PaymentMethods:
+                        await ImportPaymentMethods(csvContent);
+                        break;
                     default:
                         throw new UserFriendlyException($"Unsupported file type: {importFile.FileType}");
                 }
@@ -196,6 +199,14 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             HandleImportResult(importedItems, errors, "group memberships");
         }
 
+        private async Task ImportPaymentMethods(string csvContent)
+        {
+            var importService = new XafPaymentMethodImportExportService(ObjectSpace);
+            var (importedItems, errors) = await importService.ImportFromCsvAsync(csvContent, "CurrentUser");
+
+            HandleImportResult(importedItems, errors, "payment methods");
+        }
+
         private void HandleImportResult<T>(IEnumerable<T> importedItems, IEnumerable<string> errors, string itemTypeName)
         {
             if (errors.Any())
@@ -239,7 +250,8 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                         { "businessentities.csv", FileType.BusinessEntities },
                         { "documenttypes.csv", FileType.DocumentTypes },
                         { "items.csv", FileType.Items },
-                        { "groupmemberships.csv", FileType.GroupMemberships }
+                        { "groupmemberships.csv", FileType.GroupMemberships },
+                        { "paymentmethods.csv", FileType.PaymentMethods }
                     };
 
                     foreach (var entry in archive.Entries)
@@ -384,6 +396,13 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                         allErrors.AddRange(groupMembershipErrors);
                         return groupMembershipItems.Count();
 
+                    case FileType.PaymentMethods:
+                        var paymentMethodImportService = new XafPaymentMethodImportExportService(ObjectSpace);
+                        var (paymentMethodItems, paymentMethodErrors) = await paymentMethodImportService.ImportFromCsvAsync(csvContent, "CurrentUser");
+                        
+                        allErrors.AddRange(paymentMethodErrors);
+                        return paymentMethodItems.Count();
+
                     default:
                         return 0;
                 }
@@ -412,6 +431,7 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                 FileType.DocumentTypes => "document types",
                 FileType.Items => "items",
                 FileType.GroupMemberships => "group memberships",
+                FileType.PaymentMethods => "payment methods",
                 _ => fileType.ToString().ToLowerInvariant()
             };
         }

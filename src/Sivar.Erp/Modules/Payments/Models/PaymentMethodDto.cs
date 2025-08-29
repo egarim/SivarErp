@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Sivar.Erp.Modules.Payments.Models
 {
-    public class PaymentMethodDto : IPaymentMethodDto
+    public class PaymentMethodDto : IPaymentMethod
     {
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;

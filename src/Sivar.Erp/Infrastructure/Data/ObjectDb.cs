@@ -56,7 +56,7 @@ namespace Sivar.Erp.Infrastructure.Data
         public IList<IInventoryLayerDto> InventoryLayers { get; set; } = new List<IInventoryLayerDto>();
 
         // Payment System
-        public IList<IPaymentMethodDto> PaymentMethods { get; set; } = new List<IPaymentMethodDto>();
+        public IList<IPaymentMethod> PaymentMethods { get; set; } = new List<IPaymentMethod>();
         public IList<IPaymentDto> Payments { get; set; } = new List<IPaymentDto>();
 
         // Security System

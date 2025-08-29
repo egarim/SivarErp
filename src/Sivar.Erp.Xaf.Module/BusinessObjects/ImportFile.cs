@@ -17,7 +17,7 @@ namespace Sivar.Erp.Xaf.Module.BusinessObjects
 {
     public enum FileType
     {
-        Accounts,TaxGroups,Taxes,BusinessEntities,Items,DocumentTypes,GroupMemberships, TaxRules,All
+        Accounts,TaxGroups,Taxes,BusinessEntities,Items,DocumentTypes,GroupMemberships, TaxRules,PaymentMethods,All
     }
     // Register this entity in your DbContext (usually in the BusinessObjects folder of your project) with the "public DbSet<ImportFile> ImportFiles { get; set; }" syntax.
     [DefaultClassOptions]
