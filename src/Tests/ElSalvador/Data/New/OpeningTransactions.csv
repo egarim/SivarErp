@@ -1,0 +1,7 @@
+TransactionNumber,TransactionDate,DocumentNumber,Description,DebitAccountCode,CreditAccountCode,Amount,Reference
+OP-2025-001,2025-01-01,OP-001,Opening Balance - Initial Capital Investment,11010101,31010101,10000.00,Initial capital injection - Cash in hand
+OP-2025-002,2025-01-02,OP-002,Opening Balance - Bank Account Opening,11010201,11010101,8000.00,Transfer majority of cash to bank
+OP-2025-003,2025-01-03,OP-003,Opening Balance - Initial Inventory - Product 1,1105010201,11010201,3000.00,Starting inventory - Product 1
+OP-2025-004,2025-01-03,OP-004,Opening Balance - Initial Inventory - Product 2,1105010202,11010201,2000.00,Starting inventory - Product 2
+OP-2025-005,2025-01-04,OP-005,Opening Balance - Office Equipment,1204010202,11010201,2500.00,Basic office furniture and computer
+OP-2025-006,2025-01-05,OP-006,Opening Balance - Prepaid Insurance,110601,11010201,500.00,6-month insurance premium paid in advance

@@ -15,6 +15,10 @@ namespace Sivar.Erp.Modules.ImportExport
     {
         private readonly IEnumerable<IAccount> _accounts;
 
+        /// <summary>
+        /// Initializes a new instance of the TransactionsImportExportService class
+        /// </summary>
+        /// <param name="accounts">Collection of accounts for validation</param>
         public TransactionsImportExportService(IEnumerable<IAccount> accounts)
         {
             _accounts = accounts;
@@ -26,7 +30,7 @@ namespace Sivar.Erp.Modules.ImportExport
         /// </summary>
         /// <param name="transactionsWithEntries">List of transactions with their associated ledger entries</param>
         /// <returns>Tuple containing the transactions CSV and ledger entries CSV as strings</returns>
-        public (string TransactionsCsv, string LedgerEntriesCsv) ExportTransactions(
+        public Task<(string TransactionsCsv, string LedgerEntriesCsv)> ExportTransactionsAsync(
             List<(TransactionDto Transaction, List<LedgerEntryDto> Entries)> transactionsWithEntries)
         {
             try
@@ -34,7 +38,7 @@ namespace Sivar.Erp.Modules.ImportExport
                 string transactionsCsv = GenerateTransactionsCsv(transactionsWithEntries.Select(x => x.Transaction).ToList());
                 string ledgerEntriesCsv = GenerateLedgerEntriesCsv(transactionsWithEntries);
 
-                return (transactionsCsv, ledgerEntriesCsv);
+                return Task.FromResult((transactionsCsv, ledgerEntriesCsv));
             }
             catch (Exception ex)
             {
@@ -49,7 +53,7 @@ namespace Sivar.Erp.Modules.ImportExport
         /// </summary>
         /// <param name="transactionsWithEntries">List of transactions with their associated ledger entries</param>
         /// <returns>CSV content as string with both transactions and ledger entries</returns>
-        public string ExportTransactionsToCsv(
+        public Task<string> ExportTransactionsToCsvAsync(
             List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> transactionsWithEntries)
         {
             try
@@ -92,7 +96,7 @@ namespace Sivar.Erp.Modules.ImportExport
                     }
                 }
 
-                return sb.ToString();
+                return Task.FromResult(sb.ToString());
             }
             catch (Exception ex)
             {
@@ -162,73 +166,93 @@ namespace Sivar.Erp.Modules.ImportExport
         /// formatted by ExportTransactionsToCsv
         /// </summary>
         /// <param name="csvText">CSV text containing transactions and ledger entries</param>
-        /// <returns>List of transactions with their associated ledger entries</returns>
-        public List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> ImportFromCsv(string csvText)
+        /// <returns>List of transactions with their associated ledger entries and any import errors</returns>
+        public Task<(List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> ImportedData, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvText)
         {
             var result = new List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)>();
+            var errors = new List<string>();
             var transactions = new Dictionary<string, ITransaction>();
             var entriesByTransactionId = new Dictionary<string, List<ILedgerEntry>>();
 
-            var lines = csvText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-            // Track which section we're in
-            bool inTransactionSection = false;
-            bool inLedgerEntrySection = false;
-
-            foreach (var line in lines)
+            try
             {
-                // Skip empty lines
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
+                var lines = csvText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-                // Check for section headers
-                if (line.StartsWith("# TRANSACTIONS"))
-                {
-                    inTransactionSection = true;
-                    inLedgerEntrySection = false;
-                    continue;
-                }
-                else if (line.StartsWith("# LEDGER ENTRIES"))
-                {
-                    inTransactionSection = false;
-                    inLedgerEntrySection = true;
-                    continue;
-                }
+                // Track which section we're in
+                bool inTransactionSection = false;
+                bool inLedgerEntrySection = false;
 
-                // Skip headers
-                if (line.StartsWith("TransactionId,") || line.StartsWith("EntryId,"))
-                    continue;
-
-                // Parse lines in the corresponding section
-                if (inTransactionSection)
+                foreach (var line in lines)
                 {
-                    var transaction = ParseTransactionLine(line);
-                    if (transaction != null)
+                    // Skip empty lines
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    // Check for section headers
+                    if (line.StartsWith("# TRANSACTIONS"))
                     {
-                        transactions[transaction.TransactionNumber] = transaction;
-                        entriesByTransactionId[transaction.TransactionNumber] = new List<ILedgerEntry>();
+                        inTransactionSection = true;
+                        inLedgerEntrySection = false;
+                        continue;
+                    }
+                    else if (line.StartsWith("# LEDGER ENTRIES"))
+                    {
+                        inTransactionSection = false;
+                        inLedgerEntrySection = true;
+                        continue;
+                    }
+
+                    // Skip headers
+                    if (line.StartsWith("TransactionId,") || line.StartsWith("EntryId,"))
+                        continue;
+
+                    // Parse lines in the corresponding section
+                    if (inTransactionSection)
+                    {
+                        var transaction = ParseTransactionLine(line);
+                        if (transaction != null)
+                        {
+                            transactions[transaction.TransactionNumber] = transaction;
+                            entriesByTransactionId[transaction.TransactionNumber] = new List<ILedgerEntry>();
+                        }
+                        else
+                        {
+                            errors.Add($"Failed to parse transaction line: {line}");
+                        }
+                    }
+                    else if (inLedgerEntrySection)
+                    {
+                        var (entry, transactionId) = ParseLedgerEntryLine(line);
+                        if (entry != null && transactions.ContainsKey(transactionId))
+                        {
+                            entriesByTransactionId[transactionId].Add(entry);
+                        }
+                        else
+                        {
+                            if (entry == null)
+                                errors.Add($"Failed to parse ledger entry line: {line}");
+                            else
+                                errors.Add($"Transaction '{transactionId}' not found for ledger entry: {line}");
+                        }
                     }
                 }
-                else if (inLedgerEntrySection)
+
+                // Combine transactions and entries
+                foreach (var transactionId in transactions.Keys)
                 {
-                    var (entry, transactionId) = ParseLedgerEntryLine(line);
-                    if (entry != null && transactions.ContainsKey(transactionId))
-                    {
-                        entriesByTransactionId[transactionId].Add(entry);
-                    }
+                    ITransaction transaction = transactions[transactionId];
+                    IEnumerable<ILedgerEntry> ledgerEntryDtos = entriesByTransactionId[transactionId];
+                    result.Add((transaction, ledgerEntryDtos));
                 }
-            }
 
-            // Combine transactions and entries
-            foreach (var transactionId in transactions.Keys)
+                Console.WriteLine($"Imported {transactions.Count} transactions with {entriesByTransactionId.Values.Sum(e => e.Count)} total ledger entries");
+            }
+            catch (Exception ex)
             {
-                ITransaction transaction = transactions[transactionId];
-                IEnumerable<ILedgerEntry> ledgerEntryDtos = entriesByTransactionId[transactionId];
-                result.Add((transaction, ledgerEntryDtos));
+                errors.Add($"Error importing CSV: {ex.Message}");
             }
 
-            Console.WriteLine($"Imported {transactions.Count} transactions with {entriesByTransactionId.Values.Sum(e => e.Count)} total ledger entries");
-            return result;
+            return Task.FromResult((result, (IEnumerable<string>)errors));
         }
 
         private TransactionDto? ParseTransactionLine(string line)
@@ -265,14 +289,14 @@ namespace Sivar.Erp.Modules.ImportExport
                 var transactionId = parts[1];
                 var officialCode = parts[3];
 
-               
 
-                var accountId= _accounts.FirstOrDefault(a => a.OfficialCode == officialCode)?.OfficialCode ?? string.Empty;
+
+                var accountId = _accounts.FirstOrDefault(a => a.OfficialCode == officialCode)?.OfficialCode ?? string.Empty;
                 Console.WriteLine($"Account code '{officialCode}' not found in provided accounts.");
 
                 var entry = new LedgerEntryDto
                 {
-                   
+
                     TransactionNumber = transactionId,
                     OfficialCode = officialCode,
                     AccountName = parts[4],

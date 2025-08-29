@@ -73,6 +73,9 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                     case FileType.PaymentMethods:
                         await ImportPaymentMethods(csvContent);
                         break;
+                    case FileType.Transactions:
+                        await ImportTransactions(csvContent);
+                        break;
                     default:
                         throw new UserFriendlyException($"Unsupported file type: {importFile.FileType}");
                 }
@@ -207,6 +210,14 @@ namespace Sivar.Erp.Xaf.Module.Controllers
             HandleImportResult(importedItems, errors, "payment methods");
         }
 
+        private async Task ImportTransactions(string csvContent)
+        {
+            var importService = new XafTransactionsImportExportService(ObjectSpace);
+            var (importedData, errors) = await importService.ImportFromCsvAsync(csvContent);
+
+            HandleImportResult(importedData.Select(x => x.Transaction), errors, "transactions");
+        }
+
         private void HandleImportResult<T>(IEnumerable<T> importedItems, IEnumerable<string> errors, string itemTypeName)
         {
             if (errors.Any())
@@ -226,6 +237,10 @@ namespace Sivar.Erp.Xaf.Module.Controllers
         /// Imports data from a ZIP file containing multiple CSV files.
         /// The ZIP file should contain CSV files named according to FileType enum values (e.g., accounts.csv, taxes.csv).
         /// Not all file types are required in the ZIP - only the ones present will be processed.
+        /// Files are imported in priority order (using decimal priorities) to ensure proper dependency resolution:
+        /// - Accounts (1.0) are imported first as they are referenced by other entities
+        /// - Transactions (10.0) are imported last as they depend on most other entities
+        /// - Decimal priorities allow inserting new file types between existing ones if needed
         /// </summary>
         /// <param name="importFile">The import file containing the ZIP archive</param>
         private async Task ImportFromZipFile(ImportFile importFile)
@@ -240,44 +255,57 @@ namespace Sivar.Erp.Xaf.Module.Controllers
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read))
                 {
-                    // Define the mapping between file names and FileType enum values
-                    var fileTypeMapping = new Dictionary<string, FileType>
+                    // Define the mapping between file names, FileType enum values, and import priority
+                    var fileTypeMapping = new Dictionary<string, (FileType FileType, decimal Priority)>
                     {
-                        { "accounts.csv", FileType.Accounts },
-                        { "taxgroups.csv", FileType.TaxGroups },
-                        { "taxes.csv", FileType.Taxes },
-                        { "taxrules.csv", FileType.TaxRules },
-                        { "businessentities.csv", FileType.BusinessEntities },
-                        { "documenttypes.csv", FileType.DocumentTypes },
-                        { "items.csv", FileType.Items },
-                        { "groupmemberships.csv", FileType.GroupMemberships },
-                        { "paymentmethods.csv", FileType.PaymentMethods }
+                        { "accounts.csv", (FileType.Accounts, 1.0m) },
+                        { "taxgroups.csv", (FileType.TaxGroups, 2.0m) },
+                        { "taxes.csv", (FileType.Taxes, 3.0m) },
+                        { "taxrules.csv", (FileType.TaxRules, 4.0m) },
+                        { "businessentities.csv", (FileType.BusinessEntities, 5.0m) },
+                        { "documenttypes.csv", (FileType.DocumentTypes, 6.0m) },
+                        { "items.csv", (FileType.Items, 7.0m) },
+                        { "groupmemberships.csv", (FileType.GroupMemberships, 8.0m) },
+                        { "paymentmethods.csv", (FileType.PaymentMethods, 9.0m) },
+                        { "transactions.csv", (FileType.Transactions, 10.0m) }
                     };
+
+                    // Collect all entries with their priorities first
+                    var entriesToProcess = new List<(ZipArchiveEntry Entry, FileType FileType, decimal Priority)>();
 
                     foreach (var entry in archive.Entries)
                     {
                         var fileName = entry.Name.ToLowerInvariant();
                         
-                        if (fileTypeMapping.TryGetValue(fileName, out var fileType))
+                        if (fileTypeMapping.TryGetValue(fileName, out var fileInfo))
                         {
-                            try
+                            entriesToProcess.Add((entry, fileInfo.FileType, fileInfo.Priority));
+                        }
+                    }
+
+                    // Sort by priority to ensure correct import order
+                    entriesToProcess = entriesToProcess.OrderBy(x => x.Priority).ToList();
+
+                    // Process entries in priority order
+                    foreach (var (entry, fileType, priority) in entriesToProcess)
+                    {
+                        try
+                        {
+                            using (var entryStream = entry.Open())
                             {
-                                using (var entryStream = entry.Open())
+                                var csvContent = await ReadCsvFromStream(entryStream);
+                                
+                                var itemCount = await ProcessSingleFileType(fileType, csvContent, allErrors);
+                                if (itemCount > 0)
                                 {
-                                    var csvContent = await ReadCsvFromStream(entryStream);
-                                    
-                                    var itemCount = await ProcessSingleFileType(fileType, csvContent, allErrors);
-                                    if (itemCount > 0)
-                                    {
-                                        var typeName = GetTypeDisplayName(fileType);
-                                        importResults[typeName] = itemCount;
-                                    }
+                                    var typeName = GetTypeDisplayName(fileType);
+                                    importResults[typeName] = itemCount;
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                allErrors.Add($"Error processing {entry.Name}: {ex.Message}");
-                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            allErrors.Add($"Error processing {entry.Name}: {ex.Message}");
                         }
                     }
                 }
@@ -403,6 +431,13 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                         allErrors.AddRange(paymentMethodErrors);
                         return paymentMethodItems.Count();
 
+                    case FileType.Transactions:
+                        var transactionImportService = new XafTransactionsImportExportService(ObjectSpace);
+                        var (transactionData, transactionErrors) = await transactionImportService.ImportFromCsvAsync(csvContent);
+                        
+                        allErrors.AddRange(transactionErrors);
+                        return transactionData.Count();
+
                     default:
                         return 0;
                 }
@@ -432,6 +467,7 @@ namespace Sivar.Erp.Xaf.Module.Controllers
                 FileType.Items => "items",
                 FileType.GroupMemberships => "group memberships",
                 FileType.PaymentMethods => "payment methods",
+                FileType.Transactions => "transactions",
                 _ => fileType.ToString().ToLowerInvariant()
             };
         }

@@ -161,6 +161,11 @@ namespace Tests
                 results.Add($"✓ Configured document accounting for Sales, Purchase, and Cash operations");
                 results.Add("");
 
+                // PHASE 0: INITIAL CAPITAL INJECTION (Foundation)
+                results.Add("=== PHASE 0: INITIAL CAPITAL INJECTION (FOUNDATION) ===");
+                await CreateInitialCapitalInjection(results);
+                results.Add("");
+
                 // PHASE 1: PURCHASE TRANSACTION (Inventory In)
                 results.Add("=== PHASE 1: PURCHASE TRANSACTION (INVENTORY IN) ===");
 
@@ -572,7 +577,7 @@ namespace Tests
             var requiredMappings = new[]
             {
                 "ACCOUNTS_RECEIVABLE", "ACCOUNTS_PAYABLE", "VAT_PAYABLE", "VAT_RECEIVABLE",
-                "WITHHOLDING_PAYABLE", "WITHHOLDING_RECEIVABLE", "CASH"
+                "WITHHOLDING_PAYABLE", "WITHHOLDING_RECEIVABLE", "CASH", "CAPITAL_PAID"
             };
 
             var missingMappings = requiredMappings.Where(req => !accountMappingsDict.ContainsKey(req)).ToList();
@@ -893,7 +898,7 @@ namespace Tests
                 // Add basic purchase totals to make transaction balanced
                 var subtotal = document.Lines.Sum(l => l.Amount);
                 
-                // Add inventory total (debit)
+                // Add inventory total (debit) - we're buying inventory
                 document.DocumentTotals.Add(new TotalDto
                 {
                     Concept = "Inventory",
@@ -903,17 +908,82 @@ namespace Tests
                     IncludeInTransaction = true
                 });
 
-                // For accounts payable, the total should equal the subtotal (not including tax in this specific case)
-                // The tax is already handled separately by the existing DocumentTotals
+                // Since we now have cash from capital injection, pay cash instead of creating payable
                 document.DocumentTotals.Add(new TotalDto
                 {
-                    Concept = "Accounts Payable",
+                    Concept = "Cash Payment",
                     Total = subtotal,
                     DebitAccountCode = "",
-                    CreditAccountCode = _accountMappings?.GetValueOrDefault("ACCOUNTS_PAYABLE") ?? "2100",
+                    CreditAccountCode = _accountMappings?.GetValueOrDefault("CASH") ?? "1100", // Credit cash (asset decreases)
                     IncludeInTransaction = true
                 });
             }
+        }
+
+        /// <summary>
+        /// Creates the initial capital injection transaction to provide startup funds
+        /// </summary>
+        private async Task CreateInitialCapitalInjection(List<string> results)
+        {
+            results.Add("=== STEP 0: INITIAL CAPITAL INJECTION ===");
+            
+            // Create initial capital injection transaction manually
+            var capitalTransaction = new TransactionDto
+            {
+                TransactionNumber = "CAP-2025-001",
+                TransactionDate = new DateOnly(2025, 6, 16), // Day before purchase
+                DocumentNumber = "CAP-2025-001",
+                Description = "Initial Capital Investment - Company Foundation",
+                IsPosted = false
+            };
+
+            var capitalLedgerEntries = new List<LedgerEntryDto>
+            {
+                // Debit: Cash (Asset increases)
+                new LedgerEntryDto
+                {
+                    LedgerEntryNumber = "CAP-2025-001-001",
+                    TransactionNumber = capitalTransaction.TransactionNumber,
+                    OfficialCode = _accountMappings!["CASH"], // 11010101 - CAJA GENERAL
+                    EntryType = EntryType.Debit,
+                    Amount = 15000.00m, // $15,000 initial capital
+                    AccountName = "Caja General"
+                },
+                // Credit: Capital (Equity increases)
+                new LedgerEntryDto
+                {
+                    LedgerEntryNumber = "CAP-2025-001-002", 
+                    TransactionNumber = capitalTransaction.TransactionNumber,
+                    OfficialCode = _accountMappings!["CAPITAL_PAID"], // 31010101 - CAPITAL SOCIAL PAGADO
+                    EntryType = EntryType.Credit,
+                    Amount = 15000.00m,
+                    AccountName = "Capital Social Pagado"
+                }
+            };
+
+            results.Add($"✓ Created capital injection transaction: {capitalTransaction.TransactionNumber}");
+            results.Add($"✓ Transaction date: {capitalTransaction.TransactionDate:M/d/yyyy}");
+            results.Add($"✓ Capital amount: ${15000.00m:F2}");
+            
+            // Verify transaction is balanced
+            var isCapitalBalanced = IsTransactionBalanced(capitalLedgerEntries);
+            results.Add($"✓ Capital transaction is balanced: {isCapitalBalanced}");
+            
+            // Post the capital transaction
+            capitalTransaction.LedgerEntries = capitalLedgerEntries;
+            await _accountingModule!.PostTransactionAsync(capitalTransaction);
+            results.Add("✓ Capital injection transaction posted successfully");
+            results.Add("");
+            
+            // Show transaction details
+            results.Add("CAPITAL INJECTION ENTRIES:");
+            foreach (var entry in capitalLedgerEntries)
+            {
+                var account = _objectDb.Accounts.FirstOrDefault(a => a.OfficialCode == entry.OfficialCode);
+                results.Add($"  {entry.EntryType}: {entry.OfficialCode} - {account?.AccountName ?? entry.AccountName}: ${entry.Amount:F2}");
+            }
+            results.Add("");
+            results.Add("✓ Company now has $15,000 in cash to fund operations");
         }
 
         /// <summary>

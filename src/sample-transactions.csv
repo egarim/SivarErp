@@ -1,0 +1,14 @@
+# TRANSACTIONS
+TransactionId,Date,Description,DocumentId
+TXN-001,2024-01-15,"Sales Invoice Payment","INV-001"
+TXN-002,2024-01-16,"Purchase Invoice","PUR-001"
+TXN-003,2024-01-17,"Bank Transfer","TRF-001"
+
+# LEDGER ENTRIES
+EntryId,TransactionId,AccountId,OfficialCode,AccountName,EntryType,Amount
+LE-001,TXN-001,"1100","Cash",Debit,1000.00
+LE-002,TXN-001,"4100","Sales Revenue",Credit,1000.00
+LE-003,TXN-002,"6100","Purchases",Debit,750.00
+LE-004,TXN-002,"2100","Accounts Payable",Credit,750.00
+LE-005,TXN-003,"1110","Bank Account",Debit,500.00
+LE-006,TXN-003,"1100","Cash",Credit,500.00
