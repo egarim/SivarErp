@@ -1,6 +1,7 @@
 using DevExpress.Persistent.Base;
 
 using Sivar.Erp.Modules.Accounting.Transactions;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -46,13 +47,13 @@ public class Transaction : BaseEntity, ITransaction
     /// <summary>
     /// Navigation property to ledger entries
     /// </summary>
-    public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = new List<LedgerEntry>();
+    public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = new ObservableCollection<LedgerEntry>();
 
     // Interface implementation for IEnumerable<ILedgerEntry>
     IEnumerable<ILedgerEntry> ITransaction.LedgerEntries 
     { 
         get => LedgerEntries; 
-        set => LedgerEntries = value.Cast<LedgerEntry>().ToList(); 
+        set => LedgerEntries = new ObservableCollection<LedgerEntry>(value.Cast<LedgerEntry>()); 
     }
 
     /// <summary>

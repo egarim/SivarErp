@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Sivar.Erp.Modules.Accounting.Transactions;
@@ -48,7 +49,7 @@ public class TransactionBatch : BaseEntity, ITransactionBatch
     /// <summary>
     /// Navigation property to transactions in this batch
     /// </summary>
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public virtual ICollection<Transaction> Transactions { get; set; } = new ObservableCollection<Transaction>();
 
     /// <summary>
     /// Posts the batch
