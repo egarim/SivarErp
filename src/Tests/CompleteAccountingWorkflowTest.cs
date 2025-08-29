@@ -16,7 +16,7 @@ using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
 using Sivar.Erp.Modules.Accounting.Transactions;
-using TransactionEntryType = Sivar.Erp.Modules.Accounting.Transactions.EntryType;
+
 using Sivar.Erp.Modules.Documents.Application.DTOs;
 using Sivar.Erp.Modules.Documents.Application.Services;
 using Sivar.Erp.Modules.Documents.Core.Entities;
@@ -29,7 +29,6 @@ using Sivar.Erp.Modules.Payments.Models;
 using Sivar.Erp.Modules.Payments.Services;
 using Sivar.Erp.Modules.Taxes;
 using Sivar.Erp.Modules.Taxes.TaxAccountingProfiles;
-using Sivar.Erp.Core.Enums;
 using Sivar.Erp.Modules.Taxes.TaxGroup;
 using Sivar.Erp.Modules.Taxes.TaxRule;
 using System;
@@ -225,8 +224,8 @@ namespace Tests
                 foreach (var entry in purchaseLedgerEntries)
                 {
                     results.Add($"  {entry.EntryType}: {entry.OfficialCode} - ${entry.Amount:F2}");
-                    if (entry.EntryType == TransactionEntryType.Debit) totalDebits += entry.Amount;
-                    if (entry.EntryType == TransactionEntryType.Credit) totalCredits += entry.Amount;
+                    if (entry.EntryType == EntryType.Debit) totalDebits += entry.Amount;
+                    if (entry.EntryType == EntryType.Credit) totalCredits += entry.Amount;
                 }
                 results.Add($"Total Debits: ${totalDebits:F2}, Total Credits: ${totalCredits:F2}, Difference: ${Math.Abs(totalDebits - totalCredits):F2}");
                 
@@ -292,8 +291,8 @@ namespace Tests
                 // Step 6: Final Transaction Details
                 results.Add("=== STEP 6: TRANSACTION SUMMARY ===");
                 results.Add("PURCHASE TRANSACTION:");
-                var purchaseTotalDebits = purchaseLedgerEntries.Where(e => e.EntryType == TransactionEntryType.Debit).Sum(e => e.Amount);
-                var purchaseTotalCredits = purchaseLedgerEntries.Where(e => e.EntryType == TransactionEntryType.Credit).Sum(e => e.Amount);
+                var purchaseTotalDebits = purchaseLedgerEntries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
+                var purchaseTotalCredits = purchaseLedgerEntries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
                 results.Add($"  Total Debits: ${purchaseTotalDebits:F2}");
                 results.Add($"  Total Credits: ${purchaseTotalCredits:F2}");
                 results.Add($"  Difference: ${Math.Abs(purchaseTotalDebits - purchaseTotalCredits):F2}");
@@ -306,8 +305,8 @@ namespace Tests
                 results.Add("");
 
                 results.Add("SALES TRANSACTION:");
-                var salesTotalDebits = salesLedgerEntries.Where(e => e.EntryType == TransactionEntryType.Debit).Sum(e => e.Amount);
-                var salesTotalCredits = salesLedgerEntries.Where(e => e.EntryType == TransactionEntryType.Credit).Sum(e => e.Amount);
+                var salesTotalDebits = salesLedgerEntries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
+                var salesTotalCredits = salesLedgerEntries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
                 results.Add($"  Total Debits: ${salesTotalDebits:F2}");
                 results.Add($"  Total Credits: ${salesTotalCredits:F2}");
                 results.Add($"  Difference: ${Math.Abs(salesTotalDebits - salesTotalCredits):F2}");
@@ -922,8 +921,8 @@ namespace Tests
         /// </summary>
         private bool IsTransactionBalanced(List<LedgerEntryDto> entries)
         {
-            var totalDebits = entries.Where(e => e.EntryType == TransactionEntryType.Debit).Sum(e => e.Amount);
-            var totalCredits = entries.Where(e => e.EntryType == TransactionEntryType.Credit).Sum(e => e.Amount);
+            var totalDebits = entries.Where(e => e.EntryType == EntryType.Debit).Sum(e => e.Amount);
+            var totalCredits = entries.Where(e => e.EntryType == EntryType.Credit).Sum(e => e.Amount);
             return Math.Abs(totalDebits - totalCredits) < 0.01m; // Allow for small rounding differences
         }        /// <summary>
                  /// Prints the performance logs stored in ObjectDb

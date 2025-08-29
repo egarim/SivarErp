@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Core.Enums;
 using Sivar.Erp.Modules.Accounting.Transactions;
 
 

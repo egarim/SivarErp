@@ -13,6 +13,9 @@ namespace Sivar.Erp.Modules.Accounting.Transactions
         /// Reference to the parent transaction
         /// </summary>
         string TransactionNumber { get; set; }
+        /// <summary>
+        /// Unique ledger entry number
+        /// </summary>
         [BusinessKey]
         string LedgerEntryNumber { get; set; }
 

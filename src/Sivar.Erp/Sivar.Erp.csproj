@@ -22,7 +22,6 @@
 
   <!-- Folder structure organization -->
   <ItemGroup>
-    <Folder Include="Core\Entities\" />
     <Folder Include="Core\Interfaces\" />
     <Folder Include="Core\Attributes\" />
     <Folder Include="Infrastructure\Data\" />

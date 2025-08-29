@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-
 namespace Sivar.Erp.Modules.Accounting.Transactions
 {
     /// <summary>
