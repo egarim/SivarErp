@@ -132,11 +132,18 @@ public class SivarErpDbContext : DbContext
             entity.HasIndex(e => e.OfficialCode);
             entity.HasIndex(e => e.TransactionNumber);
             entity.HasIndex(e => e.TransactionId);
+            entity.HasIndex(e => e.AccountId);
             
             // Configure proper Guid-based relationship using TransactionId -> Transaction primary key
             entity.HasOne(le => le.Transaction)
                   .WithMany(t => t.LedgerEntries)
                   .HasForeignKey(le => le.ID)
+                  .OnDelete(DeleteBehavior.Restrict);
+            
+            // Configure Account relationship
+            entity.HasOne(le => le.Account)
+                  .WithMany()
+                  .HasForeignKey(le => le.AccountId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 

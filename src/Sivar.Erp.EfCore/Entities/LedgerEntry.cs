@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Sivar.Erp.Modules.Accounting.Transactions;
@@ -11,6 +12,7 @@ namespace Sivar.Erp.EfCore.Entities;
 [Table("LedgerEntries")]
 public class LedgerEntry : BaseEntity, ILedgerEntry
 {
+    [Browsable(false)]
     /// <summary>
     /// Reference to the parent transaction (business key for compatibility)
     /// </summary>
@@ -41,19 +43,45 @@ public class LedgerEntry : BaseEntity, ILedgerEntry
     [Column(TypeName = "decimal(18,4)")]
     public virtual decimal Amount { get; set; }
 
+    [Browsable(false)]
     /// <summary>
-    /// Name of the account
+    /// Name of the account (persisted for performance/querying)
     /// </summary>
     [Required]
     [MaxLength(200)]
     public virtual string AccountName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Official code/identifier for the account
+    /// Official code/identifier for the account (persisted for performance/querying)
     /// </summary>
     [Required]
     [MaxLength(50)]
     public virtual string OfficialCode { get; set; } = string.Empty;
+
+    [Browsable(false)]
+    /// <summary>
+    /// Foreign key to the Account
+    /// </summary>
+    public virtual Guid? AccountId { get; set; }
+
+    private Account? _account;
+
+    /// <summary>
+    /// Navigation property to the Account
+    /// </summary>
+    [ForeignKey(nameof(AccountId))]
+    public virtual Account? Account 
+    { 
+        get => _account;
+        set 
+        {
+            _account = value;
+            // Update the persisted values when account changes
+            OfficialCode = value?.OfficialCode ?? string.Empty;
+            AccountName = value?.AccountName ?? string.Empty;
+        }
+    }
+
 
     /// <summary>
     /// Optional description for the entry

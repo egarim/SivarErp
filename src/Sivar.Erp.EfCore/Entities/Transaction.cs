@@ -44,6 +44,7 @@ public class Transaction : BaseEntity, ITransaction
     /// </summary>
     public virtual bool IsPosted { get; set; } = false;
 
+    [DevExpress.ExpressApp.DC.Aggregated]
     /// <summary>
     /// Navigation property to ledger entries
     /// </summary>
