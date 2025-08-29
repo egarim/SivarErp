@@ -11,7 +11,7 @@ namespace Sivar.Erp.Modules.ImportExport
     /// <summary>
     /// Helper to import transactions and ledger entries from tabular text.
     /// </summary>
-    public class TransactionsImportExportService
+    public class TransactionsImportExportService : ITransactionImportExportService
     {
         private readonly IEnumerable<IAccount> _accounts;
 
