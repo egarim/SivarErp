@@ -194,7 +194,7 @@ namespace Sivar.Erp.Xaf.Module.Services.ImportExport
         {
             var account = new AccountDto
             {
-                IsArchived = false
+               
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -384,7 +384,7 @@ namespace Sivar.Erp.Xaf.Module.Services.ImportExport
         /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
-            return "AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId";
+            return "AccountName,OfficialCode,AccountType,ParentOfficialCode";
         }
 
         /// <summary>
@@ -394,15 +394,13 @@ namespace Sivar.Erp.Xaf.Module.Services.ImportExport
         /// <returns>CSV row as a string</returns>
         private string GetCsvRow(IAccount account)
         {
-            string balanceAndIncomeLineId = account.BalanceAndIncomeLineId.HasValue
-                ? account.BalanceAndIncomeLineId.Value.ToString()
-                : string.Empty;
+         
 
             string parentOfficialCode = string.IsNullOrWhiteSpace(account.ParentOfficialCode)
                 ? string.Empty
                 : account.ParentOfficialCode;
 
-            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},\"{parentOfficialCode}\",{balanceAndIncomeLineId}";
+            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},\"{parentOfficialCode}\"";
         }
 
         #endregion

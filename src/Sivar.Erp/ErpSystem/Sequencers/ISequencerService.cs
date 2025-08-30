@@ -18,26 +18,26 @@ namespace Sivar.Erp.ErpSystem.Sequencers
         /// </summary>
         /// <param name="sequence">The sequence configuration</param>
         /// <returns>The created sequence</returns>
-        Task<SequenceDto> CreateSequenceAsync(SequenceDto sequence);
+        Task<ISequence> CreateSequenceAsync(ISequence sequence);
 
         /// <summary>
         /// Updates an existing sequence
         /// </summary>
         /// <param name="sequence">The sequence to update</param>
         /// <returns>The updated sequence</returns>
-        Task<SequenceDto> UpdateSequenceAsync(SequenceDto sequence);
+        Task<ISequence> UpdateSequenceAsync(ISequence sequence);
 
         /// <summary>
         /// Gets a sequence by its code
         /// </summary>
         /// <param name="code">The sequence code</param>
         /// <returns>The sequence if found, null otherwise</returns>
-        Task<SequenceDto?> GetSequenceByCodeAsync(string code);
+        Task<ISequence?> GetSequenceByCodeAsync(string code);
 
         /// <summary>
         /// Gets all active sequences
         /// </summary>
         /// <returns>List of active sequences</returns>
-        Task<IEnumerable<SequenceDto>> GetActiveSequencesAsync();
+        Task<IEnumerable<ISequence>> GetActiveSequencesAsync();
     }
 }

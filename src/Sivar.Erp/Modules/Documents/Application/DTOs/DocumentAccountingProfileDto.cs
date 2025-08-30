@@ -1,14 +1,14 @@
 using System;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Interfaces;
-using Sivar.Erp.Core.Contracts;
+
 
 namespace Sivar.Erp.Modules.Documents.Application.DTOs
 {
     /// <summary>
     /// DTO implementation of IDocumentAccountingProfile
     /// </summary>
-    public class DocumentAccountingProfileDto : Modules.Documents.Core.Interfaces.IDocumentAccountingProfile, Sivar.Erp.Core.Contracts.IDocumentAccountingProfile
+    public class DocumentAccountingProfileDto : IDocumentAccountingProfile
     {
         /// <summary>
         /// Unique identifier for the accounting profile

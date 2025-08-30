@@ -193,7 +193,7 @@ namespace Sivar.Erp.Modules.ImportExport
             var account = new AccountDto
             {
                 
-                IsArchived = false
+             
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -219,12 +219,6 @@ namespace Sivar.Erp.Modules.ImportExport
                             account.AccountType = AccountType.Asset;
                         }
                         break;
-                    case "balanceandincomelineid":
-                        if (Guid.TryParse(value, out var lineId))
-                        {
-                            account.BalanceAndIncomeLineId = lineId;
-                        }
-                        break;
                     case "parentofficialcode":
                         account.ParentOfficialCode = string.IsNullOrWhiteSpace(value) ? null : value;
                         break;
@@ -240,7 +234,7 @@ namespace Sivar.Erp.Modules.ImportExport
         /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
-            return "AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId";
+            return "AccountName,OfficialCode,AccountType,ParentOfficialCode";
         }
 
         /// <summary>
@@ -250,15 +244,13 @@ namespace Sivar.Erp.Modules.ImportExport
         /// <returns>CSV row as a string</returns>
         private string GetCsvRow(IAccount account)
         {
-            string balanceAndIncomeLineId = account.BalanceAndIncomeLineId.HasValue
-                ? account.BalanceAndIncomeLineId.Value.ToString()
-                : string.Empty;
+          
 
             string parentOfficialCode = string.IsNullOrWhiteSpace(account.ParentOfficialCode)
                 ? string.Empty
                 : account.ParentOfficialCode;
 
-            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},\"{parentOfficialCode}\",{balanceAndIncomeLineId}";
+            return $"\"{account.AccountName}\",\"{account.OfficialCode}\",{account.AccountType},\"{parentOfficialCode}\"";
         }
     }
 }

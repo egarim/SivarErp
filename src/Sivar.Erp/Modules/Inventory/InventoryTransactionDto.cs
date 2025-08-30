@@ -1,13 +1,12 @@
 using System;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
-using Sivar.Erp.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.Inventory
 {
     /// <summary>
     /// Implementation of IInventoryTransaction
     /// </summary>
-    public class InventoryTransactionDto : IInventoryTransaction, IEntity
+    public class InventoryTransactionDto : IInventoryTransaction
     {
         public Guid Oid { get; set; }
         public string Id { get; set; }

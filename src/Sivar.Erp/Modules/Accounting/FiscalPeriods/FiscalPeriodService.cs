@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.ErpSystem.Diagnostics;
+using Sivar.Erp.Infrastructure.Diagnostics;
 
 namespace Sivar.Erp.Modules.Accounting.FiscalPeriods
 {

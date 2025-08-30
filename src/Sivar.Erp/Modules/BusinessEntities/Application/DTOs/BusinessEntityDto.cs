@@ -1,4 +1,5 @@
-using Sivar.Erp.Core.Interfaces;
+
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Modules.Documents.Core.ValueObjects;
 using System;

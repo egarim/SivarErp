@@ -1,6 +1,6 @@
 using System;
 
-namespace Sivar.Erp.ErpSystem.Diagnostics
+namespace Sivar.Erp.Infrastructure.Diagnostics
 {
     public class PerformanceLogDto
     {

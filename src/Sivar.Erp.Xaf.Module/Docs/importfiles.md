@@ -2,6 +2,23 @@
 
 This document provides comprehensive information about all CSV import files supported by the SivarErp system. The import system uses a priority-based approach (1.0 to 10.0) to ensure proper dependency resolution during bulk imports.
 
+## Interface Architecture
+
+All import/export operations are handled through dedicated interfaces in the `Sivar.Erp.Services.ImportExport` namespace. Each interface follows a consistent pattern:
+
+### Standard Interface Pattern
+```csharp
+public interface I{Type}ImportExportService
+{
+    Task<(IEnumerable<I{Type}> Imported{Types}, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+    Task<string> ExportToCsvAsync(IEnumerable<I{Type}> items);
+}
+```
+
+### Implementation Layers
+- **Modules Layer**: XAF-based implementations for business objects (`Sivar.Erp.Services.ImportExport`)
+- **Infrastructure Layer**: .NET 9 implementations for core contracts (`Sivar.Erp.Infrastructure.ImportExport`)
+
 ## Import Priority Order
 
 The system imports files in the following order to maintain data integrity:
@@ -25,6 +42,18 @@ The system imports files in the following order to maintain data integrity:
 
 **Priority**: 1.0 (First to import)
 
+### Interface
+```csharp
+namespace Sivar.Erp.Services.ImportExport
+{
+    public interface IAccountImportExportService
+    {
+        Task<(IEnumerable<IAccount> ImportedAccounts, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<IAccount> accounts);
+    }
+}
+```
+
 **Required Headers**:
 - `AccountName` (Required)
 - `OfficialCode` (Required)
@@ -32,21 +61,19 @@ The system imports files in the following order to maintain data integrity:
 
 **Optional Headers**:
 - `ParentOfficialCode`
-- `BalanceAndIncomeLineId`
 
 **Properties**:
 - **AccountName**: The descriptive name of the account (e.g., "Cash in Bank", "Accounts Receivable")
 - **OfficialCode**: Unique identifier/code for the account (e.g., "1100", "1200")
 - **AccountType**: Type of account (Asset, Liability, Equity, Revenue, Expense)
 - **ParentOfficialCode**: Code of parent account for hierarchical structure
-- **BalanceAndIncomeLineId**: GUID linking to balance sheet or income statement line items
 
 **Example**:
 ```csv
-AccountName,OfficialCode,AccountType,ParentOfficialCode,BalanceAndIncomeLineId
-Cash in Bank,1100,Asset,,550e8400-e29b-41d4-a716-446655440000
-Accounts Receivable,1200,Asset,,550e8400-e29b-41d4-a716-446655440001
-Sales Revenue,4100,Revenue,,550e8400-e29b-41d4-a716-446655440002
+AccountName,OfficialCode,AccountType,ParentOfficialCode
+Cash in Bank,1100,Asset,
+Accounts Receivable,1200,Asset,
+Sales Revenue,4100,Revenue,
 ```
 
 **Validation**: Uses AccountValidator with El Salvador account type prefixes. Account codes must follow specific format rules.
@@ -58,6 +85,18 @@ Sales Revenue,4100,Revenue,,550e8400-e29b-41d4-a716-446655440002
 **Purpose**: Groups for organizing taxes and business entities. Used to apply tax rules to groups of entities or items.
 
 **Priority**: 2.0
+
+### Interface
+```csharp
+namespace Sivar.Erp.Services.ImportExport
+{
+    public interface ITaxGroupImportExportService
+    {
+        Task<(IEnumerable<ITaxGroup> ImportedTaxGroups, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<ITaxGroup> taxGroups);
+    }
+}
+```
 
 **Required Headers**:
 - `Code` (Required)
@@ -86,6 +125,22 @@ SERVICES,Service Items,Professional services,true,Item
 ---
 
 ## 3. Taxes (taxes.csv)
+
+**Purpose**: Defines tax rates and calculations. Core component of the tax system.
+
+**Priority**: 3.0
+
+### Interface
+```csharp
+namespace Sivar.Erp.Services.ImportExport
+{
+    public interface ITaxImportExportService
+    {
+        Task<(IEnumerable<ITax> ImportedTaxes, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<ITax> taxes);
+    }
+}
+```
 
 **Purpose**: Defines tax rates and rules applied to transactions. Core tax configuration for the system.
 
@@ -134,6 +189,18 @@ ISR,Impuesto Sobre la Renta,Percentage,Line,1.0,,true,false,1301,2101,ISR reteni
 
 **Priority**: 4.0
 
+### Interface
+```csharp
+namespace Sivar.Erp.Modules.ImportExport
+{
+    public interface ITaxRuleImportExportService
+    {
+        Task<(IEnumerable<ITaxRule> ImportedTaxRules, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<ITaxRule> taxRules);
+    }
+}
+```
+
 **Required Headers**:
 - `TaxCode` (Required)
 - `DocumentOperation` (Required)
@@ -166,6 +233,18 @@ ISR,SalesInvoice,WHOLESALE,SERVICES,true,5
 **Purpose**: Customers, vendors, and other business partners. Essential for creating transactions.
 
 **Priority**: 5.0
+
+### Interface
+```csharp
+namespace Sivar.Erp.Services.ImportExport
+{
+    public interface IBusinessEntityImportExportService
+    {
+        Task<(IEnumerable<IBusinessEntity> ImportedBusinessEntities, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<IBusinessEntity> businessEntities);
+    }
+}
+```
 
 **Required Headers**:
 - `Code` (Required)
@@ -206,6 +285,18 @@ VEND001,XYZ Suppliers,456 Commerce Ave,Santa Ana,Santa Ana,02101,El Salvador,+50
 
 **Priority**: 6.0
 
+### Interface
+```csharp
+namespace Sivar.Erp.Services.ImportExport
+{
+    public interface IDocumentTypeImportExportService
+    {
+        Task<(IEnumerable<IDocumentType> ImportedDocumentTypes, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<IDocumentType> documentTypes);
+    }
+}
+```
+
 **Required Headers**:
 - `Code` (Required)
 - `Name` (Required)
@@ -236,6 +327,18 @@ PO,Purchase Order,PurchaseOrder,true
 
 **Priority**: 7.0
 
+### Interface
+```csharp
+namespace Sivar.Erp.Services.ImportExport
+{
+    public interface IItemImportExportService
+    {
+        Task<(IEnumerable<IItem> ImportedItems, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<IItem> items);
+    }
+}
+```
+
 **Required Headers**:
 - `Code` (Required)
 - `Type` (Required)
@@ -263,6 +366,18 @@ PROD002,Product,Office Chair - Ergonomic,125.00
 **Purpose**: Associates business entities or items with their respective groups for tax rule application.
 
 **Priority**: 8.0
+
+### Interface
+```csharp
+namespace Sivar.Erp.Modules.ImportExport
+{
+    public interface IGroupMembershipImportExportService
+    {
+        Task<(IEnumerable<GroupMembershipDto> ImportedMemberships, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<GroupMembershipDto> memberships);
+    }
+}
+```
 
 **Required Headers**:
 - `GroupId` (Required)
@@ -293,6 +408,18 @@ Oid,GroupId,EntityId,GroupType
 **Purpose**: Defines available payment methods for transactions (cash, credit card, bank transfer, etc.).
 
 **Priority**: 9.0
+
+### Interface
+```csharp
+namespace Sivar.Erp.Modules.ImportExport
+{
+    public interface IPaymentMethodImportExportService
+    {
+        Task<(IEnumerable<IPaymentMethod> ImportedPaymentMethods, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvContent, string userName);
+        Task<string> ExportToCsvAsync(IEnumerable<IPaymentMethod> paymentMethods);
+    }
+}
+```
 
 **Required Headers**:
 - `Code` (Required)
@@ -330,6 +457,22 @@ CHECK,Check Payment,Check,1100,true,true,true
 **Purpose**: Actual business transactions with associated ledger entries. Contains the financial data.
 
 **Priority**: 10.0 (Last to import - depends on all other entities)
+
+### Interface
+```csharp
+namespace Sivar.Erp.Modules.ImportExport
+{
+    public interface ITransactionImportExportService
+    {
+        Task<string> ExportTransactionsToCsvAsync(List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> transactionsWithEntries);
+        Task<(List<(ITransaction Transaction, IEnumerable<ILedgerEntry> Entries)> ImportedData, IEnumerable<string> Errors)> ImportFromCsvAsync(string csvText);
+        
+        // Additional export methods for different formats
+        Task<(string TransactionsCsv, string LedgerEntriesCsv)> ExportTransactionsAsync(
+            List<(TransactionDto Transaction, List<LedgerEntryDto> Entries)> transactionsWithEntries);
+    }
+}
+```
 
 **Transaction Headers**:
 - `TransactionId` (or `TransactionNumber`)

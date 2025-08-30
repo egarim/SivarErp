@@ -1,9 +1,7 @@
 using Sivar.Erp.Modules.BusinessEntities.Application.DTOs;
-using Sivar.Erp.Core.Interfaces;
+
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Interfaces;
-using Sivar.Erp.ErpSystem.ActivityStream;
-using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using Sivar.Erp.Modules.Accounting.FiscalPeriods;
@@ -19,6 +17,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
+using Sivar.Erp.Infrastructure.Diagnostics;
+
 
 namespace Sivar.Erp.Modules
 {
@@ -30,9 +31,9 @@ namespace Sivar.Erp.Modules
         public IList<ITaxGroup> TaxGroups { get; set; } = new List<ITaxGroup>();
         public IList<ITax> Taxes { get; set; } = new List<ITax>();
         public IList<IItem> Items { get; set; } = new List<IItem>();
-        public IList<GroupMembershipDto> GroupMemberships { get; set; } = new List<GroupMembershipDto>();
-        public IList<ActivityRecord> ActivityRecords { get; set; } = new List<ActivityRecord>();
-        public IList<SequenceDto> Sequences { get; set; } = new List<SequenceDto>();
+        public IList<IGroupMembership> GroupMemberships { get; set; } = new List<IGroupMembership>();
+   
+        public IList<ISequence> Sequences { get; set; } = new List<ISequence>();
         public IList<IFiscalPeriod> fiscalPeriods { get; set; } = new List<IFiscalPeriod>();
 
         /// <summary>
@@ -103,6 +104,7 @@ namespace Sivar.Erp.Modules
         /// Collection of inventory layers/batches for FIFO and LIFO costing
         /// </summary>
         public IList<InventoryLayerDto> InventoryLayers { get; set; } = new List<InventoryLayerDto>();
+   
 
         public ObjectDb()
         {

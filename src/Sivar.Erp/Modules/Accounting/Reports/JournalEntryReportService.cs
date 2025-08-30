@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Transactions;
+using Sivar.Erp.Infrastructure.Diagnostics;
 using Sivar.Erp.ErpSystem.Diagnostics;
 
 namespace Sivar.Erp.Modules.Accounting.Reports;

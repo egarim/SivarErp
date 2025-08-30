@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.ErpSystem.ActivityStream;
+
 using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Modules.Security;
 using Sivar.Erp.ErpSystem.Modules.Security.Core;
@@ -9,6 +9,7 @@ using Sivar.Erp.ErpSystem.Modules.Security.Platform;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.TimeService;
+using Sivar.Erp.Infrastructure.Diagnostics;
 using Sivar.Erp.Modules;
 using Sivar.Erp.Modules.Accounting;
 using Sivar.Erp.Modules.Accounting.BalanceCalculators;
@@ -16,10 +17,9 @@ using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
 using Sivar.Erp.Modules.Accounting.Transactions;
-
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
 using Sivar.Erp.Modules.Documents.Application.Services;
-using Sivar.Erp.Modules.Documents.Core.Entities;
 using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Services;
 using Sivar.Erp.Modules.ImportExport;
@@ -68,7 +68,7 @@ namespace Tests
         private TaxRuleEvaluator? _taxRuleEvaluator;
         private ITaxAccountingProfileService? _taxAccountingService; private ITaxAccountingProfileImportExportService? _taxAccountingImportService;
 
-        private Sivar.Erp.Core.Contracts.ImportExport.IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
+        private IDocumentAccountingProfileImportExportService? _documentAccountingProfileImportService;
         private IDocumentAccountingProfileService? _documentAccountingProfileService; private ISecurityModule? _securityModule;
         private IPaymentService? _paymentService;
         private IPaymentMethodService? _paymentMethodService;
@@ -423,7 +423,7 @@ namespace Tests
             var taxRules = _objectDb.TaxRules?.ToList() ?? new List<ITaxRule>();
 
             // Create tax rule evaluator with rules and group memberships
-            var groupMemberships = _objectDb.GroupMemberships?.ToList() ?? new List<GroupMembershipDto>();
+            var groupMemberships = _objectDb.GroupMemberships?.ToList() ?? new List<IGroupMembership>();
             _taxRuleEvaluator = new TaxRuleEvaluator(taxRules, _objectDb.Taxes, groupMemberships);
 
             // Read tax accounting profiles from CSV file
@@ -469,7 +469,7 @@ namespace Tests
         {
             // Get services from the service provider (configured by factory)
             _documentAccountingProfileService = _serviceProvider.GetRequiredService<IDocumentAccountingProfileService>();
-            _documentAccountingProfileImportService = _serviceProvider.GetRequiredService<Sivar.Erp.Core.Contracts.ImportExport.IDocumentAccountingProfileImportExportService>();
+            _documentAccountingProfileImportService = _serviceProvider.GetRequiredService<IDocumentAccountingProfileImportExportService>();
 
             // Read document accounting profiles from CSV file
             var dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
@@ -518,7 +518,7 @@ namespace Tests
             var dateTimeZoneService = _serviceProvider.GetRequiredService<IDateTimeZoneService>();
             var optionService = _serviceProvider.GetRequiredService<IOptionService>();
             var logger = _serviceProvider.GetRequiredService<ILogger<AccountingModule>>();            // Create services that require ObjectDb instance (these can't be pre-configured in factory)
-            var activityStreamService = new ActivityStreamService(dateTimeZoneService, _objectDb); var sequencerService = new SequencerService(_objectDb); var fiscalPeriodLogger = _serviceProvider.GetRequiredService<ILogger<FiscalPeriodService>>();
+            var sequencerService = new SequencerService(_objectDb); var fiscalPeriodLogger = _serviceProvider.GetRequiredService<ILogger<FiscalPeriodService>>();
             var performanceContextProvider = _serviceProvider.GetService<IPerformanceContextProvider>();
             var fiscalPeriodService = new FiscalPeriodService(fiscalPeriodLogger, _objectDb, performanceContextProvider);
             var accountBalanceCalculator = new AccountBalanceCalculatorServiceBase(_objectDb);            // Create journal entry services
@@ -529,7 +529,7 @@ namespace Tests
             _journalEntryReportService = new JournalEntryReportService(journalEntryReportLogger, _objectDb, _journalEntryService);            // Create accounting module with correct parameter order, including the logger and objectDb
             _accountingModule = new AccountingModule(
                 optionService,
-                activityStreamService,
+        
                 dateTimeZoneService,
                 fiscalPeriodService,
                 accountBalanceCalculator,
@@ -622,7 +622,7 @@ namespace Tests
         private async Task ImportDocumentAccountingProfilesFromCsv()
         {
             // Get the service
-            var documentAccountingProfileService = _serviceProvider.GetRequiredService<Sivar.Erp.Core.Contracts.ImportExport.IDocumentAccountingProfileImportExportService>();
+            var documentAccountingProfileService = _serviceProvider.GetRequiredService<IDocumentAccountingProfileImportExportService>();
 
             // Read document accounting profiles from CSV file
             var dataDirectory = "C:\\Users\\joche\\Documents\\GitHub\\SivarErp\\src\\Tests\\ElSalvador\\Data\\New\\";
@@ -705,7 +705,7 @@ namespace Tests
                 DocumentType = new SimpleDocumentType { Code = documentType.Code, Name = documentType.Name },
                 DocumentNumber = "CCF-2025-001",
                 Date = new DateOnly(2025, 6, 18),
-                BusinessEntity = businessEntity as Sivar.Erp.Core.Interfaces.IBusinessEntity,
+                BusinessEntity = businessEntity as IBusinessEntity,
                 Lines = new List<Sivar.Erp.Modules.Documents.Core.Interfaces.IDocumentLine>(),
                 DocumentTotals = new List<ITotal>()
             };
@@ -791,8 +791,8 @@ namespace Tests
                 DocumentType = mockDocumentType,
                 DocumentNumber = "PIF-2025-001",
                 Date = new DateOnly(2025, 6, 17), // Day before sales
-                BusinessEntity = supplier as Sivar.Erp.Core.Interfaces.IBusinessEntity,
-                Lines = new List<Sivar.Erp.Modules.Documents.Core.Interfaces.IDocumentLine>(),
+                BusinessEntity = supplier as IBusinessEntity,
+                Lines = new List<IDocumentLine>(),
                 DocumentTotals = new List<ITotal>()
             };
 

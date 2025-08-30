@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Sivar.Erp.Core.Contracts.ImportExport;
 
 namespace Sivar.Erp.Modules
 {
@@ -16,7 +15,7 @@ namespace Sivar.Erp.Modules
         private readonly ImportExport.ITaxGroupImportExportService _taxGroupImportService;
         private readonly Infrastructure.ImportExport.Documents.IDocumentTypeImportExportService _documentTypeImportService;
         private readonly ImportExport.IBusinessEntityImportExportService _businessEntityImportService;
-        private readonly IItemImportExportService _itemImportService;
+        private readonly ImportExport.IItemImportExportService _itemImportService;
         private readonly ImportExport.IGroupMembershipImportExportService _groupMembershipImportService;
         private readonly ImportExport.ITaxRuleImportExportService _taxRuleImportService;
         private readonly string _username;
@@ -38,7 +37,7 @@ namespace Sivar.Erp.Modules
            ImportExport.ITaxGroupImportExportService taxGroupImportService,
            Infrastructure.ImportExport.Documents.IDocumentTypeImportExportService documentTypeImportService,
            ImportExport.IBusinessEntityImportExportService businessEntityImportService,
-           IItemImportExportService itemImportService,
+           ImportExport.IItemImportExportService itemImportService,
            ImportExport.IGroupMembershipImportExportService groupMembershipImportService,
            ImportExport.ITaxRuleImportExportService taxRuleImportService,
            string username = "SystemInit")

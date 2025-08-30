@@ -1,12 +1,12 @@
 using System;
-using Sivar.Erp.Core.Contracts;
+
 
 namespace Sivar.Erp.Infrastructure.Configuration
 {
     /// <summary>
     /// Interface for option entities
     /// </summary>
-    public interface IOption : IEntity
+    public interface IOption 
     {
         /// <summary>
         /// Unique code for the option

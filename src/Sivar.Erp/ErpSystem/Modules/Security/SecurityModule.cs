@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.ErpSystem.Modules.Security.Core;
 using Sivar.Erp.Modules;
+using Sivar.Erp.Infrastructure.Diagnostics;
 using Sivar.Erp.ErpSystem.Diagnostics;
 
 namespace Sivar.Erp.ErpSystem.Modules.Security

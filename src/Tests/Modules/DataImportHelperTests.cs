@@ -1,10 +1,8 @@
 using NUnit.Framework;
 using Sivar.Erp.Infrastructure.ImportExport.Documents;
-using Sivar.Erp.Infrastructure.ImportExport.Inventory;
 using Sivar.Erp.Modules;
 using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using Sivar.Erp.Modules.ImportExport;
-using Sivar.Erp.Core.Contracts.ImportExport;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +17,7 @@ namespace Tests.Modules
         private ITaxImportExportService _taxImportService;
         private ITaxGroupImportExportService _taxGroupImportService;
         private IBusinessEntityImportExportService _businessEntityImportService;
-        private Sivar.Erp.Core.Contracts.ImportExport.IItemImportExportService _itemImportService;
+        private IItemImportExportService _itemImportService;
         private IDocumentTypeImportExportService _documentTypeImportService;
         private ITaxRuleImportExportService _taxRuleImportService;
         private IGroupMembershipImportExportService _groupMembershipImportService;

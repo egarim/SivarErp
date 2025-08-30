@@ -36,7 +36,7 @@ namespace Sivar.Erp.Modules
             ITaxGroupImportExportService taxGroupImportService,
             IDocumentTypeImportExportService documentTypeImportService,
             IBusinessEntityImportExportService businessEntityImportService,
-            Core.Contracts.ImportExport.IItemImportExportService itemImportService,
+            IItemImportExportService itemImportService,
             IGroupMembershipImportExportService groupMembershipImportService,
             ITaxRuleImportExportService taxRuleImportService)
         {

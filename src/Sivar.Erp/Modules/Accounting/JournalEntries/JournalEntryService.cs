@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.ErpSystem.Diagnostics;
+using Sivar.Erp.Infrastructure.Diagnostics;
 using Sivar.Erp.Modules.Accounting.Transactions;
 
 

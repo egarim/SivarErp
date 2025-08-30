@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Sivar.Erp.Core.Enums;
 
 namespace Sivar.Erp.Modules.Taxes.Domain
 {
@@ -10,7 +9,7 @@ namespace Sivar.Erp.Modules.Taxes.Domain
     /// </summary>
     public class TaxDto : INotifyPropertyChanged, ITax
     {
-        private Guid _oid;
+        private Guid _ID;
         private string _name;
         private string _code;
         private TaxType _taxType;
@@ -23,14 +22,14 @@ namespace Sivar.Erp.Modules.Taxes.Domain
         /// <summary>
         /// Unique identifier for the tax
         /// </summary>
-        public Guid Oid
+        public Guid ID
         {
-            get => _oid;
+            get => _ID;
             set
             {
-                if (_oid != value)
+                if (_ID != value)
                 {
-                    _oid = value;
+                    _ID = value;
                     OnPropertyChanged();
                 }
             }

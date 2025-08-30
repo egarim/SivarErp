@@ -28,7 +28,7 @@ namespace Sivar.Erp.ErpSystem.Sequencers
                 throw new InvalidOperationException($"Sequence {sequenceCode} is not active");
 
             sequence.CurrentNumber++;
-            sequence.LastUsedDate = DateTime.UtcNow;
+     
             int nextNumber = sequence.CurrentNumber;
             
             string numberPart = nextNumber.ToString().PadLeft(sequence.PaddingLength, sequence.PaddingChar);
@@ -36,7 +36,7 @@ namespace Sivar.Erp.ErpSystem.Sequencers
             return await Task.FromResult($"{sequence.Prefix}{numberPart}{sequence.Suffix}");
         }
 
-        public async Task<SequenceDto> CreateSequenceAsync(SequenceDto sequence)
+        public async Task<ISequence> CreateSequenceAsync(ISequence sequence)
         {
             if (sequence == null)
                 throw new ArgumentNullException(nameof(sequence));
@@ -48,16 +48,16 @@ namespace Sivar.Erp.ErpSystem.Sequencers
             if (existing != null)
                 throw new InvalidOperationException($"Sequence with code {sequence.Code} already exists");
 
-            sequence.Id = Guid.NewGuid();
+           
             sequence.CurrentNumber = 0;
             sequence.IsActive = true;
-            sequence.LastUsedDate = DateTime.UtcNow;
+         
 
             objectDb.Sequences.Add(sequence);
             return await Task.FromResult(sequence);
         }
 
-        public async Task<SequenceDto> UpdateSequenceAsync(SequenceDto sequence)
+        public async Task<ISequence> UpdateSequenceAsync(ISequence sequence)
         {
             if (sequence == null)
                 throw new ArgumentNullException(nameof(sequence));
@@ -79,7 +79,7 @@ namespace Sivar.Erp.ErpSystem.Sequencers
             return await Task.FromResult(sequence);
         }
 
-        public async Task<SequenceDto?> GetSequenceByCodeAsync(string code)
+        public async Task<ISequence?> GetSequenceByCodeAsync(string code)
         {
             if (string.IsNullOrEmpty(code))
                 throw new ArgumentException("Sequence code cannot be empty", nameof(code));
@@ -88,7 +88,7 @@ namespace Sivar.Erp.ErpSystem.Sequencers
             return await Task.FromResult(sequence);
         }
 
-        public async Task<IEnumerable<SequenceDto>> GetActiveSequencesAsync()
+        public async Task<IEnumerable<ISequence>> GetActiveSequencesAsync()
         {
             return await Task.FromResult(objectDb.Sequences.Where(s => s.IsActive));
         }

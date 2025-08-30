@@ -1,14 +1,13 @@
 using System;
 
-namespace Sivar.Erp.Infrastructure.Sequencers
+namespace Sivar.Erp.ErpSystem.Sequencers
 {
-    public interface ISequenceDto
+    public interface ISequence
     {
         string Code { get; set; }
         int CurrentNumber { get; set; }
-        Guid Id { get; set; }
+ 
         bool IsActive { get; set; }
-        DateTime LastUsedDate { get; set; }
         string Name { get; set; }
         char PaddingChar { get; set; }
         int PaddingLength { get; set; }

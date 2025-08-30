@@ -1,23 +1,27 @@
+using Microsoft.Extensions.Logging;
+using Sivar.Erp.Modules.Documents.Application.DTOs;
+using Sivar.Erp.Modules.Documents.Core.Interfaces;
+using Sivar.Erp.Modules.ImportExport;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Sivar.Erp.Modules.Documents.Application.DTOs;
-using Sivar.Erp.Core.Contracts.ImportExport;
-using Sivar.Erp.Core.Contracts;
 
 namespace Sivar.Erp.Infrastructure.ImportExport.Documents
 {
     /// <summary>
     /// Infrastructure implementation of document accounting profile import/export service using Core.Contracts interface
     /// </summary>
-    public class DocumentAccountingProfileImportExportService : Core.Contracts.ImportExport.IDocumentAccountingProfileImportExportService
+    public class DocumentAccountingProfileImportExportService : IDocumentAccountingProfileImportExportService
     {
         private readonly ILogger<DocumentAccountingProfileImportExportService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the DocumentAccountingProfileImportExportService class
+        /// </summary>
+        /// <param name="logger">Logger for the service</param>
         public DocumentAccountingProfileImportExportService(ILogger<DocumentAccountingProfileImportExportService> logger)
         {
             _logger = logger;
@@ -165,11 +169,11 @@ namespace Sivar.Erp.Infrastructure.ImportExport.Documents
                 foreach (var profile in profiles)
                 {
                     sb.AppendLine(string.Join(",",
-                        Escape(profile.DocumentOperation),
-                        Escape(profile.SalesAccountCode),
-                        Escape(profile.AccountsReceivableCode),
-                        Escape(profile.InventoryAccountCode),
-                        Escape(profile.CostOfGoodsSoldAccountCode),
+                        Escape(profile.DocumentOperation ?? ""),
+                        Escape(profile.SalesAccountCode ?? ""),
+                        Escape(profile.AccountsReceivableCode ?? ""),
+                        Escape(profile.InventoryAccountCode ?? ""),
+                        Escape(profile.CostOfGoodsSoldAccountCode ?? ""),
                         profile.CostRatio.ToString("G")
                     ));
                 }

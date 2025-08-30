@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sivar.Erp.Modules.Documents.Core.Entities;
+
 using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Modules.Inventory.Core.Enums;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;

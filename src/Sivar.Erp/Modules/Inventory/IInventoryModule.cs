@@ -36,7 +36,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// Registers inventory sequences in the system
         /// </summary>
         /// <param name="sequenceDtos">Collection of sequence DTOs to register with</param>
-        void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos);
+        void RegisterSequence(IEnumerable<ISequence> sequenceDtos);
         
         /// <summary>
         /// Gets an inventory item by code

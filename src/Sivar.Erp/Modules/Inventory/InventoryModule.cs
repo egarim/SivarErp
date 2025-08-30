@@ -5,13 +5,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
-using Sivar.Erp.ErpSystem.ActivityStream;
-using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Modules;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Modules.Inventory.Reports;
+using Sivar.Erp.Infrastructure.Diagnostics;
+using Sivar.Erp.ErpSystem.Diagnostics;
 
 namespace Sivar.Erp.Modules.Inventory
 {
@@ -58,7 +58,6 @@ namespace Sivar.Erp.Modules.Inventory
         /// <param name="contextProvider">Performance context provider</param>
         public InventoryModule(
             IOptionService optionService,
-            IActivityStreamService activityStreamService,
             IDateTimeZoneService dateTimeZoneService,
             ISequencerService sequencerService,
             IInventoryService inventoryService,
@@ -67,7 +66,7 @@ namespace Sivar.Erp.Modules.Inventory
             ILogger<InventoryModule> logger,
             IObjectDb objectDb = null,
             IPerformanceContextProvider contextProvider = null)
-            : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
+            : base(optionService, dateTimeZoneService, sequencerService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _objectDb = objectDb;
@@ -112,7 +111,7 @@ namespace Sivar.Erp.Modules.Inventory
         /// Registers inventory sequences in the system
         /// </summary>
         /// <param name="sequenceDtos">Collection of sequence DTOs to register with</param>
-        public override void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos)
+        public override void RegisterSequence(IEnumerable<ISequence> sequenceDtos)
         {
             _performanceLogger.Track(nameof(RegisterSequence), () =>
             {
@@ -204,12 +203,7 @@ namespace Sivar.Erp.Modules.Inventory
                     item, quantity, warehouseCode, transactionType, 
                     referenceDocument, unitCost, userName, notes);
 
-                // Record activity
-                var systemActor = CreateSystemStreamObject();
-                var itemTarget = CreateStreamObject(
-                    "InventoryItem",
-                    item.Code,
-                    $"Item {item.Code} - {item.Description}");
+              
 
                 var contextData = new Dictionary<string, object>
                 {
@@ -221,11 +215,6 @@ namespace Sivar.Erp.Modules.Inventory
                 
                 string contextJson = JsonSerializer.Serialize(contextData);
 
-                await RecordActivityAsync(
-                    systemActor,
-                    "Received",
-                    itemTarget,
-                    contextJson);
 
                 return transaction;
             });
@@ -249,12 +238,7 @@ namespace Sivar.Erp.Modules.Inventory
                     item, quantity, warehouseCode, transactionType, 
                     referenceDocument, userName, notes);
 
-                // Record activity
-                var systemActor = CreateSystemStreamObject();
-                var itemTarget = CreateStreamObject(
-                    "InventoryItem",
-                    item.Code,
-                    $"Item {item.Code} - {item.Description}");
+               
                     
                 var contextData = new Dictionary<string, object>
                 {
@@ -266,11 +250,7 @@ namespace Sivar.Erp.Modules.Inventory
                 
                 string contextJson = JsonSerializer.Serialize(contextData);
 
-                await RecordActivityAsync(
-                    systemActor,
-                    "Issued",
-                    itemTarget,
-                    contextJson);
+               
 
                 return transaction;
             });
@@ -295,16 +275,7 @@ namespace Sivar.Erp.Modules.Inventory
 
                 if (reservation != null)
                 {
-                    // Record activity
-                    var userActor = CreateStreamObject(
-                        "User",
-                        userName,
-                        $"User {userName}");
-
-                    var itemTarget = CreateStreamObject(
-                        "InventoryItem",
-                        item.Code,
-                        $"Item {item.Code} - {item.Description}");
+                   
 
                     var contextData = new Dictionary<string, object>
                     {
@@ -316,11 +287,7 @@ namespace Sivar.Erp.Modules.Inventory
                     
                     string contextJson = JsonSerializer.Serialize(contextData);
 
-                    await RecordActivityAsync(
-                        userActor,
-                        "Reserved",
-                        itemTarget,
-                        contextJson);
+                   
                 }
 
                 return reservation;
@@ -343,16 +310,7 @@ namespace Sivar.Erp.Modules.Inventory
 
                 if (result)
                 {
-                    // Record activity
-                    var userActor = CreateStreamObject(
-                        "User",
-                        userName,
-                        $"User {userName}");
-
-                    var itemTarget = CreateStreamObject(
-                        "InventoryItem",
-                        reservation.Item.Code,
-                        $"Item {reservation.Item.Code} - {reservation.Item.Description}");
+                   
 
                     var contextData = new Dictionary<string, object>
                     {
@@ -364,11 +322,7 @@ namespace Sivar.Erp.Modules.Inventory
                     
                     string contextJson = JsonSerializer.Serialize(contextData);
 
-                    await RecordActivityAsync(
-                        userActor,
-                        "Cancelled Reservation",
-                        itemTarget,
-                        contextJson);
+                  
                 }
 
                 return result;
@@ -393,16 +347,7 @@ namespace Sivar.Erp.Modules.Inventory
                 var transaction = await ReservationService.FulfillReservationAsync(
                     reservationId, actualQuantity, userName);
 
-                // Record activity
-                var userActor = CreateStreamObject(
-                    "User",
-                    userName,
-                    $"User {userName}");
-
-                var itemTarget = CreateStreamObject(
-                    "InventoryItem",
-                    reservation.Item.Code,
-                    $"Item {reservation.Item.Code} - {reservation.Item.Description}");
+               
                     
                 var contextData = new Dictionary<string, object>
                 {
@@ -415,11 +360,7 @@ namespace Sivar.Erp.Modules.Inventory
                 
                 string contextJson = JsonSerializer.Serialize(contextData);
 
-                await RecordActivityAsync(
-                    userActor,
-                    "Fulfilled Reservation",
-                    itemTarget,
-                    contextJson);
+               
 
                 return transaction;
             });
@@ -440,12 +381,7 @@ namespace Sivar.Erp.Modules.Inventory
                     itemCode, startDate, endDate, warehouseCode);
 
                 // Record activity
-                var systemActor = CreateSystemStreamObject();
-                
-                var itemTarget = CreateStreamObject(
-                    "InventoryItem",
-                    itemCode,
-                    $"Item {itemCode}");
+              
                     
                 var contextData = new Dictionary<string, object>
                 {
@@ -457,11 +393,7 @@ namespace Sivar.Erp.Modules.Inventory
                 
                 string contextJson = JsonSerializer.Serialize(contextData);
 
-                await RecordActivityAsync(
-                    systemActor,
-                    "Generated Kardex",
-                    itemTarget,
-                    contextJson);
+               
 
                 return report;
             });

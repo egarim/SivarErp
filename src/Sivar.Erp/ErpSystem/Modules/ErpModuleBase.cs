@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Sivar.Erp.ErpSystem.Options;
-using Sivar.Erp.ErpSystem.ActivityStream;
+
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.ErpSystem.Sequencers;
 
@@ -21,10 +21,7 @@ namespace Sivar.Erp.ErpSystem.Modules
 
         protected readonly IDateTimeZoneService DateTimeZoneService;
 
-        /// <summary>
-        /// Service for recording activities
-        /// </summary>
-        protected readonly IActivityStreamService ActivityStreamService;
+    
         
         /// <summary>
         /// Default timezone identifier for the service
@@ -36,10 +33,10 @@ namespace Sivar.Erp.ErpSystem.Modules
         /// </summary>
         /// <param name="optionService">The option service</param>
         /// <param name="activityStreamService">The activity stream service</param>
-        protected ErpModuleBase(IOptionService optionService, IActivityStreamService activityStreamService,IDateTimeZoneService dateTimeZoneService, ISequencerService sequencerService)
+        protected ErpModuleBase(IOptionService optionService, IDateTimeZoneService dateTimeZoneService, ISequencerService sequencerService)
         {
             OptionService = optionService ?? throw new ArgumentNullException(nameof(optionService));
-            ActivityStreamService = activityStreamService ?? throw new ArgumentNullException(nameof(activityStreamService));
+          
             DateTimeZoneService= dateTimeZoneService ?? throw new ArgumentNullException(nameof(DateTimeZoneService));
             this.sequencerService = sequencerService;
         }
@@ -57,7 +54,7 @@ namespace Sivar.Erp.ErpSystem.Modules
             return value ?? defaultValue;
         }
 
-        public abstract void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos);
+        public abstract void RegisterSequence(IEnumerable<ISequence> sequenceDtos);
      
 
         /// <summary>
@@ -79,79 +76,8 @@ namespace Sivar.Erp.ErpSystem.Modules
                 userName);
         }
         
-        /// <summary>
-        /// Records an activity in the system activity stream
-        /// </summary>
-        /// <param name="actor">Who performed the action</param>
-        /// <param name="verb">What action was performed</param>
-        /// <param name="target">What was acted upon</param>
-        /// <param name="timeZoneId">Optional timezone ID, defaults to service default</param>
-        /// <returns>The recorded activity</returns>
-        protected async Task<ActivityRecord> RecordActivityAsync(
-            IStreamObject actor,
-            string verb,
-            IStreamObject target,
-            string timeZoneId = null)
-        {
-            return await ActivityStreamService.RecordActivityAsync(
-                actor,
-                verb,
-                target,
-                timeZoneId ?? DefaultTimeZoneId);
-        }
+       
         
-        /// <summary>
-        /// Records a detailed activity in the system activity stream
-        /// </summary>
-        /// <param name="activity">Activity record with detailed information</param>
-        /// <returns>The recorded activity</returns>
-        protected async Task<ActivityRecord> RecordDetailedActivityAsync(ActivityRecord activity)
-        {
-            // Ensure the timezone is set
-            if (string.IsNullOrEmpty(activity.TimeZoneId))
-            {
-                activity.TimeZoneId = DefaultTimeZoneId;
-            }
-            
-            return await ActivityStreamService.RecordActivityAsync(activity);
-        }
-        
-        /// <summary>
-        /// Creates a new stream object for use in activity records
-        /// </summary>
-        /// <param name="objectType">Type of object</param>
-        /// <param name="objectKey">Object key/identifier</param>
-        /// <param name="displayName">Human-friendly name</param>
-        /// <param name="displayImage">Optional URL to image</param>
-        /// <returns>Stream object for activity recording</returns>
-        protected IStreamObject CreateStreamObject(
-            string objectType,
-            string objectKey,
-            string displayName,
-            string displayImage = null)
-        {
-            return new StreamObject(objectType, objectKey, displayName, displayImage);
-        }
-        
-        /// <summary>
-        /// Creates a stream object representing a user
-        /// </summary>
-        /// <param name="userId">User ID</param>
-        /// <param name="displayName">User's display name</param>
-        /// <param name="avatarUrl">Optional URL to user's avatar</param>
-        /// <returns>Stream object representing the user</returns>
-        protected IStreamObject CreateUserStreamObject(string userId, string displayName, string avatarUrl = null)
-        {
-            return CreateStreamObject("User", userId, displayName, avatarUrl);
-        }
-        
-        /// <summary>
-        /// Creates a stream object representing the system
-        /// </summary>
-        /// <returns>Stream object representing the system</returns>
-        protected IStreamObject CreateSystemStreamObject()
-        {
-            return CreateStreamObject("System", "system", "System", "/assets/icons/system.svg");
-        }
+      
     }
 }

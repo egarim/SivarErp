@@ -2,16 +2,16 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-using Sivar.Erp.Core.Contracts.ImportExport;
+
 using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using Sivar.Erp.Modules.ImportExport;
 using Sivar.Erp.Modules.Inventory.Application.Validators;
-using Sivar.Erp.ErpSystem.ActivityStream;
+
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Infrastructure.ImportExport.Documents;
-using Sivar.Erp.Infrastructure.ImportExport.Inventory;
+
 using Sivar.Erp.Modules;
 using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
@@ -117,7 +117,7 @@ namespace Tests
             services.AddTransient<IBusinessEntityImportExportService, BusinessEntityImportExportService>();
 
             // Register Core.Contracts interface directly - NO MORE ADAPTERS!
-            services.AddTransient<Sivar.Erp.Core.Contracts.ImportExport.IItemImportExportService, ItemImportExportService>();
+            services.AddTransient<IItemImportExportService, ItemImportExportService>();
 
             services.AddTransient<IGroupMembershipImportExportService>(provider =>
                 new GroupMembershipImportExportService(provider.GetRequiredService<GroupMembershipValidator>())); 
@@ -140,7 +140,7 @@ namespace Tests
             });
 
             // Register Core.Contracts interface directly - NO MORE ADAPTERS!
-            services.AddTransient<Sivar.Erp.Core.Contracts.ImportExport.IDocumentAccountingProfileImportExportService, Sivar.Erp.Infrastructure.ImportExport.Documents.DocumentAccountingProfileImportExportService>();
+            services.AddTransient<IDocumentAccountingProfileImportExportService, DocumentAccountingProfileImportExportService>();
 
             services.AddTransient<ITaxRuleImportExportService>(provider =>
                 new TaxRuleImportExportService(provider.GetRequiredService<TaxRuleValidator>()));
@@ -207,7 +207,7 @@ namespace Tests
                     provider.GetRequiredService<ITaxGroupImportExportService>(),
                     provider.GetRequiredService<IDocumentTypeImportExportService>(),
                     provider.GetRequiredService<IBusinessEntityImportExportService>(),
-                    provider.GetRequiredService<Sivar.Erp.Core.Contracts.ImportExport.IItemImportExportService>(), // Use consolidated interface
+                    provider.GetRequiredService<IItemImportExportService>(), // Use consolidated interface
                     provider.GetRequiredService<IGroupMembershipImportExportService>(),
                     provider.GetRequiredService<ITaxRuleImportExportService>(),
                     "TestUser"));

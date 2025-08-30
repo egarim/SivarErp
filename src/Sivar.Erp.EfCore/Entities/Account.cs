@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Data.Filtering;
-using Sivar.Erp.Core.Enums;
+
 using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 
 namespace Sivar.Erp.EfCore.Entities;

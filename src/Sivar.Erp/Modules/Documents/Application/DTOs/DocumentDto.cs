@@ -1,4 +1,4 @@
-using Sivar.Erp.Core.Interfaces;
+
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Enums;
@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.Documents.Application.DTOs
 {

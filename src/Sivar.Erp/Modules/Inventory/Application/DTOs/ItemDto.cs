@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
-using Sivar.Erp.Core.Contracts;
+
 using Sivar.Erp.Modules.Documents.Core.Enums;
 using Sivar.Erp.Modules.Documents.Core.ValueObjects;
 
@@ -11,7 +11,7 @@ namespace Sivar.Erp.Modules.Inventory.Application.DTOs
     /// <summary>
     /// Data Transfer Object implementation for IItem with change notification
     /// </summary>
-    public class ItemDto : Modules.Inventory.Core.Interfaces.IItem, Sivar.Erp.Core.Contracts.IItem, INotifyPropertyChanged
+    public class ItemDto :IItem, INotifyPropertyChanged
     {
         Guid oid;
         private string _code = string.Empty;

@@ -1,8 +1,6 @@
-using Sivar.Erp.Core.Interfaces;
+
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Modules.Documents.Core.Interfaces;
-using Sivar.Erp.ErpSystem.ActivityStream;
-using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.Modules.Accounting.ChartOfAccounts;
 using Sivar.Erp.Modules.Accounting.FiscalPeriods;
@@ -16,6 +14,9 @@ using Sivar.Erp.Modules.Inventory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
+using Sivar.Erp.Infrastructure.Diagnostics;
+
 
 namespace Sivar.Erp.Modules
 {
@@ -31,9 +32,9 @@ namespace Sivar.Erp.Modules
         IList<ITaxGroup> TaxGroups { get; set; }
 
         IList<ITaxRule> TaxRules { get; set; }
-        IList<GroupMembershipDto> GroupMemberships { get; set; }
-        IList<ActivityRecord> ActivityRecords { get; set; }
-        IList<SequenceDto> Sequences { get; set; }
+        IList<IGroupMembership> GroupMemberships { get; set; }
+  
+        IList<ISequence> Sequences { get; set; }
 
         /// <summary>
         /// Collection of document accounting profiles used for transaction generation

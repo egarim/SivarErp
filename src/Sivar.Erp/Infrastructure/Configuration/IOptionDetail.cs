@@ -1,12 +1,12 @@
 using System;
-using Sivar.Erp.Core.Contracts;
+
 
 namespace Sivar.Erp.Infrastructure.Configuration
 {
     /// <summary>
     /// Interface for option detail entities
     /// </summary>
-    public interface IOptionDetail : IEntity
+    public interface IOptionDetail 
     {
         /// <summary>
         /// Reference to the parent option

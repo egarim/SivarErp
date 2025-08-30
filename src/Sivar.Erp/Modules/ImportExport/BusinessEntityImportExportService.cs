@@ -1,11 +1,11 @@
 using Sivar.Erp.Modules.BusinessEntities.Application.DTOs;
 using Sivar.Erp.Modules.BusinessEntities.Application.Validators;
-using Sivar.Erp.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.ImportExport
 {

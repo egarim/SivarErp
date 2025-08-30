@@ -190,7 +190,7 @@ namespace Sivar.Erp.Modules.ImportExport
         {
             var membership = new GroupMembershipDto
             {
-                ID = Guid.NewGuid() // Generate a new ID for imported memberships
+               
             };
 
             for (int i = 0; i < headers.Length; i++)
@@ -199,12 +199,7 @@ namespace Sivar.Erp.Modules.ImportExport
 
                 switch (headers[i].ToLowerInvariant())
                 {
-                    case "oid":
-                        if (Guid.TryParse(value, out var oid))
-                        {
-                            membership.ID = oid;
-                        }
-                        break;
+                    
                     case "groupid":
                         membership.GroupCode = value;
                         break;
@@ -229,7 +224,7 @@ namespace Sivar.Erp.Modules.ImportExport
         /// <returns>CSV header as a string</returns>
         private string GetCsvHeader()
         {
-            return "Oid,GroupId,EntityId,GroupType";
+            return "GroupId,EntityId,GroupType";
         }
 
         /// <summary>
@@ -239,7 +234,7 @@ namespace Sivar.Erp.Modules.ImportExport
         /// <returns>CSV row as a string</returns>
         private string GetCsvRow(GroupMembershipDto membership)
         {
-            return $"{membership.ID},\"{membership.GroupCode}\",\"{membership.EntityId}\",{membership.GroupType}";
+            return $"{membership.GroupCode}\",\"{membership.EntityId}\",{membership.GroupType}";
         }
     }
 }

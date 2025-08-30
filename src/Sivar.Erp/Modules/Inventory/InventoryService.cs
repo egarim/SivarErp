@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
-using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.Infrastructure.Diagnostics;
+using Sivar.Erp.ErpSystem.Diagnostics;
 
 namespace Sivar.Erp.Modules.Inventory
 {

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.ErpSystem.Diagnostics; // Use legacy PerformanceLogger for now
 using Sivar.Erp.Modules.Accounting.FiscalPeriods;
 using Sivar.Erp.Modules;
 
 // Explicit import to resolve ambiguity
-using LegacyIPerformanceContextProvider = Sivar.Erp.ErpSystem.Diagnostics.IPerformanceContextProvider;
+
+using Sivar.Erp.Infrastructure.Diagnostics;
+using Sivar.Erp.ErpSystem.Diagnostics;
 
 namespace Sivar.Erp.Modules.Accounting.Services.FiscalPeriods
 {
@@ -20,7 +21,7 @@ namespace Sivar.Erp.Modules.Accounting.Services.FiscalPeriods
         private readonly PerformanceLogger<FiscalPeriodService> _performanceLogger;
         private readonly IObjectDb _objectDb;
 
-        public FiscalPeriodService(ILogger<FiscalPeriodService> logger, IObjectDb objectDb, LegacyIPerformanceContextProvider? contextProvider = null)
+        public FiscalPeriodService(ILogger<FiscalPeriodService> logger, IObjectDb objectDb, IPerformanceContextProvider? contextProvider = null)
         {
             _objectDb = objectDb ?? throw new ArgumentNullException(nameof(objectDb));
             // Convert Core.Contracts.IObjectDb to legacy IObjectDb for PerformanceLogger

@@ -22,9 +22,8 @@
 
   <!-- Folder structure organization -->
   <ItemGroup>
-    <Folder Include="Core\Interfaces\" />
     <Folder Include="Core\Attributes\" />
-    <Folder Include="Infrastructure\Data\" />
+    <Folder Include="ErpSystem\Diagnostics\" />
     <Folder Include="Modules\BusinessEntities\Core\Entities\" />
     <Folder Include="Modules\BusinessEntities\Application\DTOs\" />
     <Folder Include="Modules\BusinessEntities\Application\Validators\" />

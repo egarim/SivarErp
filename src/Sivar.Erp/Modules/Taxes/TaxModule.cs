@@ -1,4 +1,4 @@
-using Sivar.Erp.ErpSystem.ActivityStream;
+
 using Sivar.Erp.ErpSystem.Modules;
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
@@ -13,11 +13,11 @@ namespace Sivar.Erp.Modules.Taxes
 {
     public class TaxModule : ErpModuleBase
     {
-        public TaxModule(IOptionService optionService, IActivityStreamService activityStreamService, IDateTimeZoneService dateTimeZoneService, ISequencerService sequencerService) : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
+        public TaxModule(IOptionService optionService, IDateTimeZoneService dateTimeZoneService, ISequencerService sequencerService) : base(optionService, dateTimeZoneService, sequencerService)
         {
         }
 
-        public override void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos)
+        public override void RegisterSequence(IEnumerable<ISequence> sequenceDtos)
         {
             throw new NotImplementedException();
         }

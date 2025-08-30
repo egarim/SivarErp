@@ -4,7 +4,8 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.Core.Contracts;
+using Sivar.Erp.Modules;
+
 
 namespace Sivar.Erp.Infrastructure.Diagnostics
 {
@@ -150,7 +151,7 @@ namespace Sivar.Erp.Infrastructure.Diagnostics
             // Store in ObjectDb if available
             if (_objectDb?.PerformanceLogs != null)
             {
-                var performanceLog = new PerformanceLog
+                var performanceLog = new PerformanceLogDto  
                 {
                     Timestamp = DateTime.UtcNow,
                     Method = operationName,
@@ -192,7 +193,7 @@ namespace Sivar.Erp.Infrastructure.Diagnostics
             // Store error in ObjectDb if available
             if (_objectDb?.PerformanceLogs != null)
             {
-                var performanceLog = new PerformanceLog
+                var performanceLog = new PerformanceLogDto
                 {
                     Timestamp = DateTime.UtcNow,
                     Method = operationName,

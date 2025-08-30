@@ -15,12 +15,12 @@ namespace Sivar.Erp.Modules.Taxes.TaxRule
     {
         private readonly IList<ITaxRule> _taxRules;
         private readonly IList<ITax> _availableTaxes;
-        private readonly IList<GroupMembershipDto> _groupMemberships;
+        private readonly IList<IGroupMembership> _groupMemberships;
 
         public TaxRuleEvaluator(
             IList<ITaxRule> taxRules,
             IList<ITax> availableTaxes,
-            IList<GroupMembershipDto> groupMemberships)
+            IList<IGroupMembership> groupMemberships)
         {
             _taxRules = taxRules;
             _availableTaxes = availableTaxes;

@@ -6,8 +6,9 @@ using Microsoft.Extensions.Logging;
 using Sivar.Erp.Modules.Inventory.Core.Interfaces;
 using Sivar.Erp.Modules.Inventory.Application.DTOs;
 using Sivar.Erp.Modules.Documents.Application.DTOs;
-using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Sequencers;
+using Sivar.Erp.Infrastructure.Diagnostics;
+using Sivar.Erp.ErpSystem.Diagnostics;
 
 namespace Sivar.Erp.Modules.Inventory.Reports
 {

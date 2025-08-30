@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sivar.Erp.ErpSystem.ActivityStream;
+
 using Sivar.Erp.ErpSystem.Options;
 using Sivar.Erp.ErpSystem.Sequencers;
 using Sivar.Erp.ErpSystem.TimeService;
 using Sivar.Erp.Modules.Accounting.BalanceCalculators;
 using Sivar.Erp.Modules.Accounting.FiscalPeriods;
-using Sivar.Erp.ErpSystem.Diagnostics;
 using Sivar.Erp.ErpSystem.Modules;
 using Sivar.Erp.Modules.Accounting.JournalEntries;
 using Sivar.Erp.Modules.Accounting.Reports;
 using Sivar.Erp.Modules.Accounting.Transactions;
 using Sivar.Erp.Modules.Documents.Core.Interfaces;
+using Sivar.Erp.Infrastructure.Diagnostics;
+using Sivar.Erp.ErpSystem.Diagnostics;
 
 namespace Sivar.Erp.Modules.Accounting
 {
@@ -39,7 +40,6 @@ namespace Sivar.Erp.Modules.Accounting
 
         public AccountingModule(
             IOptionService optionService,
-            IActivityStreamService activityStreamService,
             IDateTimeZoneService dateTimeZoneService,
             IFiscalPeriodService fiscalPeriodService,
             IAccountBalanceCalculator accountBalanceCalculator,
@@ -49,7 +49,7 @@ namespace Sivar.Erp.Modules.Accounting
             IJournalEntryReportService reportService,
             IObjectDb? objectDb = null,
             IPerformanceContextProvider? contextProvider = null)
-            : base(optionService, activityStreamService, dateTimeZoneService, sequencerService)
+            : base(optionService, dateTimeZoneService, sequencerService)
         {
             _fiscalPeriodService = fiscalPeriodService ?? throw new ArgumentNullException(nameof(fiscalPeriodService));
             _accountBalanceCalculator = accountBalanceCalculator ?? throw new ArgumentNullException(nameof(accountBalanceCalculator));
@@ -179,17 +179,7 @@ namespace Sivar.Erp.Modules.Accounting
                     }
                 }
 
-                // Log the activity
-                var systemActor = CreateSystemStreamObject();
-                var transactionTarget = CreateStreamObject(
-                    "Transaction",
-                    transaction.TransactionNumber,
-                    $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
-
-                await RecordActivityAsync(
-                    systemActor,
-                    "Posted",
-                    transactionTarget);
+                
 
                 return true;
             });
@@ -223,17 +213,7 @@ namespace Sivar.Erp.Modules.Accounting
                 // Unpost the transaction
                 transaction.UnPost();
 
-                // Log the activity
-                var systemActor = CreateSystemStreamObject();
-                var transactionTarget = CreateStreamObject(
-                    "Transaction",
-                    transaction.TransactionNumber,
-                    $"Transaction {transaction.TransactionNumber} on {transaction.TransactionDate}");
-
-                await RecordActivityAsync(
-                    systemActor,
-                    "Unposted",
-                    transactionTarget);
+             
 
                 return true;
             });
@@ -387,41 +367,41 @@ namespace Sivar.Erp.Modules.Accounting
             return _fiscalPeriodService;
         }
 
-        public override void RegisterSequence(IEnumerable<SequenceDto> sequenceDtos)
+        public override void RegisterSequence(IEnumerable<ISequence> sequenceDtos)
         {
             _performanceLogger.Track(nameof(RegisterSequence), () =>
             {
-                SequenceDto sequence = new SequenceDto();
+                ISequence sequence = new SequenceDto();
                 sequence.Code = TRANSACTION_SEQUENCE_CODE;
                 sequence.CurrentNumber = 1;
                 sequence.Name = "Transactions";
                 sequence.Prefix = "T";
                 sequence.Suffix = "S";
 
-                SequenceDto ledgerEntry = new SequenceDto();
+                ISequence ledgerEntry = new SequenceDto();
                 ledgerEntry.Code = LEDGERENTRY_SEQUENCE_CODE;
                 ledgerEntry.CurrentNumber = 1;
                 ledgerEntry.Name = "LedgerEntries";
                 ledgerEntry.Prefix = "LE";
                 ledgerEntry.Suffix = "S";
 
-                SequenceDto BatchSequence = new SequenceDto();
-                BatchSequence.Code = BATCH_SEQUENCE_CODE;
-                BatchSequence.CurrentNumber = 1;
-                BatchSequence.Name = "Batch";
-                BatchSequence.Prefix = "B";
-                BatchSequence.Suffix = "S";
+                ISequence batchSequence = new SequenceDto();
+                batchSequence.Code = BATCH_SEQUENCE_CODE;
+                batchSequence.CurrentNumber = 1;
+                batchSequence.Name = "Batch";
+                batchSequence.Prefix = "B";
+                batchSequence.Suffix = "S";
 
-                SequenceDto FiscalPeriod = new SequenceDto();
-                FiscalPeriod.Code = FISCAL_SEQUENCE_CODE;
-                FiscalPeriod.CurrentNumber = 1;
-                FiscalPeriod.Name = "Fiscal Period";
-                FiscalPeriod.Prefix = "FP";
-                FiscalPeriod.Suffix = "S";
+                ISequence fiscalPeriod = new SequenceDto();
+                fiscalPeriod.Code = FISCAL_SEQUENCE_CODE;
+                fiscalPeriod.CurrentNumber = 1;
+                fiscalPeriod.Name = "Fiscal Period";
+                fiscalPeriod.Prefix = "FP";
+                fiscalPeriod.Suffix = "S";
 
-                this.sequencerService.CreateSequenceAsync(FiscalPeriod);
+                this.sequencerService.CreateSequenceAsync(fiscalPeriod);
                 this.sequencerService.CreateSequenceAsync(sequence);
-                this.sequencerService.CreateSequenceAsync(BatchSequence);
+                this.sequencerService.CreateSequenceAsync(batchSequence);
                 this.sequencerService.CreateSequenceAsync(ledgerEntry);
             });
         }

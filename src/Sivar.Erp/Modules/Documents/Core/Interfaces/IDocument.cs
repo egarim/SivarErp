@@ -1,8 +1,6 @@
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
 using System;
 using System.ComponentModel;
-using System.Collections.Generic;
-using Sivar.Erp.Core.Interfaces;
-using Sivar.Erp.Core.Attributes;
 
 namespace Sivar.Erp.Modules.Documents.Core.Interfaces
 {

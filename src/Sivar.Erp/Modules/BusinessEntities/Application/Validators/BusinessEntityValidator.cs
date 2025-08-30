@@ -1,6 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
-using Sivar.Erp.Core.Interfaces;
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
 
 namespace Sivar.Erp.Modules.BusinessEntities.Application.Validators
 {

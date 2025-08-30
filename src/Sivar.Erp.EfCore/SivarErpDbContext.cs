@@ -82,7 +82,7 @@ public class SivarErpDbContext : DbContext
     public DbSet<SecurityEvent> SecurityEvents { get; set; }
 
     // System
-    public DbSet<ActivityRecord> ActivityRecords { get; set; }
+
     public DbSet<Sequence> Sequences { get; set; }
     public DbSet<PerformanceLog> PerformanceLogs { get; set; }
 
@@ -355,14 +355,7 @@ public class SivarErpDbContext : DbContext
 
     private void ConfigureSystemEntities(ModelBuilder modelBuilder)
     {
-        // ActivityRecord entity configuration
-        modelBuilder.Entity<ActivityRecord>(entity =>
-        {
-            entity.HasIndex(e => new { e.Date, e.Time });
-            entity.HasIndex(e => new { e.ActorType, e.ActorId });
-            entity.HasIndex(e => e.Verb);
-            entity.HasIndex(e => new { e.TargetId, e.TargetType });
-        });
+      
 
         // Sequence entity configuration
         modelBuilder.Entity<Sequence>(entity =>

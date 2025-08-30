@@ -1,5 +1,6 @@
 using DevExpress.Persistent.Base;
-using Sivar.Erp.Core.Interfaces;
+
+using Sivar.Erp.Modules.BusinessEntities.Core.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

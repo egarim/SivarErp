@@ -9,26 +9,12 @@ namespace Sivar.Erp.Modules.Taxes.TaxGroup
     /// </summary>
     public class GroupMembershipDto : INotifyPropertyChanged, IGroupMembership
     {
-        private Guid _oid;
+ 
         private string _groupId;
         private string _entityId;
         private GroupType _groupType;
 
-        /// <summary>
-        /// Unique identifier for the membership
-        /// </summary>
-        public Guid ID
-        {
-            get => _oid;
-            set
-            {
-                if (_oid != value)
-                {
-                    _oid = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+       
 
         /// <summary>
         /// The tax group ID that this membership belongs to

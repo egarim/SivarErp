@@ -27,10 +27,6 @@ namespace Sivar.Erp.Modules.Accounting.ChartOfAccounts
         /// </summary>
         string UpdatedBy { get; set; }
         
-        /// <summary>
-        /// Optional reference to balance sheet or income statement line
-        /// </summary>
-        Guid? BalanceAndIncomeLineId { get; set; }
 
         /// <summary>
         /// Name of the account

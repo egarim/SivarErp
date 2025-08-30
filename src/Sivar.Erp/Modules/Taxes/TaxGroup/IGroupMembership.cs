@@ -17,9 +17,6 @@ namespace Sivar.Erp.Modules.Taxes.TaxGroup
         /// The type of group this membership relates to
         /// </summary>
         GroupType GroupType { get; set; }
-        /// <summary>
-        /// Unique identifier for the membership
-        /// </summary>
-        Guid ID { get; set; }
+       
     }
 }
